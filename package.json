@@ -1,0 +1,15 @@
+{
+  "name": "twisttier",
+  "version": "1.0.0",
+  "description": "cs307 project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://sidv@dev.azure.com/sidv/CS307/_git/CS307"
+  },
+  "author": "chris fallon",
+  "license": "UNLICENSED"
+}

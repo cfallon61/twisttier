@@ -19,13 +19,12 @@ steps:
     node --version
   displayName: 'print node version for now'
 
-
-- task: Bash@3
+- task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
-          git checkout $(Build.SourceBranchName)
-          git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
-          git push $(Build.SourceBranchName)
-    noRc: false
+      git checkout $(Build.SourceBranchName)
+      git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
+      git push $(Build.SourceBranchName)
+
 

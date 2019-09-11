@@ -23,8 +23,9 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      git checkout $(Build.SourceBranchName)
-      git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
-      git push $(Build.SourceBranchName)
+     git checkout $(Build.SourceBranchName)
+     git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
+     git push heroku $(Build.SourceBranchName)
+
 
 

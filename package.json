@@ -11,5 +11,9 @@
     "url": "https://sidv@dev.azure.com/sidv/CS307/_git/CS307"
   },
   "author": "chris fallon",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "latest"
+  }
+
 }

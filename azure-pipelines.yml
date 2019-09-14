@@ -16,11 +16,11 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    node --version
-  displayName: 'print node version for now'
+    npm install
+  displayName: 'install all dependencies'
 
 - script: |
-    mocha test --reporter mocha-junit-reporter
+    npm test
   displayName: 'Run unit tests'
 
 - task: PublishTestResults@2

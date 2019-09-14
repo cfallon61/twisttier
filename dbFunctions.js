@@ -35,7 +35,7 @@ var userExists = async function (user){
 // @param accountInfo: object with all the user details from the create account form
 // @return: bool
 //         true if creation successful, false if not
-createUser(async((accountInfo) => {
+async function createUser(accountInfo) {
   var user = { 
     email: accountInfo.email, 
     username: accountInfo.username
@@ -48,10 +48,10 @@ createUser(async((accountInfo) => {
   }
 
   
-}));
+};
 
 getSpins ((user, res) =>{
-  /*
+  
   var spin = [
     {
       "user": "poop",
@@ -76,8 +76,8 @@ getSpins ((user, res) =>{
       ]
     }
   ]; 
-  return 0;
-  */
+  return spin;
+  
 });
 
 addSpin ((user, res) =>{

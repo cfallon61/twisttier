@@ -1,11 +1,10 @@
 const express = require('express');
 const session = require('client-sessions');
-require('dotenv').config({path: __dirname + "/.env"});
 // import config file
 const init = require('./config.json');
 const app = express();
 
-const port = process.env['LISTEN_PORT'];
+const port = process.env.PORT || 8080;
 
 // map the session info the session middleware
 app.use(session(init.sessionSetup));

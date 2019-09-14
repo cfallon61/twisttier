@@ -64,6 +64,7 @@ createUser(async((accountInfo) => {
 }));
 
 getSpins ((user, res) =>{
+  /*
   var spin = [
     {
       "user": "poop",
@@ -87,8 +88,9 @@ getSpins ((user, res) =>{
         {tag2: "name"}
       ]
     }
-  ];
-  return spin;
+  ]; 
+  return 0;
+  */
 });
 
 addSpin ((user, res) =>{

@@ -17,7 +17,7 @@ steps:
 
 - script: |
     npm install
-  displayName: 'print node version for now'
+  displayName: 'install all dependencies'
 
 - script: |
     npm test

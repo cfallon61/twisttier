@@ -19,6 +19,17 @@ steps:
     node --version
   displayName: 'print node version for now'
 
+- script: |
+    mocha test --reporter mocha-junit-reporter
+  displayName: 'Run unit tests'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/TEST-*.xml'
+    failTaskOnFailedTests: true
+
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'

@@ -1,12 +1,7 @@
 
 const db = require('./dbFunctions.js');
 
-module.exports = {
-  createAccount: createAccount,
-  authorize: authorize,
-  deleteAccount: deleteAccount,
-  editAccount: editAccount
-};
+
 
 function createAccount(accountInfo){
   return db.createUser(accountInfo);
@@ -24,3 +19,11 @@ function editAccount(){
 
 }
 
+
+
+module.exports = {
+  createAccount,
+  authorize,
+  deleteAccount,
+  editAccount
+};

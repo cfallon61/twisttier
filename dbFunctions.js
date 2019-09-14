@@ -9,23 +9,10 @@ const { Pool } = require("pg");
 const pool = new Pool(credentials.database);
 const usertable = process.env.USER_TABLE;
 
-module.exports = {
-  getSpins: getSpins,
-  addSpin: addSping,
-  showNotification: showNotification,
-  getCurrentTime: getCurrentTime,
-  followTopicUserPair: followTopicUserPair,
-  unfollowTopicUserPair: unfollowTopicUserPair,
-  likeSpin: likeSpin,
-  unlikeSpin: unlikeSpin,
-  reSpin: reSpin,
-  getRespinThread: getRespinThread,
-  createUser: createUser
-};
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
-async function userExists(user){
+var userExists = async function (user){
   var email = "";
   var username = "";
 
@@ -103,3 +90,17 @@ getRespinThread ((user, res) =>{
 pool.on('error', (err, client) => {
   console.error('An error occurred: ', err);
 });
+
+module.exports = {
+  getSpins,
+  addSpins,
+  showNotification,
+  getCurrentTime,
+  followTopicUserPair,
+  unfollowTopicUserPair,
+  likeSpin,
+  unlikeSpin,
+  reSpin,
+  getRespinThread,
+  createUser
+};

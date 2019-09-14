@@ -51,7 +51,33 @@ createUser(async((accountInfo) => {
 }));
 
 getSpins ((user, res) =>{
-  
+  /*
+  var spin = [
+    {
+      "user": "poop",
+      "date": "post date",
+      "text": "content",
+      "quotes": quote_count,
+      "likes": like_count,
+      "tags": [
+        {tag1: "name"},
+        {tag2: "name"}
+      ]
+    },
+    {
+      "user": "poop",
+      "date": "post date",
+      "text": "content",
+      "quotes": quote_count,
+      "likes": like_count,
+      "tags": [
+        {tag1: "name"},
+        {tag2: "name"}
+      ]
+    }
+  ]; 
+  return 0;
+  */
 });
 
 addSpin ((user, res) =>{

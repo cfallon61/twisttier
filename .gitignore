@@ -1,3 +1,6 @@
 !.gitignore
 !*
 git_password
+# *.js
+!index.js
+.env

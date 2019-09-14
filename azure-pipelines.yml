@@ -16,7 +16,7 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    node --version
+    npm install
   displayName: 'print node version for now'
 
 - script: |

@@ -1,4 +1,6 @@
 
+const db = require('./dbFunctions.js');
+
 module.exports = {
   createAccount: createAccount,
   authorize: authorize,
@@ -6,8 +8,8 @@ module.exports = {
   editAccount: editAccount
 };
 
-function createAccount(){
-
+function createAccount(accountInfo){
+  return db.createUser(accountInfo);
 }
 
 function authorize(){

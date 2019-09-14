@@ -13,9 +13,11 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
+    "chai": "^4.2.0",
     "client-sessions": "latest",
     "dotenv": "^8.1.0",
     "express": "latest",
+    "mocha": "^6.2.0",
     "pg": "latest"
   }
 }

@@ -4,3 +4,5 @@ git_password
 # *.js
 !index.js
 .env
+node_modules
+node_modules/*

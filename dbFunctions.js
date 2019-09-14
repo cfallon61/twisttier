@@ -19,12 +19,13 @@ module.exports = {
   likeSpin: likeSpin,
   unlikeSpin: unlikeSpin,
   reSpin: reSpin,
-  getRespinThread: getRespinThread
+  getRespinThread: getRespinThread,
+  createUser: createUser
 };
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
-async function queryUserExists(user){
+async function userExists(user){
   var email = "";
   var username = "";
 
@@ -41,10 +42,26 @@ async function queryUserExists(user){
   return helper.isEmpty(res);
 }
 
-// error handler
-pool.on('error', (err, client) => {
-  console.error('An error occurred: ', err);
-});
+
+
+// database function that does all the heavy lifting
+// @param accountInfo: object with all the user details from the create account form
+// @return: bool
+//         true if creation successful, false if not
+createUser(async((accountInfo) => {
+  var user = { 
+    email: accountInfo.email, 
+    username: accountInfo.username
+  };
+
+  // check if the user exists already
+  if (userExists(user))
+  {
+    return false;
+  }
+
+  
+}));
 
 getSpins ((user, res) =>{
   
@@ -80,4 +97,9 @@ reSpin ((user, res) =>{
 
 getRespinThread ((user, res) =>{
   
+});
+
+// error handler
+pool.on('error', (err, client) => {
+  console.error('An error occurred: ', err);
 });

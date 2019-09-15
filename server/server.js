@@ -10,7 +10,7 @@ const app = express();
 
 const port = process.env.PORT || 8080;
 // assign root index directory
-const root = path.join(__dirname,"./pages");
+const root = path.join(__dirname,"./frontend/public");
 const images = path.join(__dirname, "./images");
 
 // map the session info the session middleware

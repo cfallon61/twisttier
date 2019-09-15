@@ -35,7 +35,7 @@ var userExists = async function (user){
 // @param accountInfo: object with all the user details from the create account form
 // @return: bool
 //         true if creation successful, false if not
-createUser(async((accountInfo) => {
+async function createUser(accountInfo) {
   var user = { 
     email: accountInfo.email, 
     username: accountInfo.username
@@ -46,38 +46,10 @@ createUser(async((accountInfo) => {
   {
     return false;
   }
-
-  
-}));
+};
 
 getSpins ((user, res) =>{
-  /*
-  var spin = [
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": quote_count,
-      "likes": like_count,
-      "tags": [
-        {tag1: "name"},
-        {tag2: "name"}
-      ]
-    },
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": quote_count,
-      "likes": like_count,
-      "tags": [
-        {tag1: "name"},
-        {tag2: "name"}
-      ]
-    }
-  ]; 
-  return 0;
-  */
+ 
 });
 
 addSpin ((user, res) =>{

@@ -7,6 +7,7 @@ git_password
 node_modules
 node_modules/*
 package-lock.json
+./node_modules
 
 
 # See https://help.github.com/ignore-files/ for more about ignoring files.

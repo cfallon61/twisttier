@@ -2,7 +2,7 @@ const express = require('express');
 const session = require('client-sessions');
 const fs = require('fs');
 const multer = require ('multer');
-
+const path = require('path');
 // import config file
 const init = require('./config.json');
 
@@ -27,7 +27,7 @@ app.get('/', (req, res) =>{
   res.send('hello');
 });
 
-app.submit('/create_user', (req, res) => {
+app.post('/create_user', (req, res) => {
 
 });
 

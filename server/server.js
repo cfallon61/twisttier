@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('client-sessions');
 const fs = require('fs');
-const multer = require ('multer');
+// const multer = require ('multer');
 
 // import config file
 const init = require('./config.json');
@@ -10,7 +10,7 @@ const app = express();
 
 const port = process.env.PORT || 8080;
 // assign root index directory
-const root = path.join(__dirname,"../frontend/public");
+const root = path.join(__dirname,"../public");
 const images = path.join(__dirname, "../images");
 
 // map the session info the session middleware

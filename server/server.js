@@ -1,13 +1,8 @@
 const express = require('express');
 const session = require('client-sessions');
 const fs = require('fs');
-<<<<<<< HEAD
 const multer = require ('multer');
 const path = require('path');
-=======
-// const multer = require ('multer');
-
->>>>>>> 4e6e596221511f5a0632edd8bf79e413ce4d6fa2
 // import config file
 const init = require('./config.json');
 

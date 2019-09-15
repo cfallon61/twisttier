@@ -2,7 +2,7 @@
 
 var dbfunction_test = require('../dbFunctions');
 var expect = require('chai').expect;
-/*
+
 describe('getSpins()', function() {
     it('should return an array of jsons', function() { 
         var spin = [
@@ -34,4 +34,3 @@ describe('getSpins()', function() {
         
     });
 });
-*/

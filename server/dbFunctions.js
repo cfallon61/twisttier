@@ -35,7 +35,7 @@ var userExists = async function (user){
 // @param accountInfo: object with all the user details from the create account form
 // @return: bool
 //         true if creation successful, false if not
-async function createUser(accountInfo) {
+createUser = async function(accountInfo) {
   var user = { 
     email: accountInfo.email, 
     username: accountInfo.username
@@ -48,41 +48,41 @@ async function createUser(accountInfo) {
   }
 };
 
-getSpins ((user, res) =>{
+getSpins = function(user, res){
  
-});
+};
 
-addSpin ((user, res) =>{
+addSpin = function(user, res){
   
-});
+};
 
-showNotification((user, res) =>{
+showNotification = function(user, res){
   
-});
+};
 
-getCurrentTime((user, res) =>{
+getCurrentTime = function(user, res){
 
-});
+};
 
-followTopicUserPair ((user, res) =>{
+followTopicUserPair = function(user, res){
   
-});
-unfollowTopicUserPair ((user, res) =>{
+};
+unfollowTopicUserPair = function(user, res){
   
-});
-likeSpin ((user, res) =>{
+};
+likeSpin = function(user, res){
   
-});
-unlikeSpin ((user, res) =>{
+};
+unlikeSpin = function(user, res){
   
-});
-reSpin ((user, res) =>{
+};
+reSpin = function(user, res){
   
-});
+};
 
-getRespinThread ((user, res) =>{
+getRespinThread = function(user, res){
   
-});
+};
 
 // error handler
 pool.on('error', (err, client) => {

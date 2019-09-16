@@ -4,7 +4,12 @@
   "description": "cs307 project",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test_server": "mocha",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "server": "node ./server/server.js"
   },
   "repository": {
     "type": "git",
@@ -13,13 +18,21 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
+    "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
     "dotenv": "^8.1.0",
     "express": "latest",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "core-js": "^3.2.1",
+    "jquery": "^3.4.1",
+    "react": "^16.9.0",
+    "react-bootstrap": "^1.0.0-beta.12",
+    "react-dom": "^16.9.0",
+    "react-scripts": "0.9.5",
+    "multer": "latest"
   },
   "devDependencies": {
     "chai": "^4.2.0"

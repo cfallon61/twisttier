@@ -3,19 +3,19 @@ const db = require('./dbFunctions.js');
 
 
 
-function createAccount(accountInfo){
+function createAccount(accountInfo) {
   return db.createUser(accountInfo);
 }
 
-function authorize(){
+function authorize() {
 
 }
 
-function deleteAccount(){
+function deleteAccount() {
 
 }
 
-function editAccount(){
+function editAccount() {
 
 }
 

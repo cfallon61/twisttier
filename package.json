@@ -18,24 +18,24 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
-    "bootstrap": "^4.3.1",
-    "chai": "^4.2.0",
+    "bootstrap": "latest",
+    "chai": "latest",
     "client-sessions": "latest",
-    "dotenv": "^8.1.0",
+    "dotenv": "latest",
     "express": "latest",
-    "mocha": "^6.2.0",
+    "mocha": "latest",
     "mocha-junit-reporter": "latest",
     "pg": "^7.12.1",
-    "core-js": "^3.2.1",
-    "jquery": "^3.4.1",
-    "react": "^16.9.0",
-    "react-bootstrap": "^1.0.0-beta.12",
-    "react-dom": "^16.9.0",
+    "core-js": "latest",
+    "jquery": "latest",
+    "react": "latest",
+    "react-bootstrap": "latest-beta.12",
+    "react-dom": "latest",
     "react-scripts": "0.9.5",
     "multer": "latest"
   },
   "devDependencies": {
-    "chai": "^4.2.0"
+    "chai": "latest"
   },
   "proxy": "http://localhost:81"
 }

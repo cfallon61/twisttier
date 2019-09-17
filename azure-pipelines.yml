@@ -24,8 +24,6 @@ steps:
     npm run test_server
   displayName: 'Run Server unit tests'
 
- 
-
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'

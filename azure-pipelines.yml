@@ -23,10 +23,7 @@ steps:
 - script: |
     npm run test_server
   displayName: 'Run Server unit tests'
-
-- script: |
-    npm run test_react
-  displayName: 'Run React Tests'
+  
 
 - task: PublishTestResults@2
   inputs:

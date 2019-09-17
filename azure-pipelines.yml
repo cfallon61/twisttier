@@ -40,6 +40,6 @@ steps:
      git checkout $(Build.SourceBranchName)
      git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
      git push heroku $(Build.SourceBranchName)
-
+   displayName: "Deploy to heroku"
 
 

@@ -21,12 +21,10 @@ steps:
   displayName: 'install all dependencies'
 
 - script: |
-    npm test_server
+    npm run test_server
   displayName: 'Run Server unit tests'
 
-- script: |
-    npm test_react
-  displayName: 'Run React Tests'
+ 
 
 - task: PublishTestResults@2
   inputs:

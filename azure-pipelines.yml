@@ -23,6 +23,7 @@ steps:
 - script: |
     npm run test_server
   displayName: 'Run Server unit tests'
+  
 
 - task: PublishTestResults@2
   inputs:
@@ -38,6 +39,6 @@ steps:
      git checkout $(Build.SourceBranchName)
      git remote add heroku https://heroku:$(deploy)@git.heroku.com/twisttier.git
      git push heroku $(Build.SourceBranchName)
-   displayName: "Deploy to heroku"
+  displayName: "Deploy to heroku"
 
 

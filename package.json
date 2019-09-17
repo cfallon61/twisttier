@@ -10,8 +10,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start": "run-p start_server start_react",
-    "heroku-postbuild": "cd src && npm install && npm run build"
+    "start": "run-p start_server start_react"
   },
   "repository": {
     "type": "git",

@@ -21,7 +21,7 @@ steps:
   displayName: 'install all dependencies'
 
 - script: |
-    npm test_server
+    npm run test_server
   displayName: 'Run Server unit tests'
 
 - script: |

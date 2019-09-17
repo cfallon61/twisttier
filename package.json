@@ -5,10 +5,12 @@
   "main": "server.js",
   "scripts": {
     "test_server": "mocha",
+    "start_react": "react-scripts start",
+    "start_server": "node ./server/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start": "node ./server/server.js",
+    "start": "run-p start_server start_react",
     "heroku-postbuild": "cd src && npm install && npm run build"
   },
   "repository": {
@@ -21,21 +23,19 @@
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
+    "core-js": "^3.2.1",
     "dotenv": "^8.1.0",
     "express": "latest",
+    "jquery": "^3.4.1",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
+    "multer": "latest",
     "pg": "^7.12.1",
-    "core-js": "^3.2.1",
-    "jquery": "^3.4.1",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
     "react-scripts": "0.9.5",
-    "multer": "latest"
+    "npm-run-all": "latest"
   },
-  "devDependencies": {
-    "chai": "^4.2.0"
-  },
-  "proxy": "http://localhost:81"
+  "proxy": "http://localhost:8080"
 }

@@ -5,11 +5,11 @@
   "main": "server.js",
   "scripts": {
     "test_server": "mocha",
-    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "server": "node ./server/server.js"
+    "start": "node ./server/server.js",
+    "heroku-postbuild": "cd src && npm install && npm build"
   },
   "repository": {
     "type": "git",

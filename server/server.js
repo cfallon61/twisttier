@@ -25,6 +25,8 @@ app.listen(port, (err) => {
 
 app.get('/', (req, res) =>{
   res.send('hello');
+  console.log("requested root");
+  // res.sendFile(path.join(root, "index.html"));
 });
 
 app.post('/create_user', (req, res) => {

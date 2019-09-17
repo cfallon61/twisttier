@@ -1,0 +1,26 @@
+.spin-area{
+    width: 50vw;
+    height: 20vh;
+    margin: auto;
+    border: 1px solid black; 
+    box-shadow: 10px 10px 30px 10px rgba(68, 59, 59, 0.05);
+}
+
+.username-section{
+    text-align: left;
+    vertical-align: 1;
+    height: 5vh;
+    width: 40vw;
+}
+
+.spin-content{
+    text-align: left;
+    height: 12vh;
+    width: 40vw;
+}
+
+.time-section{
+    text-align: left;
+    height: 3vh;
+    width: 40vw;
+}

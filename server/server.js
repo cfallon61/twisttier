@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('client-sessions');
 const fs = require('fs');
-const multer = require ('multer');
+// const multer = require ('multer');
 const path = require('path');
 // import config file
 const init = require('./config.json');

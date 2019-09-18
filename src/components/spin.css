@@ -1,0 +1,46 @@
+.spin-area{
+    max-width: 50vw;
+    max-height: 20vh;
+    margin: auto;
+    border: 3px solid black; 
+    border-radius:50px;
+    padding: 20px;
+    box-shadow: 5px 10px 5px;
+}
+
+.username-section{
+    text-align: left;
+    padding-left: 1vw;
+    vertical-align: 1;
+    max-height: 5vh;
+    max-width: 40vw;
+}
+
+.username-section::after{
+    content:' ';
+    width: 40vw;
+    display:block;
+    border:2px solid black;
+}
+
+
+.spin-content{
+    text-align: left;
+    padding-left: 1vw;
+    max-height: 12vh;
+    max-width: 40vw;
+}
+
+.spin-content::after{
+    content:' ';
+    width: 40vw;
+    display:block;
+    border:2px solid black;
+}
+
+.time-section{
+    text-align: right;
+    padding-left: 1vw;
+    max-height: 3vh;
+    max-width: 40vw;
+}

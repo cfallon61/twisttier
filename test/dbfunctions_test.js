@@ -1,6 +1,6 @@
 /* test/dbfunction_test.js */
 
-var dbfunction_test = require('../../server/dbFunctions.js');
+var dbfunction_test = require('../server/dbFunctions.js');
 var expect = require('chai').expect;
 
 describe('getSpins()', function () {

@@ -8,6 +8,7 @@ import Spin from './components/spin.jsx';
 
 
 class App extends Component {
+
   render() {
     return (
 
@@ -19,7 +20,7 @@ class App extends Component {
         </div>
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload. helllooooo
-          <Spin className="spintest"/>
+          <Spin className="spintest" username="tgul" content="Say hi to spins." timestamp="12:56 pm, 9/18/2019"/>
         </p>
       <Button label="this is fun" name ="b1" text="heelo" variant="primary" onClick={()=>{ alert('alert'); }}> button 1 </Button>
 

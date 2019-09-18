@@ -3,30 +3,31 @@ import './spin.css'
 
 class Spin extends Component
 {
-    //Text, basic profile info, timestamp
     state = {
-        content: "Something I wrote.",
-        username: "TarcanGul",
-        timestamp: "now"
+        tags: {},
+        edited: false, 
+        quoted: false,
+        quoteThread: [],
+        likes : 0
     };
 
     render()
     {
         return (
-            <div class="spin-area">
-                <div class="username-section">
+            <div className="spin-area">
+                <div className="username-section">
                     <h5>
-                        {this.state.username}
+                        {this.props.username}
                     </h5>
                 </div>
-                <div class="spin-content">
+                <div className="spin-content">
                     <p>
-                        {this.state.content}
+                        {this.props.content}
                     </p>
                 </div>
-                <div class="time-section">
+                <div className="time-section">
                     <h6>
-                        {this.state.timestamp}
+                        {this.props.timestamp}
                     </h6>
                 </div>
             </div>

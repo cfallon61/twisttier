@@ -29,12 +29,12 @@
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
     "multer": "latest",
+    "npm-run-all": "latest",
     "pg": "^7.12.1",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
-    "react-scripts": "0.9.5",
-    "npm-run-all": "latest"
+    "react-scripts": "0.9.5"
   },
   "proxy": "http://localhost:8080"
 }

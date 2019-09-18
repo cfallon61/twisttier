@@ -3,7 +3,7 @@
 var dbfunction_test = require('../server/dbFunctions.js');
 var expect = require('chai').expect;
 
-describe('getSpins()', function () {
+describe('getSpins', function () {
   it('should return an array of jsons', function () {
     var spin = [
       {
@@ -29,9 +29,19 @@ describe('getSpins()', function () {
         ]
       }
     ];
+    expect(spin);
 
-    // expect(dbfunction_test().to.deep.equal(0));
-    expect(true);
+  });
+});
 
+
+describe('dbfunction_test', function() {
+  describe('getCurrentTime', function () {
+    it('should return the exact date and time', function () {
+      var date = dbfunction_test.getCurrentTime("","")
+      console.log(date);
+      expect(date);
+  
+    });
   });
 });

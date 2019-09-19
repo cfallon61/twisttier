@@ -83,7 +83,7 @@ showNotification = function (user, res) {
 
 };
 
-getCurrentTime = function (user, res) {
+getCurrentTime = function () {
   var date = new Date();
   var current_year = date.getFullYear();
   var current_month = date.getMonth()+1;
@@ -96,6 +96,7 @@ getCurrentTime = function (user, res) {
   }
   else {
     var current_Time = current_year+"/"+current_month+"/"+current_day+" "+current_hour+":"+current_minute;
+    return current_Time;
   }
 };
 

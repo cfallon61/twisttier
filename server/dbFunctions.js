@@ -75,8 +75,8 @@ getSpins = function (user, res) {
   return spin;
 };
 
-addSpin = function (user, res) {
-
+addSpin = function (user, spin) {
+  
 };
 
 showNotification = function (user, res) {
@@ -103,15 +103,19 @@ getCurrentTime = function () {
 followTopicUserPair = function (user, res) {
 
 };
+
 unfollowTopicUserPair = function (user, res) {
 
 };
+
 likeSpin = function (user, res) {
 
 };
+
 unlikeSpin = function (user, res) {
 
 };
+
 reSpin = function (user, res) {
 
 };

@@ -48,7 +48,31 @@ createUser = async function (accountInfo) {
 };
 
 getSpins = function (user, res) {
-
+  var spin = [
+    {
+      "user": "poop",
+      "date": "post date",
+      "text": "content",
+      "quotes": 30,
+      "likes": 12,
+      "tags": [
+        { tag1: "name" },
+        { tag2: "name" }
+      ]
+    },
+    {
+      "user": "poop",
+      "date": "post date",
+      "text": "content",
+      "quotes": 0,
+      "likes": 100,
+      "tags": [
+        { tag1: "name" },
+        { tag2: "name" }
+      ]
+    }
+  ];
+  return spin;
 };
 
 addSpin = function (user, res) {
@@ -60,7 +84,19 @@ showNotification = function (user, res) {
 };
 
 getCurrentTime = function (user, res) {
-
+  var date = new Date();
+  var current_year = date.getFullYear();
+  var current_month = date.getMonth()+1;
+  var current_day = date.getDate();
+  var current_hour = date.getHours();
+  var current_minute = date.getMinutes();
+  if(current_month < 10) {
+    var current_Time = current_year+"/0"+current_month+"/"+current_day+" "+current_hour+":"+current_minute;
+    return current_Time;
+  }
+  else {
+    var current_Time = current_year+"/"+current_month+"/"+current_day+" "+current_hour+":"+current_minute;
+  }
 };
 
 followTopicUserPair = function (user, res) {

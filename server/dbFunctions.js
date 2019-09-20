@@ -59,8 +59,9 @@ showNotification = function (user, res) {
 
 };
 
-getCurrentTime = function (user, res) {
-
+getCurrentTime = function () {
+  var moment = require('moment');
+  return moment().format('MMMM Do YYYY, h:mma');
 };
 
 followTopicUserPair = function (user, res) {

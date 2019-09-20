@@ -28,6 +28,7 @@
     "jquery": "^3.4.1",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
+    "moment": "^2.24.0",
     "multer": "latest",
     "npm-run-all": "latest",
     "pg": "^7.12.1",

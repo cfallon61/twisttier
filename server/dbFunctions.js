@@ -83,20 +83,8 @@ showNotification = function (user, res) {
 };
 
 getCurrentTime = function () {
-  var date = new Date();
-  var current_year = date.getFullYear();
-  var current_month = date.getMonth()+1;
-  var current_day = date.getDate();
-  var current_hour = date.getHours();
-  var current_minute = date.getMinutes();
-  if(current_month < 10) {
-    var current_Time = current_year+"/0"+current_month+"/"+current_day+" "+current_hour+":"+current_minute;
-    return current_Time;
-  }
-  else {
-    var current_Time = current_year+"/"+current_month+"/"+current_day+" "+current_hour+":"+current_minute;
-    return current_Time;
-  }
+  var moment = require('moment');
+  return moment().format('MMMM Do YYYY, h:mma');
 };
 
 followTopicUserPair = function (user, res) {

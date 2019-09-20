@@ -9,38 +9,6 @@ const { Pool } = require("pg");
 const pool = new Pool(credentials.database);
 const usertable = process.env.USER_TABLE;
 
-var user = function(id, email, username, password) {
-  this.id = id;
-  this.email = email;
-  this.username = username;
-  this.password = password;
-  //this.signUpDate = getCurrentTime();
-  //this.lastLogin = ?
-  this.bio = "";
-  this.name = "";
-  //this.
-}
-
-user.setBio = function(bio) {
-  if (bio.length > 100) {
-      console.log("bio is too long");
-      alert("bio is too long");
-      return;
-  }
-  this.bio = bio;
-  return;
-}
-
-user.setName = function(name) {
-  if (name.length > 35) {
-      console.log("name is too long");
-      alert("name is too long");
-      return;
-  }
-  this.name = name;
-  return;
-}
-
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 var userExists = async function (user) {

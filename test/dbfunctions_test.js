@@ -36,7 +36,8 @@ describe('dbfunction_test', function() {
   });
   describe('getCurrentTime', function () {
     it('should return the exact date and time', function () {
-      var date = dbfunction_test.getCurrentTime()
+      var date = dbfunction_test.getCurrentTime();
+      console.log(date);
       expect(date);
     });
   });

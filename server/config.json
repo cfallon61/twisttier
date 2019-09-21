@@ -4,7 +4,8 @@
     "database": "d1fg6lc7ogq281",
     "user": "kbuesxacagftwy",
     "port": "5432",
-    "password": "c0cbcae48a84050a6ea51593d82b120e74d90907c0077cbaad4083918c2333ef"
+    "password": "c0cbcae48a84050a6ea51593d82b120e74d90907c0077cbaad4083918c2333ef",
+    "ssl": true
   },
 
   "sessionSetup":{

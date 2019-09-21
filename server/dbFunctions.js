@@ -2,77 +2,115 @@
 
 const credentials = require('./config.json');
 const helper = require('./helpers.js');
+const dotenv = require('dotenv').config();
 
 // import postgres lib
 const { Pool } = require("pg");
 // create new postgres client pool 
 const pool = new Pool(credentials.database);
-const usertable = process.env.USER_TABLE;
+
+const USER_TABLE = process.env.USER_TABLE;
+const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
+const TEST = (process.env.TEST === "true" ? true : false);
 
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 var userExists = async function (user) {
-  var email = "";
-  var username = "";
+  
+  var params = [user.email, user.username];
+  
+  var query = `SELECT EMAIL, USERNAME FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
+  var res = await pool.query(query, params);
+  // response is a json 
+  // need to get rows, which is a list
 
-  if (user.hasOwnProperty('email')) { email = user.email; }
-  if (user.hasOwnProperty('username')) { username = user.username; }
+  var rows = res.rows;
 
-  var params = [usertable, email, username];
+  if (rows.length > 0) {
+    var error = [];
+    // should have only 1 index of the username / email occurring
+    // so this is why the [0];
+    var vals = rows[0];
 
-  var res = await pool.query("SELECT EMAIL, USERNAME FROM $1 WHERE EMAIL=\'$2\' OR USERNAME=\'$3\'", params);
-
-  console.log(res);
-
-  // return boolean of whether the db returned an empty string
-  return helper.isEmpty(res);
+    if ('email' in vals) {
+      error.push("Email already in use");
+    }
+    if ('username' in vals) {
+      error.push('Username already in use');
+    }
+    return error;
+  }
+  // return false if they dont already exist, this is good
+  return false;
 }
-
 
 
 // database function that does all the heavy lifting
 // @param accountInfo: object with all the user details from the create account form
-// @return: bool
+// @return: object containing creation info
 //         true if creation successful, false if not
-createUser = async function (accountInfo) {
-  var user = {
-    email: accountInfo.email,
-    username: accountInfo.username
-  };
-
+ async function createUser(accountInfo) {
+  
   // check if the user exists already
-  if (userExists(user)) {
-    return false;
+  var existing = await userExists(accountInfo);
+  console.log(existing);
+  if (existing != false){
+    return existing;
   }
+
+  const client = await pool.connect();
+
+  try {
+    var tablename = accountInfo.username + "_spins";
+   
+    tablename = (TEST ? tablename + "_test" : tablename); // doubtful this will work lol
+    var args = [tablename, SPIN_TEMPLATE];
+    await client.query('BEGIN');
+
+    // create the user table
+    var query = `CREATE TABLE ${args.tablename}() INHERITS (${SPIN_TEMPLATE})`;
+
+    var res = await client.query(query);
+    await client.query("ROLLBACK");
+    return true;
+
+    args = [
+      USER_TABLE, 
+      accountInfo.email, 
+      accountInfo.username,
+      accountInfo.passhash,
+      'CURRENT_TIMESTAMP',
+      'CURRENT_TIMESTAMP',
+      accountInfo.bio,
+      accountInfo.name
+    ];
+    // dynamic way of creating the field string, but i guess i can type the string in the query itself
+    // i just didn't want to
+    var fields = "(";
+    var i = 2;
+    for (var x in args){
+      fields += "$" + toString(i) + ", ";
+    }
+    fields += ")";
+
+    query = 'INSERT INTO $1 (email, username, passhash, create_date, last_login, bio, name) VALUES ' + fields;
+    
+
+    
+
+  } catch (e){
+    await client.query('ROLLBACK');
+    return e;
+  } finally {
+    client.release();
+  }
+
+  return true;  
 };
 
 getSpins = function (user, res) {
-  var spin = [
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": 30,
-      "likes": 12,
-      "tags": [
-        { tag1: "name" },
-        { tag2: "name" }
-      ]
-    },
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": 0,
-      "likes": 100,
-      "tags": [
-        { tag1: "name" },
-        { tag2: "name" }
-      ]
-    }
-  ];
-  return spin;
+
 };
 
 addSpin = function (user, spin) {
@@ -140,5 +178,6 @@ module.exports = {
   unlikeSpin,
   reSpin,
   getRespinThread,
-  createUser
+  createUser,
+  userExists
 };

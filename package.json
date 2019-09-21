@@ -19,6 +19,9 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
+    "bcrypt": "latest",
+    "formidable": "latest",
+    "multer": "latest",
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
@@ -28,14 +31,18 @@
     "jquery": "^3.4.1",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
-    "multer": "latest",
     "npm-run-all": "latest",
     "pg": "^7.12.1",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "0.9.5"
+    "react-scripts": "0.9.5",
+    "express-validator": "latest"
+  },
+  "devDependencies": {
+    "assert": "latest",
+    "node-mocks-http": "latest"
   },
   "proxy": "http://localhost:8080"
 }

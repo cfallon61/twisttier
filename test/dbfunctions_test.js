@@ -30,14 +30,12 @@ describe('dbfunction_test', function() {
           ]
         }
       ];
-      expect(spin);
   
     });
   });
   describe('getCurrentTime', function () {
     it('should return the exact date and time', function () {
       var date = dbfunction_test.getCurrentTime()
-      expect(date);
     });
   });
 });

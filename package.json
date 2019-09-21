@@ -19,7 +19,7 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
-    "bcrypt": "latest",
+    "bcrypt": "^3.0.6",
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
@@ -33,7 +33,6 @@
     "moment": "^2.24.0",
     "multer": "latest",
     "npm-run-all": "latest",
-    "password-hash": "^1.2.2",
     "pg": "^7.12.1",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",

@@ -3,9 +3,9 @@
 var dbfunction_test = require('../server/dbFunctions.js');
 var expect = require('chai').expect;
 const assert = require('assert');
-var passwordHash = require('password-hash');
+const bcrypt = require('bcrypt');
 
-describe('dbfunction_test', function() {
+describe('database functions test', function() {
   describe('getSpins', function () {
     it('should return an array of jsons', function () {
       var spin = [
@@ -47,8 +47,8 @@ describe('dbfunction_test', function() {
   // describe('createUser', function() {
   //   it('should return true', async function() {
   //     var realUser;
-  //   realUser.email = "jdoe@purdue.edu";
-  //   realUser.username = "doeJohn";
+  //     realUser.email = "jdoe@purdue.edu";
+  //     realUser.username = "doeJohn";
   //     let user = await dbfunction_test.createUser(realUser);
   //     expect(user).to.equal(true);
   //   });
@@ -62,12 +62,15 @@ describe('dbfunction_test', function() {
   // });
 
   describe('passHash', function() {
-    it('should return true', function() {
-      var hashedPassword = dbfunction_test.passHash('password123');
-      var thehashedPassword = 'sha1$3I7HRwy7$cbfdac6008f9cab4083784cbd1874f76618d2a97';
-      var verif = passwordHash.verify('password123', hashedPassword);
-      expect(verif).to.equal(true);
-      expect(thehashedPassword).to.equal(hashedPassword);
+    it('should return true on both tests', function() {
+      bcrypt.compare('Password123', hash, function(err, res) {
+        expect(res).to.equal(true);
+        // if(res) {
+        //  // Passwords match
+        // } else {
+        //  // Passwords don't match
+        // } 
+      });
     });
   });
 });

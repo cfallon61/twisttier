@@ -12,7 +12,7 @@ async function postCreateUser(req, res){
 
   var accountInfo = {
     email: req.body.email,
-    password: req.body.db.passHash(password), // TODO CHANGE THIS TO CREATE A HASH
+    password: req.body.password, // TODO CHANGE THIS TO CREATE A HASH
     name: req.body.name,
     username: req.body.username,
     bio: req.body.bio

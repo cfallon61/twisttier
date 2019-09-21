@@ -13,6 +13,12 @@ const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true" ? true : false);
 
+passHash = function(password) {
+  var passwordHash = require('./lib/password-hash');
+  var passHashed = passwordHash.generate(password);
+  return passHashed;
+}
+
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}

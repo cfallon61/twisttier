@@ -45,21 +45,21 @@ createUser = async function (accountInfo) {
     return false;
   }
 
-  store the hashed password in the database
-  bcrypt.hash(accountInfo.password, saltRounds, function (err,   hash) {
-    // this parts needs to be replaced by 
+  // store the hashed password in the database
+  // bcrypt.hash(accountInfo.password, saltRounds, function (err,   hash) {
+  //   // this parts needs to be replaced by 
     
-    // db.User.create({
-    //   name: req.body.usernamesignup,
-    //   email: req.body.emailsignup,
-    //   password: hash
-    //   }).then(function(data) {
-    //    if (data) {
-    //    res.redirect('/home');
-    //    }
-    // });
+  //   // db.User.create({
+  //   //   name: req.body.usernamesignup,
+  //   //   email: req.body.emailsignup,
+  //   //   password: hash
+  //   //   }).then(function(data) {
+  //   //    if (data) {
+  //   //    res.redirect('/home');
+  //   //    }
+  //   // });
   
-  });
+  // });
 };
 
 getSpins = function (user, res) {

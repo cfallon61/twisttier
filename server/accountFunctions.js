@@ -20,25 +20,25 @@ function authorize(accountInfo) {
   // will use usersExists function to see if it first exists
   if (db.userExists(user)) {
       
-    if it exists, match the username and password
-      db.User.findOne({
-        where: {
-            email: req.body.email
-               }
-      }).then(function (user) {
-       if (!user) {
-          res.redirect('/');
-       } else {
-        bcrypt.compare(req.body.password, user.password, function (err, result) {
-              if (result == true) {
-                  res.redirect('/home');
-              } else {
-              res.send('Incorrect password');
-              res.redirect('/');
-              }
-            });
-          }
-        });
+    // if it exists, match the username and password
+    //   db.User.findOne({
+    //     where: {
+    //         email: req.body.email
+    //            }
+    //   }).then(function (user) {
+    //    if (!user) {
+    //       res.redirect('/');
+    //    } else {
+    //     bcrypt.compare(req.body.password, user.password, function (err, result) {
+    //           if (result == true) {
+    //               res.redirect('/home');
+    //           } else {
+    //           res.send('Incorrect password');
+    //           res.redirect('/');
+    //           }
+    //         });
+    //       }
+    //     });
   }
  
 

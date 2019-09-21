@@ -2,7 +2,7 @@
 
 const credentials = require('./config.json');
 const helper = require('./helpers.js');
-const dotenv = require('dotenv').config();
+//const dotenv = require('dotenv').config();
 
 // import postgres lib
 const { Pool } = require("pg");
@@ -13,11 +13,11 @@ const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true" ? true : false);
 
-passHash = function(password) {
+passHash = function (password) {
   var passwordHash = require('./lib/password-hash');
   var passHashed = passwordHash.generate(password);
   return passHashed;
-}
+};
 
 
 // query the database to see if the user exists

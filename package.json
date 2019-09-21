@@ -26,7 +26,6 @@
     "core-js": "^3.2.1",
     "dotenv": "^8.1.0",
     "express": "latest",
-    "express-validator": "latest",
     "formidable": "latest",
     "jquery": "^3.4.1",
     "mocha": "^6.2.0",
@@ -44,7 +43,8 @@
   },
   "devDependencies": {
     "assert": "latest",
-    "node-mocks-http": "latest"
+    "express-validator": "^6.2.0",
+    "node-mocks-http": "^1.8.0"
   },
   "proxy": "http://localhost:8080"
 }

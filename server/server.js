@@ -83,7 +83,7 @@ app.get('/', (req, res) => {
 app.post('/create_user',
 [check('email').isEmail(), 
  check('password').isLength({min:8}),
- check('bio').isLength({max:35}),
+ check('bio').isLength({max:150}),
  check('name').isLength({max:25, min: 1}),
  check('username').isLength({max:15, min: 1})], 
  mids.postCreateUser);
@@ -100,6 +100,10 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
 {
   //placeholder @TODO implement database mapping
   res.status(200).send("good job you uploaded a picture");
+});
+
+app.post('/logout', (req, res) =>{
+
 });
 
 

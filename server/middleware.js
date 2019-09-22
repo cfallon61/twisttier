@@ -1,5 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const db = require('./dbFunctions');
+const bcrypt = require('bcrypt');
 
 
 async function postCreateUser(req, res){
@@ -24,10 +25,9 @@ async function postCreateUser(req, res){
     res.status(406).json({ errors: userCreated });
   }
   else {
+    // TODO add sessions
     res.redirect('/profileImage');// TODO create this form
-    // res.send("ok");
   }
-
 }
 
 module.exports = {

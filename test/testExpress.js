@@ -6,7 +6,7 @@ const db = require('../server/dbFunctions');
 
 
 describe("middleware / routing function tests", () => {
-  describe("Test post /create_user", async () => { 
+  describe("#createUser !exist", async () => { 
     it("should return a redirect to the upload profile image page", async () => {
         const req = httpMocks.createRequest(
         {
@@ -17,7 +17,7 @@ describe("middleware / routing function tests", () => {
             email: 'welcometohell@gmail.com',
             name: "Kurt",
             password: "password",
-            bio: 'why is it that i am the only one actually working on this?',
+            bio: 'why am i the only one actually working?',
           }
         });
 
@@ -27,33 +27,9 @@ describe("middleware / routing function tests", () => {
       const actualRes = mockres._getData();
       
       assert.notDeepStrictEqual(actualRes, false);
+      return true;
     });
   });
 
-  describe("#userExists() true", async () => {
-    it ("should return a list of errors", async() => {
-      user = {
-        email: "test@test.com",
-        username: "test"
-      };
-
-      var res = await db.userExists(user);
-      var expected = ['Email already in use', 'Username already in use'];
-
-      assert.deepStrictEqual(res, expected);
-    });
-  });
-
-  describe("#userExists() false", async () => {
-    it("should return false", async () => {
-      user = {
-        email: "test@test656565.com",
-        username: "test656565"
-      };
-
-      var res = await db.userExists(user);
-
-      assert.deepStrictEqual(res, false);
-    });
-  });
+  
 });

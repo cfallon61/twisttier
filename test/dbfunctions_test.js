@@ -36,14 +36,6 @@ describe('database functions test', function() {
   
     });
   });
-
-  describe('getCurrentTime', function () {
-    it('should return the exact date and time', function () {
-      var date = dbfunction_test.getCurrentTime()
-      expect(date);
-    });
-  });
-
   // describe('createUser', function() {
   //   it('should return true', async function() {
   //     var realUser;
@@ -61,16 +53,16 @@ describe('database functions test', function() {
   //   });
   // });
 
-  describe('passHash', function() {
-    it('should return true on both tests', function() {
-      bcrypt.compare('Password123', hash, function(err, res) {
-        expect(res).to.equal(true);
-        // if(res) {
-        //  // Passwords match
-        // } else {
-        //  // Passwords don't match
-        // } 
-      });
-    });
-  });
+//   describe('passHash', function() {
+//     it('should return true on both tests', function() {
+//       // bcrypt.compare('Password123', hash, function(err, res) {
+//         // expect(res).to.equal(true);
+//         // if(res) {
+//         //  // Passwords match
+//         // } else {
+//         //  // Passwords don't match
+//         // } 
+//       });
+//     });
+//   });
 });

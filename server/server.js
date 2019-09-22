@@ -102,6 +102,10 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
   res.status(200).send("good job you uploaded a picture");
 });
 
+app.post('/logout', (req, res) =>{
+
+});
+
 
 app.use((err, req, res, next) =>{
   // TODO implement a log file for errors

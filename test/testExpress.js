@@ -31,29 +31,5 @@ describe("middleware / routing function tests", () => {
     });
   });
 
-  describe("#userExists() true", async () => {
-    it ("should return a list of errors", async() => {
-      user = {
-        email: "test@test.com",
-        username: "test"
-      };
-
-      var res = await db.userExists(user);
-
-      assert.notDeepStrictEqual(res, false);
-    });
-  });
-
-  describe("#userExists() false", async () => {
-    it("should return false", async () => {
-      user = {
-        email: "test@test656565.com",
-        username: "test656565"
-      };
-
-      var res = await db.userExists(user);
-
-      assert.deepStrictEqual(res, false);
-    });
-  });
+  
 });

@@ -36,9 +36,10 @@ var userExists = async function (user) {
   return false;
 }
 
-function addToUsers(accountInfo){
-  
-}
+function userTableName(username) { 
+  var name = username + "_spins";
+  return (TEST ? name + "_test" : name);
+};
 
 // database function that does all the heavy lifting
 // @param accountInfo: object with all the user details from the create account form
@@ -53,15 +54,16 @@ function addToUsers(accountInfo){
   }
 
   const client = await pool.connect();
+  var rows = [];
 
   try {
-    var tablename = accountInfo.username + "_spins";
 
     const hash = await bcrypt.hash(accountInfo.password, 10);
     accountInfo.passhash = hash;
 
     // dynamically create tables based on if this is development or not
-    tablename = (TEST ? tablename + "_test" : tablename);
+    var tablename = userTableName(accountInfo.username);
+    
     var args = [tablename, SPIN_TEMPLATE];
     await client.query('BEGIN');
 
@@ -93,23 +95,62 @@ function addToUsers(accountInfo){
     res = await client.query(query, args);
     // tell server we are done 
     await client.query('COMMIT');
+
+    rows = res.rows;
     
-  } catch (e){
+  } 
+  catch (e) {
     await client.query('ROLLBACK');
-    console.log(e);
-    return e;
-  } finally {
+    console.log(`Error caught by error handler: ${e}`);
+    // return e;
+  } 
+  finally {
     client.release();
   }
 
-  return true;  
+  return (rows.length === 0 ? false : true);
+};
+
+
+// function that deletes user info
+// this function is to be called after the server has properly authenticated
+// @param username: the user's username
+// @return true on success, error on failure
+async function deleteUser(username){
+  const client = await pool.connect();
+  var rows = [];
+
+  try{
+    var tablename = userTableName(username);
+
+    // delete spin table
+    var query =  `DROP TABLE ${tablename}`;
+
+    var res = await client.query(query);
+
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1`;
+
+    var res = await client.query(query, [username]);
+    await client.query('COMMIT');
+
+    rows = res.rows;
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? true : false);
 };
 
 getSpins = function (user, res) {
 
 };
 
-addSpin = function (user, spin) {
+addSpin = function (spin) {
   
 };
 
@@ -117,11 +158,11 @@ showNotification = function (user, res) {
 
 };
 
-followTopicUserPair = function (user, res) {
+followTopicUserPair = function (pair) {
 
 };
 
-unfollowTopicUserPair = function (user, res) {
+unfollowTopicUserPair = function (pair) {
 
 };
 
@@ -157,5 +198,6 @@ module.exports = {
   reSpin,
   getRespinThread,
   createUser,
-  userExists
+  userExists,
+  deleteUser
 };

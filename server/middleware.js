@@ -28,7 +28,6 @@ async function postCreateUser(req, res){
     // TODO add sessions
     res.redirect('/profileImage');// TODO create this form
   }
-
 }
 
 module.exports = {

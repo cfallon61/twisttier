@@ -12,6 +12,9 @@
     "cookieName": "twister_client",
     "secret": "thisIsSupposedToBeALongUnguessableStringSoHereYouGoEverybody",
     "duration": 86400000,
-    "activeDuration": 3600000 
+    "activeDuration": 3600000,
+    "secure": true,
+    "httpOnly": true,
+    "ephemeral": false
   }
 }

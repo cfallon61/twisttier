@@ -80,8 +80,7 @@ describe('database functions test', function() {
       var username = "fsdhjklasdf9p834y";
       var res = await db.deleteUser(username);
 
-      assert.notDeepStrictEqual(res, true);
+      assert.notDeepStrictEqual(res, false);
     });
   });
-
 });

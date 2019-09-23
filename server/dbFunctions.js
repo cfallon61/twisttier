@@ -241,27 +241,37 @@ async function likeSpin(user_liker, user_poster, spin) {
     var query = `SELECT like_list FROM ${tablename} 
     WHERE id LIKE '%${spin.id}%'`;
     var res = await client.query(query);
-    if (res.indexOf(user_like.username) > -1) {
+    if (res[0].indexOf(user_like.username) > -1) {
       console.log("user_liker has already liked the spin")
       return false;
     } else {
-      res.push(user_liker.username);
+      res[0].push(user_liker.username);
       query = `UPDATE ${tablename} 
       SET 
-      likelist = ${res}, 
-      likes = ${tablename}.likes+1
+      likelist = ${res[0]}, 
+      likes = likes + 1
       WHERE id = ${spin.id}`;
       res = await client.query(query);
-      await client.query('COMMIT');
       rows = res.rows;
+      await client.query('COMMIT');
     }
   } catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
+  finally {
+    client.release();
+  }
   return (rows.length === 0 ? false : true);
 };
 
+// funtion decrements like number of the spin by 1
+// check that user_liker has already liked the spin
+// check that user_liker is removed from the spin's like_list
+// @param user_liker: username of user which is unliking the spin
+// @param user_poster: username of user which is poster of spin
+// @param spin: spin which is being unliked
+// @return true on success and false on failure
 async function unlikeSpin(user, res) {
 
 };
@@ -270,7 +280,7 @@ async function reSpin(user, res) {
 
 };
 
-async function getRespinThread(user, res) {
+async function getQuoteOrigin(user, res) {
 
 };
 
@@ -288,7 +298,7 @@ module.exports = {
   likeSpin,
   unlikeSpin,
   reSpin,
-  getRespinThread,
+  getQuoteOrigin,
   createUser,
   userExists,
   deleteUser,

@@ -88,4 +88,5 @@ module.exports = {
   authorize,
   deleteAccount,
   editAccount,
+  authorizeAccount
 };

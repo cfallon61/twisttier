@@ -85,30 +85,4 @@ describe('database functions test', function() {
     });
   });
 
-  describe("#accFunc.authorizeAccount()", async () => {
-    it("should return true as user-password pair verified", async () => {
-      user = {
-        username: 'test',
-        email: 'test@test.com',
-        password: "password",
-      };
-
-      var res = await accFunc.authorizeAccount(user);
-
-      assert.notDeepStrictEqual(res, false);
-    });
-
-    it("should return false", async () => {
-      user = {
-        email: "test@test656565.com",
-        username: "test656565",
-        password: "psdasd"
-      };
-
-      var res = await accFunc.authorizeAccount(user);
-
-      assert.deepStrictEqual(res, false);
-    });
-  });
-
 });

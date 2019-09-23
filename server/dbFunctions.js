@@ -146,39 +146,55 @@ async function deleteUser(username){
   return (rows.length === 0 ? true : false);
 };
 
-getSpins = function (user, res) {
+async function getSpins(user, res) {
 
 };
 
-addSpin = function (spin) {
+async function addSpin(user, spin) {
   
 };
 
-showNotification = function (user, res) {
+async function showNotification(user, res) {
 
 };
 
-followTopicUserPair = function (pair) {
+async function followTopicUserPair(pair) {
 
 };
 
-unfollowTopicUserPair = function (pair) {
+async function unfollowTopicUserPair(pair) {
 
 };
 
-likeSpin = function (user, res) {
+// funtion increments like number of the spin by 1
+// check that user_liker hasn't already liked the spin
+// check that user_liker is added to spin's like_list
+// @param user_liker: username of user which is liking the spin
+// @param user_poster: username of user which is recieveing the like on his spin
+// @param spin: spin which is being liked
+// @return true on success and false on failure
+async function likeSpin(user_liker, user_poster, spin) {
+  const client = await pool.connect();
+
+  try {
+    var tablename = userTableName(user_poster+'_spins_test');
+    var query =  `DROP TABLE ${tablename}`;
+
+  } catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+  }
+};
+
+async function unlikeSpin(user, res) {
 
 };
 
-unlikeSpin = function (user, res) {
+async function reSpin(user, res) {
 
 };
 
-reSpin = function (user, res) {
-
-};
-
-getRespinThread = function (user, res) {
+async function getRespinThread(user, res) {
 
 };
 

@@ -104,37 +104,7 @@ describe('database functions test', function() {
       var username = "fsdhjklasdf9p834y";
       var res = await db.deleteUser(username);
 
-      assert.notDeepStrictEqual(res, true);
+      assert.notDeepStrictEqual(res, false);
     });
   });
-
-  // describe('createUser', function() {
-  //   it('should return true', async function() {
-  //     var realUser;
-  //     realUser.email = "jdoe@purdue.edu";
-  //     realUser.username = "doeJohn";
-  //     let user = await dbfunction_test.createUser(realUser);
-  //     expect(user).to.equal(true);
-  //   });
-  //   it('should return false', async function() {
-  //     var fakeUser;
-  //     fakeUser.email = "uhoh@stinky.com";
-  //     fakeUser.username = "poopy";
-  //     let user = await dbfunction_test.createUser(fakeUser);
-  //     expect(user).to.equal(false);
-  //   });
-  // });
-
-//   describe('passHash', function() {
-//     it('should return true on both tests', function() {
-//       // bcrypt.compare('Password123', hash, function(err, res) {
-//         // expect(res).to.equal(true);
-//         // if(res) {
-//         //  // Passwords match
-//         // } else {
-//         //  // Passwords don't match
-//         // } 
-//       });
-//     });
-//   });
 });

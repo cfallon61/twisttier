@@ -17,7 +17,7 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    npm install --save-dev
+    npm install
   displayName: 'install all dependencies'
 
 - script: |

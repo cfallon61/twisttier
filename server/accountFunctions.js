@@ -71,9 +71,34 @@ async function authorize(req, res, next) {
   }
 }
 
+// checks whether the account to be deleted exists or not, deletes it,
+// returns error or success response
+function deleteAccount(req, res, next) {
+  // extract info from the request
+  const user = {
+    username : req.body.username,
+    password : req.body.password,
+    email : req.body.email
+  };
 
-function deleteAccount() {
+  var exist = db.userExists(user);
+  
+  // check if the user exists
+  // if it exists, call the delete user function of db
+  if (exist) {
+    
+    deleteSuccess = db.deleteUser(req.body.username);
 
+    if (deleteSuccess){
+      res.send("Success");
+    } else {
+      res.send("Failure");
+    }
+  } else {
+    res.send("Failure");
+  }
+
+  return next();
 }
 
 function editAccount() {

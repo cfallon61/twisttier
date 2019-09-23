@@ -7,7 +7,7 @@
     "test_server": "mocha",
     "start_react": "react-scripts start",
     "start_server": "node ./server/server.js",
-    "localRun" : "run-p start_server start_react",
+    "localRun": "run-p start_server start_react",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",

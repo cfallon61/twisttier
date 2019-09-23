@@ -7,7 +7,7 @@ class Spin extends Component
         tags: {},
         edited: false, 
         quoted: false,
-        quoteThread: [],
+        quoteOrigin: "",
         likes : 0
     };
 

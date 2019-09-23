@@ -2,95 +2,155 @@
 
 const credentials = require('./config.json');
 const helper = require('./helpers.js');
-
+const dotenv = require('dotenv').config();
+const bcrypt = require('bcrypt');
 // import postgres lib
 const { Pool } = require("pg");
 // create new postgres client pool 
 const pool = new Pool(credentials.database);
-const usertable = process.env.USER_TABLE;
+
+const USER_TABLE = process.env.USER_TABLE;
+const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
+const TEST = (process.env.TEST === "true" ? true : false);
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 var userExists = async function (user) {
-  var email = "";
-  var username = "";
-
-  if (user.hasOwnProperty('email')) { email = user.email; }
-  if (user.hasOwnProperty('username')) { username = user.username; }
-
-  var params = [usertable, email, username];
-
-  var res = await pool.query("SELECT EMAIL, USERNAME FROM $1 WHERE EMAIL=\'$2\' OR USERNAME=\'$3\'", params);
-
+  
+  var params = [user.email, user.username];
+  
+  var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
+  var res = await pool.query(query, params);
   console.log(res);
+  // response is a json 
+  // need to get rows, which is a list
 
-  // return boolean of whether the db returned an empty string
-  return helper.isEmpty(res);
+  var rows = res.rows;
+  // console.log(rows);
+  if (rows.length > 0) {
+    // should have only 1 index of the username / email occurring
+    // so this is why the [0];
+    return rows;
+  }
+  // return false if they dont already exist, this is good
+  return false;
 }
 
-
+function userTableName(username) { 
+  var name = username + "_spins";
+  return (TEST ? name + "_test" : name);
+};
 
 // database function that does all the heavy lifting
 // @param accountInfo: object with all the user details from the create account form
-// @return: bool
+// @return: object containing creation info
 //         true if creation successful, false if not
-createUser = async function (accountInfo) {
-  var user = {
-    email: accountInfo.email,
-    username: accountInfo.username
-  };
-
+ async function createUser(accountInfo) {
+  
   // check if the user exists already
-  if (userExists(user)) {
-    return false;
+  var existing = await userExists(accountInfo);
+  if (existing != false){
+    return existing;
   }
 
-  // store the hashed password in the database
-  // bcrypt.hash(accountInfo.password, saltRounds, function (err,   hash) {
-  //   // this parts needs to be replaced by 
+  const client = await pool.connect();
+  var rows = [];
+
+  try {
+
+    const hash = await bcrypt.hash(accountInfo.password, 10);
+    accountInfo.passhash = hash;
+
+    // dynamically create tables based on if this is development or not
+    var tablename = userTableName(accountInfo.username);
     
-  //   // db.User.create({
-  //   //   name: req.body.usernamesignup,
-  //   //   email: req.body.emailsignup,
-  //   //   password: hash
-  //   //   }).then(function(data) {
-  //   //    if (data) {
-  //   //    res.redirect('/home');
-  //   //    }
-  //   // });
-  
-  // });
+    var args = [tablename, SPIN_TEMPLATE];
+    await client.query('BEGIN');
+
+    // create the user table
+    var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
+
+    var res = await client.query(query);
+    // console.log(res);
+
+    args = [
+      accountInfo.email,
+      accountInfo.username,
+      accountInfo.passhash,
+      'NOW()',
+      'NOW()',
+      accountInfo.bio,
+      accountInfo.name,
+      [], // followers
+      {}, // following
+      [], // interests
+      {}, // accessibility features
+    ];
+
+    query = `INSERT INTO ${USER_TABLE} (email, 
+      username, passhash, create_date, last_login, bio, 
+      name, followers, following, interests, accessibility_features) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
+
+    res = await client.query(query, args);
+    // tell server we are done 
+    await client.query('COMMIT');
+
+    rows = res.rows;
+    
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${e}`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+
+  return (rows.length === 0 ? false : true);
+};
+
+
+// function that deletes user info
+// this function is to be called after the server has properly authenticated
+// @param username: the user's username
+// @return true on success, error on failure
+async function deleteUser(username){
+  const client = await pool.connect();
+  var rows = [];
+
+  try{
+    var tablename = userTableName(username);
+
+    // delete spin table
+    var query =  `DROP TABLE ${tablename}`;
+
+    var res = await client.query(query);
+
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1`;
+
+    var res = await client.query(query, [username]);
+    await client.query('COMMIT');
+
+    rows = res.rows;
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? true : false);
 };
 
 getSpins = function (user, res) {
-  var spin = [
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": 30,
-      "likes": 12,
-      "tags": [
-        { tag1: "name" },
-        { tag2: "name" }
-      ]
-    },
-    {
-      "user": "poop",
-      "date": "post date",
-      "text": "content",
-      "quotes": 0,
-      "likes": 100,
-      "tags": [
-        { tag1: "name" },
-        { tag2: "name" }
-      ]
-    }
-  ];
-  return spin;
+
 };
 
-addSpin = function (user, spin) {
+addSpin = function (spin) {
   
 };
 
@@ -98,16 +158,11 @@ showNotification = function (user, res) {
 
 };
 
-getCurrentTime = function () {
-  var moment = require('moment');
-  return moment().format('MMMM Do YYYY, h:mma');
-};
-
-followTopicUserPair = function (user, res) {
+followTopicUserPair = function (pair) {
 
 };
 
-unfollowTopicUserPair = function (user, res) {
+unfollowTopicUserPair = function (pair) {
 
 };
 
@@ -136,12 +191,13 @@ module.exports = {
   getSpins,
   addSpin,
   showNotification,
-  getCurrentTime,
   followTopicUserPair,
   unfollowTopicUserPair,
   likeSpin,
   unlikeSpin,
   reSpin,
   getRespinThread,
-  createUser
+  createUser,
+  userExists,
+  deleteUser
 };

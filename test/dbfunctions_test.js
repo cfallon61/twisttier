@@ -1,6 +1,7 @@
 /* test/dbfunction_test.js */
 
 var db = require('../server/dbFunctions.js');
+var accFunc = require('../server/accountFunctions.js');
 var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
@@ -83,4 +84,31 @@ describe('database functions test', function() {
       assert.notDeepStrictEqual(res, false);
     });
   });
+
+  describe("#accFunc.authorizeAccount()", async () => {
+    it("should return true as user-password pair verified", async () => {
+      user = {
+        username: 'test',
+        email: 'test@test.com',
+        password: "password",
+      };
+
+      var res = await accFunc.authorizeAccount(user);
+
+      assert.notDeepStrictEqual(res, false);
+    });
+
+    it("should return false", async () => {
+      user = {
+        email: "test@test656565.com",
+        username: "test656565",
+        password: "psdasd"
+      };
+
+      var res = await accFunc.authorizeAccount(user);
+
+      assert.deepStrictEqual(res, false);
+    });
+  });
+
 });

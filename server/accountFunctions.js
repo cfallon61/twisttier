@@ -71,6 +71,33 @@ async function authorize(req, res, next) {
   }
 }
 
+
+// function to authorize the account - either returns true meaning account
+// is authorized, false otherwise. 
+// boolean value can be used in the front end to navigate to page required.
+var authorizeAccount = async function (user) {
+
+  var exist = await db.userExists(user);
+
+  if (!exist){
+    return false;
+  }
+  
+  // compare the passwords
+  var match = await bcrypt.compare(user.password, userData[0].passhash);
+ 
+  // password doesn't match
+  if (!match){
+    return false;
+  }
+  else {
+    db.updateLoginTime(user.username);
+    return true;
+  }
+  return false;
+}
+
+
 function deleteAccount() {
 
 }

@@ -53,6 +53,7 @@ var userExists = async function (user) {
   
   var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
   var res = await pool.query(query, params);
+  console.log(res);
   // response is a json 
   // need to get rows, which is a list
 

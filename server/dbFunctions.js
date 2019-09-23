@@ -175,15 +175,33 @@ async function unfollowTopicUserPair(pair) {
 // @return true on success and false on failure
 async function likeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
+  var rows = [];
 
   try {
-    var tablename = userTableName(user_poster+'_spins_test');
-    var query =  `DROP TABLE ${tablename}`;
-
+    var tablename = userTableName(user_poster);
+    await client.query('BEGIN');
+    var query = `SELECT like_list FROM ${tablename} 
+    WHERE id LIKE '%${spin.id}%'`;
+    var res = await client.query(query);
+    if (res.indexOf(user_like.username) > -1) {
+      console.log("user_liker has already liked the spin")
+      return false;
+    } else {
+      res.push(user_liker.username);
+      query = `UPDATE ${tablename} 
+      SET 
+      likelist = ${res}, 
+      likes = ${tablename}.likes+1
+      WHERE id = ${spin.id}`;
+      res = await client.query(query);
+      await client.query('COMMIT');
+      rows = res.rows;
+    }
   } catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
+  return (rows.length === 0 ? false : true);
 };
 
 async function unlikeSpin(user, res) {

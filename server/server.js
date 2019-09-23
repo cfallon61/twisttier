@@ -4,19 +4,24 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-const db = require('./dbFunctions');
 const { check, validationResult } = require('express-validator');
 
 const dotenv = require('dotenv');
-const mids = require('./middleware.js');
+const users = require('./accountFunctions.js');
+const index = path.join(__dirname, '../build/index.html');
 
 
 const init = require('./config.json');
-const root = path.join(__dirname, "../public");
+const root = path.join(__dirname, "../build");
+const images = path.join(__dirname, '../profileImages');
+
 const port = process.env.LISTEN_PORT || 8080;
 const app = express();
+
 app.use(session(init.sessionSetup));
 app.use(express.json());
+// root
+app.use(express.static(root));
 
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
@@ -59,34 +64,22 @@ const upload = multer({
 
 }).single('profileImage');
 
-
-
-app.listen(port, (err) => {
+var server = app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
 });
 
 
-app.get('/', (req, res) => {
-  res.send('hello');
-  console.log("requested root");
-  // res.sendFile(path.join(root, "index.html"));
-});
-
 // TODO ADD SESSION CACHING
 // handle user creation
-// @param req: the html headers which will include
-//              a json with the user information
-// @param res: response to client
-//             will return 406, Not acceptable to the client if creation fails
-//             or redirect to next page
 app.post('/create_user',
-[check('email').isEmail(), 
- check('password').isLength({min:8}),
- check('bio').isLength({max:150}),
- check('name').isLength({max:25, min: 1}),
- check('username').isLength({max:15, min: 1})], 
- mids.postCreateUser);
+        [check('email').isEmail(), 
+         check('password').isLength({min:8}),
+         check('bio').isLength({max:150}),
+         check('name').isLength({max:25, min: 1}),
+         check('username').isLength({max:15, min: 1})], 
+         users.loggedIn,
+         users.postCreateUser);
  
 
 
@@ -102,10 +95,42 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
   res.status(200).send("good job you uploaded a picture");
 });
 
-app.post('/logout', (req, res) =>{
-
+app.post('/logout', loggedIn, (req, res) =>{
 });
 
+app.post('/login', notLoggedIn, users.authorize, (req, res) => {
+  // if the authorize function signals an error, send an unauthorized message
+  if (res.getHeader('error')){
+    res.status(401).send('Unauthorized');
+  }
+  else {
+    res.clientSession.uid = user.username;
+    res.sendFile(index);
+  }
+}); 
+
+// wtf this actually fricken fixed it i am PISSED
+app.get('/*', (req, res) => { res.sendFile(index);});
+
+
+function loggedIn(req, res, next) {
+  // if logged in continue, else redirect to wherever
+  if (req.clientSession.uid) {
+    next();
+  }
+  else {
+    res.sendFile(index); // TODO route this however 
+  }
+};
+
+function notLoggedIn(req, res, next) {
+  if (!req.clientSession.uid) {
+    next();
+  }
+  else {
+    res.sendFile(index); // TODO IDK where to route this behavior
+  }
+}
 
 app.use((err, req, res, next) =>{
   // TODO implement a log file for errors

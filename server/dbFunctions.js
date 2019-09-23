@@ -146,6 +146,32 @@ async function deleteUser(username){
   return (rows.length === 0 ? true : false);
 };
 
+
+// Function to update the last login time
+// return true on success, false on error
+async function updateLoginTime(username){
+  var client = await pool.connect();
+  var rows;
+  try{
+    await client.query('BEGIN');
+    const tablename = userTableName(username);
+    const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
+    var res = await client.query(query, [username]);
+    rows = res.rows;
+    await client.query('COMMIT');
+  }
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(e);
+  }
+  finally {
+    client.release();
+  }
+
+  return (rows.length === 0 ? false : true);
+};
+
+
 getSpins = function (user, res) {
 
 };
@@ -199,5 +225,6 @@ module.exports = {
   getRespinThread,
   createUser,
   userExists,
-  deleteUser
+  deleteUser,
+  updateLoginTime
 };

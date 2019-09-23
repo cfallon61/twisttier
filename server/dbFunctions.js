@@ -146,39 +146,99 @@ async function deleteUser(username){
   return (rows.length === 0 ? true : false);
 };
 
+
+// Function to update the last login time
+// return true on success, false on error
+async function updateLoginTime(username){
+  var client = await pool.connect();
+  var rows;
+  try{
+    await client.query('BEGIN');
+    const tablename = userTableName(username);
+    const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
+    var res = await client.query(query, [username]);
+    rows = res.rows;
+    await client.query('COMMIT');
+  }
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(e);
+  }
+  finally {
+    client.release();
+  }
+
+  return (rows.length === 0 ? false : true);
+};
+
+
 getSpins = function (user, res) {
 
 };
 
-addSpin = function (spin) {
+async function addSpin(user, spin) {
   
 };
 
-showNotification = function (user, res) {
+async function showNotification(user, res) {
 
 };
 
-followTopicUserPair = function (pair) {
+async function followTopicUserPair(pair) {
 
 };
 
-unfollowTopicUserPair = function (pair) {
+async function unfollowTopicUserPair(pair) {
 
 };
 
-likeSpin = function (user, res) {
+// funtion increments like number of the spin by 1
+// check that user_liker hasn't already liked the spin
+// check that user_liker is added to spin's like_list
+// @param user_liker: username of user which is liking the spin
+// @param user_poster: username of user which is recieveing the like on his spin
+// @param spin: spin which is being liked
+// @return true on success and false on failure
+async function likeSpin(user_liker, user_poster, spin) {
+  const client = await pool.connect();
+  var rows = [];
+
+  try {
+    var tablename = userTableName(user_poster);
+    await client.query('BEGIN');
+    var query = `SELECT like_list FROM ${tablename} 
+    WHERE id LIKE '%${spin.id}%'`;
+    var res = await client.query(query);
+    if (res.indexOf(user_like.username) > -1) {
+      console.log("user_liker has already liked the spin")
+      return false;
+    } else {
+      res.push(user_liker.username);
+      query = `UPDATE ${tablename} 
+      SET 
+      likelist = ${res}, 
+      likes = ${tablename}.likes+1
+      WHERE id = ${spin.id}`;
+      res = await client.query(query);
+      await client.query('COMMIT');
+      rows = res.rows;
+    }
+  } catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+  }
+  return (rows.length === 0 ? false : true);
+};
+
+async function unlikeSpin(user, res) {
 
 };
 
-unlikeSpin = function (user, res) {
+async function reSpin(user, res) {
 
 };
 
-reSpin = function (user, res) {
-
-};
-
-getRespinThread = function (user, res) {
+async function getRespinThread(user, res) {
 
 };
 
@@ -199,5 +259,6 @@ module.exports = {
   getRespinThread,
   createUser,
   userExists,
-  deleteUser
+  deleteUser,
+  updateLoginTime
 };

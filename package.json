@@ -7,10 +7,11 @@
     "test_server": "mocha",
     "start_react": "react-scripts start",
     "start_server": "node ./server/server.js",
+    "localRun" : "run-p start_server start_react",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start": "run-p start_server start_react"
+    "start": "start_server"
   },
   "repository": {
     "type": "git",
@@ -26,11 +27,9 @@
     "core-js": "^3.2.1",
     "dotenv": "^8.1.0",
     "express": "latest",
-    "formidable": "latest",
     "jquery": "^3.4.1",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
-    "moment": "^2.24.0",
     "multer": "latest",
     "npm-run-all": "latest",
     "pg": "^7.12.1",
@@ -38,7 +37,7 @@
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "0.9.5"
+    "react-scripts": "^3.1.2"
   },
   "devDependencies": {
     "assert": "latest",

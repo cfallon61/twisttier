@@ -9,7 +9,7 @@
   },
 
   "sessionSetup":{
-    "cookieName": "twister_client",
+    "cookieName": "clientSession",
     "secret": "thisIsSupposedToBeALongUnguessableStringSoHereYouGoEverybody",
     "duration": 86400000,
     "activeDuration": 3600000,

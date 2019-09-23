@@ -94,7 +94,7 @@ var authorizeAccount = async function (user) {
     db.updateLoginTime(user.username);
     return true;
   }
-
+  return false;
 }
 
 

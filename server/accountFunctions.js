@@ -6,11 +6,6 @@ const bcrypt = require('bcrypt');
 const path   = require('path');
 const index  = path.join(__dirname, '../build/index.html');
 
-<<<<<<< HEAD
-const bcrypt = require('bcrypt');
-
-const saltRounds = 10;
-=======
 function validUsername(username){
 
 }
@@ -32,7 +27,6 @@ async function postCreateUser(req, res) {
     username: req.body.username,
     bio: req.body.bio
   };
->>>>>>> 99d995a77c50def07e5b5177df4832a2130c2f0e
 
   var userCreated = await db.createUser(accountInfo);
 
@@ -45,40 +39,6 @@ async function postCreateUser(req, res) {
   }
 }
 
-<<<<<<< HEAD
-function authorize(accountInfo) {
-
-  // create the user to check for existence
-  var user = {
-    email: accountInfo.email,
-    username: accountInfo.username
-  };
-  
-  // will use usersExists function to see if it first exists
-  if (db.userExists(user)) {
-      
-    // if it exists, match the username and password
-    //   db.User.findOne({
-    //     where: {
-    //         email: req.body.email
-    //            }
-    //   }).then(function (user) {
-    //    if (!user) {
-    //       res.redirect('/');
-    //    } else {
-    //     bcrypt.compare(req.body.password, user.password, function (err, result) {
-    //           if (result == true) {
-    //               res.redirect('/home');
-    //           } else {
-    //           res.send('Incorrect password');
-    //           res.redirect('/');
-    //           }
-    //         });
-    //       }
-    //     });
-  }
- 
-=======
 // @desc: function used for logging in (idk why its not called login but whatever)
 // @return: none
 //          sends response 401 unauthorized with a set header specifying what went wrong
@@ -89,7 +49,6 @@ async function authorize(req, res, next) {
   };
 
   var userData = await db.userExists(user);
->>>>>>> 99d995a77c50def07e5b5177df4832a2130c2f0e
 
   if (userData === false)
   {
@@ -111,6 +70,33 @@ async function authorize(req, res, next) {
     return next();
   }
 }
+
+
+// function to authorize the account - either returns true meaning account
+// is authorized, false otherwise. 
+// boolean value can be used in the front end to navigate to page required.
+var authorizeAccount = async function (user) {
+
+  var exist = await db.userExists(user);
+
+  if (!exist){
+    return false;
+  }
+  
+  // compare the passwords
+  var match = await bcrypt.compare(user.password, userData[0].passhash);
+ 
+  // password doesn't match
+  if (!match){
+    return false;
+  }
+  else {
+    db.updateLoginTime(user.username);
+    return true;
+  }
+
+}
+
 
 function deleteAccount() {
 

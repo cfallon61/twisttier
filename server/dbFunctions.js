@@ -271,7 +271,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     var index = res[0].indexOf(user_like.username);
     if (index > -1) {
 
-      res[0].spice(index, 1);
+      res[0].splice(index, 1);
       
       args = [res[0], spin.id];
       query = `UPDATE ${tablename} 

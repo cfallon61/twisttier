@@ -15,17 +15,11 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
-- task: AzurePowerShell@4
+- task: Bash@3
   inputs:
-    ScriptType: 'InlineScript'
-    Inline: 'npm --add-python-to-path=''true'' --debug install --global windows-build-tools'
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
+    targetType: 'inline'
+    script: 'npm install'
     
-- script: |
-    npm install
-  displayName: 'install all dependencies'
-
 - script: |
     npm run test_server
   displayName: 'Run Server unit tests'

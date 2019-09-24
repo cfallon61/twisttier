@@ -11,8 +11,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start": "npm run begin_server",
-    "heroku-postbuild": "npm run build"
+    "start": "npm run begin_server"
   },
   "repository": {
     "type": "git",
@@ -38,11 +37,12 @@
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "^3.1.2"
+    "react-scripts": "^3.1.2",
+    "express-validator": "^6.2.0"
+        
   },
   "devDependencies": {
     "assert": "latest",
-    "express-validator": "^6.2.0",
     "node-mocks-http": "^1.8.0"
   },
   "engines": {

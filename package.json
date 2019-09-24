@@ -45,5 +45,8 @@
     "express-validator": "^6.2.0",
     "node-mocks-http": "^1.8.0"
   },
+  "engines": {
+    "node": "12.10.0"
+  },
   "proxy": "http://localhost:8080"
 }

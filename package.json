@@ -20,8 +20,7 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
-    "node-pre-gyp": "latest",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "https://github.com/kelektiv/node.bcrypt.js.git#master",
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
@@ -38,7 +37,7 @@
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "^3.1.2"   
+    "react-scripts": "^3.1.2"
   },
   "devDependencies": {
     "assert": "latest",

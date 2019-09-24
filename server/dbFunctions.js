@@ -68,6 +68,7 @@ var userExists = async function (user) {
   return false;
 }
 
+// forms the name of the table of individual users
 function userTableName(username) { 
   var name = username + "_spins";
   return (TEST ? name + "_test" : name);
@@ -82,7 +83,7 @@ function userTableName(username) {
   // check if the user exists already
   var existing = await userExists(accountInfo);
   if (existing != false){
-    return existing;
+    return existing; // return the rows
   }
 
   const client = await pool.connect();

@@ -30,6 +30,7 @@ async function postCreateUser(req, res, next) {
 
   var userCreated = await db.createUser(accountInfo);
 
+  // userCreated is the empty rows or false, return error
   if (userCreated != true) {
     res.setHeader('errors', userCreated);
   }
@@ -58,13 +59,21 @@ async function authorize(req, res, next) {
  
   // password doesn't match
   if (!match){
-    console.log('invalid password')
+    console.log('invalid password');
     res.setHeader('Error', 'Incorrect Password');
     return next();
   }
   else {
     console.log('authenticated');
-    db.updateLoginTime(user.username);
+    updateLoginTimeBool = db.updateLoginTime(user.username);
+    
+    // check whether login time was successfully updated
+    if (!updateLoginTimeBool) {
+      console.log('Login time could not be updated');
+      res.setHeader('Error', 'Login time could not be updated');
+      return next();
+    }
+
     return next();
   }
 }

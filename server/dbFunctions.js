@@ -36,6 +36,7 @@ var userExists = async function (user) {
   return false;
 }
 
+// forms the name of the table of individual users
 function userTableName(username) { 
   var name = username + "_spins";
   return (TEST ? name + "_test" : name);
@@ -50,9 +51,10 @@ function userTableName(username) {
   // check if the user exists already
   var existing = await userExists(accountInfo);
   if (existing != false){
-    return existing;
+    return existing; // return the rows
   }
 
+  // creates postgres client
   const client = await pool.connect();
   var rows = [];
 
@@ -65,6 +67,8 @@ function userTableName(username) {
     var tablename = userTableName(accountInfo.username);
     
     var args = [tablename, SPIN_TEMPLATE];
+    
+    // begins transaction
     await client.query('BEGIN');
 
     // create the user table
@@ -92,7 +96,8 @@ function userTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
 
     res = await client.query(query, args);
-    // tell server we are done 
+    
+    // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
     rows = res.rows;

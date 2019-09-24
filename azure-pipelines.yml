@@ -15,7 +15,6 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
-<<<<<<< HEAD
 # - task: Bash@3
 #   inputs:
 #     targetType: 'inline'
@@ -24,16 +23,6 @@ steps:
 # - script: |
 #     npm run test_server
 #   displayName: 'Run Server unit tests'
-=======
-
-- script: |
-    npm install --save-dev
-  displayName: 'install all dependencies'
-
-- script: |
-    npm run test_server
-  displayName: 'Run Server unit tests'
->>>>>>> 728db359c0575ea5d2d5743c01085e9d78fceeac
   
 
 # - task: PublishTestResults@2

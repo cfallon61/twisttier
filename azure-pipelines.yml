@@ -15,21 +15,21 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: 'npm install'
+# - task: Bash@3
+#   inputs:
+#     targetType: 'inline'
+#     script: 'npm install'
     
-- script: |
-    npm run test_server
-  displayName: 'Run Server unit tests'
+# - script: |
+#     npm run test_server
+#   displayName: 'Run Server unit tests'
   
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '**/TEST-*.xml'
-    failTaskOnFailedTests: true
+# - task: PublishTestResults@2
+#   inputs:
+#     testResultsFormat: 'JUnit'
+#     testResultsFiles: '**/TEST-*.xml'
+#     failTaskOnFailedTests: true
 
 
 - task: PowerShell@2

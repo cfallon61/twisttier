@@ -12,7 +12,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "start": "begin_server",
-    "heroku-postbuild": "build"
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",

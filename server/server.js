@@ -15,7 +15,7 @@ const init = require('./config.json');
 const root = path.join(__dirname, "../build");
 const images = path.join(__dirname, '../profileImages');
 
-const port = process.env.LISTEN_PORT || 8080;
+const port = process.env.PORT || 8080;
 const app = express();
 
 app.use(session(init.sessionSetup));

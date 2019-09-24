@@ -101,10 +101,10 @@ function deleteAccount(req, res, next) {
     if (deleteSuccess){
       res.send("Success");
     } else {
-      res.send("Failure");
+      res.setHeader("Error", "Could not delete");
     }
   } else {
-    res.send("Failure");
+    res.setHeader("Error", "Could not delete");
   }
 
   return next();

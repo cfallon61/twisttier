@@ -86,6 +86,7 @@ function userTableName(username) {
     return existing; // return the rows
   }
 
+  // creates postgres client
   const client = await pool.connect();
   var rows = [];
 
@@ -98,6 +99,8 @@ function userTableName(username) {
     var tablename = userTableName(accountInfo.username);
     
     var args = [tablename, SPIN_TEMPLATE];
+    
+    // begins transaction
     await client.query('BEGIN');
 
     // create the user table
@@ -126,7 +129,8 @@ function userTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
 
     res = await client.query(query, args);
-    // tell server we are done 
+    
+    // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
     rows = res.rows;
@@ -238,6 +242,7 @@ async function likeSpin(user_liker, user_poster, spin) {
 
   try {
     var tablename = userTableName(user_poster);
+    
     await client.query('BEGIN');
     var query = `SELECT like_list FROM ${tablename} 
     WHERE id LIKE '%${spin.id}%'`;

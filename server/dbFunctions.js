@@ -13,37 +13,6 @@ const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true" ? true : false);
 
-var user = function(id, email, username, password) {
-  this.id = id;
-  this.email = email;
-  this.username = username;
-  this.password = password;
-  //this.signUpDate = getCurrentTime();
-  //this.lastLogin = ?
-  this.bio = "";
-  this.name = "";
-  //this.
-}
-
-user.setBio = function(bio) {
-  if (bio.length > 100) {
-      console.log("bio is too long");
-      alert("bio is too long");
-      return;
-  }
-  this.bio = bio;
-  return;
-}
-
-user.setName = function(name) {
-  if (name.length > 35) {
-      console.log("name is too long");
-      alert("name is too long");
-      return;
-  }
-  this.name = name;
-  return;
-}
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
@@ -53,7 +22,6 @@ var userExists = async function (user) {
   
   var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
   var res = await pool.query(query, params);
-  console.log(res);
   // response is a json 
   // need to get rows, which is a list
 
@@ -103,7 +71,6 @@ function userTableName(username) {
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
 
     var res = await client.query(query);
-    // console.log(res);
 
     args = [
       accountInfo.email,
@@ -237,22 +204,33 @@ async function likeSpin(user_liker, user_poster, spin) {
 
   try {
     var tablename = userTableName(user_poster);
+    
     await client.query('BEGIN');
+   
+    var args = [spin.id];
     var query = `SELECT like_list FROM ${tablename} 
-    WHERE id LIKE '%${spin.id}%'`;
-    var res = await client.query(query);
+    WHERE id = $1`;
+
+    var res = await client.query(query, args);
+
     if (res[0].indexOf(user_like.username) > -1) {
       console.log("user_liker has already liked the spin")
       return false;
-    } else {
+    } 
+    else {
+
       res[0].push(user_liker.username);
+      args = [res[0], spin.id];
       query = `UPDATE ${tablename} 
       SET 
-      likelist = ${res[0]}, 
+      likelist = $1, 
       likes = likes + 1
-      WHERE id = ${spin.id}`;
-      res = await client.query(query);
+      WHERE id = $2`;
+
+      res = await client.query(query, args);
+      
       rows = res.rows;
+
       await client.query('COMMIT');
     }
   } catch(e) {
@@ -279,19 +257,28 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   try {
     var tablename = userTableName(user_poster);
     await client.query('BEGIN');
+    
+    var args = [spin.id];
     var query = `SELECT like_list FROM ${tablename} 
-    WHERE id LIKE '%${spin.id}%'`;
+    WHERE id = $1`;
+
     var res = await client.query(query);
     var index = res[0].indexOf(user_like.username);
     if (index > -1) {
+
       res[0].spice(index, 1);
+      
+      args = [res[0], spin.id];
       query = `UPDATE ${tablename} 
       SET 
-      likelist = ${res[0]}, 
+      likelist = $1, 
       likes = likes - 1
-      WHERE id = ${spin.id}`;
+      WHERE id = $2`;
+
       res = await client.query(query);
+
       rows = res.rows;
+
       await client.query('COMMIT');
     } else {
       console.log("user_liker has not liked the spin")

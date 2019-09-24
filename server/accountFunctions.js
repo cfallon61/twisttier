@@ -12,12 +12,12 @@ function validUsername(username){
 
 // @desc: express middleware function to interface with the database
 // @return: none
-async function postCreateUser(req, res) {
+async function postCreateUser(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    res.status(406).json({ errors: errors.array() });
-    return;
+    res.setHeader('error', errors.array());
+    return next();
   }
 
   var accountInfo = {
@@ -31,12 +31,10 @@ async function postCreateUser(req, res) {
   var userCreated = await db.createUser(accountInfo);
 
   if (userCreated != true) {
-    res.status(406).json({ errors: userCreated });
+    res.setHeader('errors', userCreated);
   }
-  else {
-    // TODO add sessions
-    res.redirect('/profileImage');// TODO create this form
-  }
+
+  return next();
 }
 
 // @desc: function used for logging in (idk why its not called login but whatever)
@@ -73,7 +71,7 @@ async function authorize(req, res, next) {
 
 // checks whether the account to be deleted exists or not, deletes it,
 // returns error or success response
-function deleteAccount(req, res, next) {
+async function deleteAccount(req, res, next) {
   // extract info from the request
   const user = {
     username : req.body.username,
@@ -81,27 +79,36 @@ function deleteAccount(req, res, next) {
     email : req.body.email
   };
 
-  var exist = db.userExists(user);
+  var exist = await db.userExists(user);
   
   // check if the user exists
   // if it exists, call the delete user function of db
-  if (exist) {
+  if (exist !== false) {
     
-    deleteSuccess = db.deleteUser(req.body.username);
+    var deleteSuccess = await db.deleteUser(req.body.username);
 
     if (deleteSuccess){
-      res.send("Success");
-    } else {
-      res.send("Failure");
+      return next();
+    } 
+    else {
+      res.setHeader('error', 'deletion failed');
     }
-  } else {
-    res.send("Failure");
+  } 
+  else {
+    res.setHeader('error', 'deletion failed');
   }
 
-  return next();
 }
 
-function editAccount() {
+function editAccount(req, res, next) {
+
+}
+
+async function addInterest(req, res, next){
+
+}
+
+async function removeInterest(req, res, next) {
 
 }
 

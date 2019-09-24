@@ -78,8 +78,17 @@ app.post('/create_user',
          check('bio').isLength({max:150}),
          check('name').isLength({max:25, min: 1}),
          check('username').isLength({max:15, min: 1})], 
-         users.loggedIn,
-         users.postCreateUser);
+         notLoggedIn,
+         users.postCreateUser, (req, res) => {
+
+           if (res.getHeader('error') != undefined){
+             res.status(406);
+           }
+           else{
+             req.clientSession.uid = req.body.username;
+             res.sendFile(index);
+           }
+         });
  
 
 
@@ -96,6 +105,8 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
 });
 
 app.post('/logout', loggedIn, (req, res) =>{
+  req.clientSession.uid = null;
+  req.clientSession.destroy();
 });
 
 app.post('/login', notLoggedIn, users.authorize, (req, res) => {
@@ -104,13 +115,14 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
     res.status(401).send('Unauthorized');
   }
   else {
-    res.clientSession.uid = user.username;
+    req.clientSession.uid = req.body.username;
     res.sendFile(index);
   }
 }); 
 
 // wtf this actually fricken fixed it i am PISSED
-app.get('/*', (req, res) => { res.sendFile(index);});
+// TODO limit to non user pages, other pages are assumed to be user pages
+app.get('/*', (req, res) => { res.sendFile(index); });
 
 
 function loggedIn(req, res, next) {
@@ -119,7 +131,7 @@ function loggedIn(req, res, next) {
     next();
   }
   else {
-    res.sendFile(index); // TODO route this however 
+    res.status(406).sendFile(index); // TODO route this however 
   }
 };
 
@@ -128,7 +140,7 @@ function notLoggedIn(req, res, next) {
     next();
   }
   else {
-    res.sendFile(index); // TODO IDK where to route this behavior
+    res.status(406).sendFile(index); // TODO IDK where to route this behavior
   }
 }
 

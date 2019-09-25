@@ -72,12 +72,26 @@ describe('database functions test', function() {
     it('@test userInfo', async () => {
       
       var res = await db.userInfo();
-      console.log("Response:", res);
+      // console.log("Response:", res);
 
       assert.notDeepStrictEqual(res, false);
     });
 
   });
 
+  describe('#db.findUserInfo()', async () => {
+    it('@test findUserInfo(): ', async () => {
+      var user = {
+        username: 'test',
+        email: 'test@test.com',
+      }
+
+      var res = await db.findUserInfo(user);
+      console.log("Response:", res);
+
+      assert.notDeepStrictEqual(res, false);
+    });
+
+  });
 
 });

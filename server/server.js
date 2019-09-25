@@ -18,6 +18,8 @@ const images = path.join(__dirname, '../profileImages');
 const port = process.env.PORT || 8080;
 const app = express();
 
+const pages = ['/', '/login', '/signup', '/timeline', '/settings']
+
 app.use(session(init.sessionSetup));
 app.use(express.json());
 // root
@@ -124,7 +126,14 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
-app.get('/*', (req, res) => { res.sendFile(index); });
+app.get('/*', (req, res) => { 
+  if (pages.indexOf(req.url) != 1){
+    res.sendFile(index); 
+  } 
+  else{
+    console.log('TODO');
+  }
+});
 
 
 function loggedIn(req, res, next) {

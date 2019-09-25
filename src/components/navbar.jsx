@@ -8,8 +8,9 @@ import FormControl from 'react-bootstrap/FormControl'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link } from 'react-router-dom'
 import Image from 'react-bootstrap/Image'
-import icon_settings from './icon_settings.jpg'
-import icon_home from  './icon_home.jpg'
+import icon_settings from './settingsIcon.png'
+import icon_home from  './homeIcon.png'
+import icon_twister from './twisterIcon.png'
 
 class Navbardemo extends Component {
   render() {
@@ -18,9 +19,13 @@ class Navbardemo extends Component {
 
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="/">Twister</Navbar.Brand>
+          <Link to="/">
+            <Image src={icon_twister} className='icon'/>
+          </Link>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Nav className="ml-auto">
 
+          <Navbar.Collapse>
           <Link to="/timeline">
           <Image src={icon_home}  className='icon'/>
           </Link>
@@ -28,6 +33,7 @@ class Navbardemo extends Component {
           <Link to="/userSettings">
           <Image src={icon_settings}  className='icon' />
           </Link>
+          </Navbar.Collapse>
 
           <Navbar.Collapse id="basic-navbar-nav">
               <Form inline>

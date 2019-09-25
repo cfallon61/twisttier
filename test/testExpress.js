@@ -92,7 +92,8 @@ describe("middleware / routing function tests", () => {
 
       const actual = mockres._getHeaders();
       const expected = {error : 'Username invalid'};
-
+        // console.log("actual: ", actual);
+        // console.log("expected: ", expected);
       assert.deepStrictEqual(actual, expected);
     });
   });

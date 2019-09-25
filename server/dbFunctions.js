@@ -111,7 +111,7 @@ function userTableName(username) {
   finally {
     client.release();
   }
-
+  console.log("rows", rows);
   return (rows.length === 0 ? false : true);
 };
 
@@ -149,6 +149,7 @@ async function deleteUser(username){
   }
   return (rows.length === 0 ? true : false);
 };
+
 
 
 // Function to update the last login time
@@ -307,6 +308,44 @@ async function getQuoteOrigin(user, res) {
 
 };
 
+// API that returns information of all users in the user database
+var userInfo = async function () {
+  
+  var query = `SELECT * FROM ${USER_TABLE}`;
+  var res = await pool.query(query);
+
+  var rows = res.rows; 
+
+  if (rows.length != 0) {
+  
+    return res.rows;
+  
+  } else {
+    
+    return false;
+  }
+
+}
+
+var findUserInfo = async function (user) {
+  
+  var params = [user.email, user.username];
+  var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
+  var res = await pool.query(query, params);
+
+  var rows = res.rows; 
+
+  if (rows.length != 0) {
+  
+    return res.rows;
+  
+  } else {
+
+    return false;
+  }
+  
+}
+
 // error handler
 pool.on('error', (err, client) => {
   console.error('An error occurred: ', err);
@@ -325,5 +364,7 @@ module.exports = {
   createUser,
   userExists,
   deleteUser,
-  updateLoginTime
+  updateLoginTime,
+  userInfo,
+  findUserInfo
 };

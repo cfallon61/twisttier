@@ -68,21 +68,16 @@ describe('database functions test', function() {
     });  
   });
 
-  describe.skip('#db.deleteUser()', () => {
-    it('@test delete user exist: should return true', async () => {
-      var username = 'bringMeDeath';
-
-      var res = await db.deleteUser(username);
-
-      assert.deepStrictEqual(res, true);
-    });
-
-    it ('@test delete user !exist: should fail', async () => {
-      var username = "fsdhjklasdf9p834y";
-      var res = await db.deleteUser(username);
+  describe('#db.userInfo()', async () => {
+    it('@test userInfo', async () => {
+      
+      var res = await db.userInfo();
+      console.log("Response:", res);
 
       assert.notDeepStrictEqual(res, false);
     });
+
   });
+
 
 });

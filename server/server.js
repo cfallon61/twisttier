@@ -104,6 +104,8 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
   res.status(200).send("good job you uploaded a picture");
 });
 
+
+// TODO send responses to front based on login / logout
 app.post('/logout', loggedIn, (req, res) =>{
   req.clientSession.uid = null;
   req.clientSession.destroy();

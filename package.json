@@ -7,7 +7,7 @@
     "test_server": "mocha",
     "begin_react": "react-scripts start",
     "begin_server": "node ./server/server.js",
-    "devRun": "run-p start_server start_react",
+    "devRun": "run-p begin_server begin_react",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
@@ -39,7 +39,6 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.1.2",
     "express-validator": "^6.2.0"
-        
   },
   "devDependencies": {
     "assert": "latest",
@@ -48,5 +47,17 @@
   "engines": {
     "node": "12.10.0"
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://localhost:8080",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

@@ -8,7 +8,7 @@ import Home from './components/Home.js';
 import Login from './components/Login.js';
 import Signup from './components/Signup.js';
 import UserSettings from './components/UserSettings.js';
-import UserFeed from './components/Userfeed.js';
+import UserFeed from './components/UserFeed.js';
 
 class App extends Component {
 

@@ -1,37 +1,45 @@
 import React, {Component} from 'react';
+import Feed from './feed.jsx';
 import Spin from './spin.jsx';
 
-const UserFeed = () => {
+class UserFeed extends Component
+{
+    constructor(props)
+    {
+        super(props);
+    }
 
+    render()
+    {
         //TODO: Get data from backend on which spins to show.
+
+        //Right now we will use three parts of the spin.
+        //content, username and timestamp.
         var spinExample = {
             content: "Here you go!",
-            username: "Tarcan",
+            username: this.props.username,
             timestamp: "9/24/19 2:05 PM"
         };
         var spinExample2 = {
             content: "Another message!",
-            username: "Tarcan",
+            username: this.props.username,
             timestamp: "9/24/19 2:20 PM"
         };
-        var spins = [];
-        spins.push(spinExample);
-        spins.push(spinExample2);
-        console.log(spins);
-        //Right now we will use three parts of the spin.
-        //content, username and timestamp.
-
-        var spinViews = []
-        for(var i = 0; i < spins.length; i++)
+        let spinList = [spinExample, spinExample2];
+        let feed = new Feed();
+        for(var i = 0; i < spinList.length; i++)
         {
-            spinViews.push(<Spin content={spins[i].content} username={spins[i].username} timestamp={spins[i].timestamp}></Spin>);
+            var spin = spinList[i];
+            console.log(spin.username);
+            feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp}/>);
         }
-        console.log(spinViews);
         return (
-            <div className="spin-container">
-                {spinViews}
+            <div className="user-feed-page">
+                {feed.render()}
             </div>
-        );
-}
+        );     
+
+    }
+} 
 
 export default UserFeed;

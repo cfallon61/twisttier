@@ -181,8 +181,50 @@ async function getSpins(user, res) {
 
 };
 
+// Adds the users spin into their spin table
+// @param user = user who created the spin
+// @param spin = spin to be added into the user's spin table
+// @return true if success and false if failure
 async function addSpin(user, spin) {
-  
+  const client = await pool.connect();
+  var rows = [];
+
+  try {
+    var tablename = userTableName(user);
+    
+    await client.query('BEGIN');
+   
+    var args = [
+      spin.content, 
+      spin.tags, 
+      spin.date, 
+      spin.edited, 
+      spin.likes, 
+      spin.quotes, 
+      spin.is_quote, 
+      spin.quote_origin, 
+      spin.like_list
+    ];
+
+    var query = 
+      `INSERT INTO ${tablename}
+      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list)
+      VALUES ($1, $2::VARCHAR(19)[], $3, $4, $5, $6, $7, $8::JSON, $9::text[])`
+    ;
+
+    var res = await client.query(query, args);
+      
+    rows = res.rows;
+    await client.query('COMMIT');
+
+  } catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+  }
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? false : true);
 };
 
 async function showNotification(user, res) {

@@ -196,8 +196,7 @@ async function addSpin(user, spin) {
    
     var args = [
       spin.content, 
-      spin.tags, 
-      spin.date, 
+      spin.tags,  
       spin.edited, 
       spin.likes, 
       spin.quotes, 
@@ -209,7 +208,7 @@ async function addSpin(user, spin) {
     var query = 
       `INSERT INTO ${tablename}
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list)
-      VALUES ($1, $2::VARCHAR(19)[], $3, $4, $5, $6, $7, $8::JSON, $9::text[])`
+      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[])`
     ;
 
     var res = await client.query(query, args);

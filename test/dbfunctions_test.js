@@ -13,6 +13,30 @@ describe('database functions test', function() {
     });
   });
 
+  describe('#dp.addSpin()', async () => {
+    it('should return true', async () => {
+
+      user = {
+        email: "jdoe@purdue.edu",
+        username: "doeJohn"
+      };
+
+      spin = {
+        content: 'god is upon us',
+        tags: '{"God", "Chris" }',
+        edited: false,
+        likes: 0,
+        quotes: 0,
+        is_quote: false,
+        quote_origin: '{"none":"-1"}',
+        like_list: '{}'
+      };
+
+      var res = await db.addSpin(user, spin);
+
+      assert.notDeepStrictEqual(res, false);
+    });
+  });
   describe("#db.userExists()", async () => {
     it("should return user data for this user", async () => {
       user = {

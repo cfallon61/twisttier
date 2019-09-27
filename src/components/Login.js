@@ -50,10 +50,7 @@ class Login extends Component
       body : JSON.stringify(writtenCredentials) 
     }).then(function(res){
       //Success!
-   
-      console.log("Success");
-      console.log(res);
-      if(res.status == "401")
+      if(res.status === "401")
       {
         //TODO: Replace alert with custom feedback component.
         alert("There is no user with this email. Please sign up.");
@@ -81,7 +78,7 @@ class Login extends Component
                 <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
               </Form.Group>
 
-            <Button variant="primary" type="login">Login</Button>
+            <Button variant="primary" type="submit">Login</Button>
           </Form>
           <Nav.Link>
             <Link to="/signup">Don't have an account? Signup!</Link>

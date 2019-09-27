@@ -22,18 +22,18 @@ describe('database functions test', function() {
 
       var res = await db.userExists(user);
 
-      expect(res > 0).toBeTruthy();
+      assert.notDeepStrictEqual(res, false);
     });
 
     it("should return false", async () => {
       user = {
-        email: "does.not.exist",
-        username: "doesnotexist"
+        email: "test@test656565.com",
+        username: "test656565"
       };
 
       var res = await db.userExists(user);
 
-      res.should.equal(false);
+      assert.deepStrictEqual(res, false);
     });
   });
 

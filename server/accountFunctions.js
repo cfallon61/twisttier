@@ -109,6 +109,17 @@ async function deleteAccount(req, res, next) {
 
 }
 
+async function viewInfo(req,res) {
+  var user = {
+    username: req.body.username,
+    email: req.body.email,
+  }
+
+  var data = await db.findUserInfo(user);
+  // send response
+  res.send(data);
+}
+
 function editAccount(req, res, next) {
 
 }
@@ -129,4 +140,5 @@ module.exports = {
   authorize,
   deleteAccount,
   editAccount,
+  viewInfo
 };

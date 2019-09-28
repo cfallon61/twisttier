@@ -350,13 +350,15 @@ async function getQuoteOrigin(user, res) {
 };
 
 // API that returns information of all users in the user database
-var userInfo = async function () {
+async function userInfo () {
   
+  // query for all user info
   var query = `SELECT * FROM ${USER_TABLE}`;
   var res = await pool.query(query);
 
   var rows = res.rows; 
 
+  // if any information received, return the info, false otherwise
   if (rows.length != 0) {
   
     return res.rows;
@@ -368,14 +370,16 @@ var userInfo = async function () {
 
 }
 
-var findUserInfo = async function (user) {
+async function findUserInfo (user) {
   
+  // query with username and email
   var params = [user.email, user.username];
   var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
   var res = await pool.query(query, params);
 
   var rows = res.rows; 
 
+  // return info or false
   if (rows.length != 0) {
   
     return res.rows;

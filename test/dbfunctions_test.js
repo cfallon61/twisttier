@@ -23,13 +23,13 @@ describe('database functions test', function() {
 
       spin = {
         content: 'god is upon us',
-        tags: '{"God", "Chris" }',
+        tags: [],
         edited: false,
         likes: 0,
         quotes: 0,
         is_quote: false,
-        quote_origin: '{"none":"-1"}',
-        like_list: '{}'
+        quote_origin: {},
+        like_list: []
       };
 
       var res = await db.addSpin(user, spin);

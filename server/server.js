@@ -124,6 +124,12 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
 }); 
 
+// TODO set up frontend API
+app.post('/info', (req, res) =>
+{
+  res.send("HELLLO");
+});
+
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
 app.get('/*', (req, res) => { 

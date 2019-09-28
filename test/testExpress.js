@@ -97,4 +97,76 @@ describe("middleware / routing function tests", () => {
       assert.deepStrictEqual(actual, expected);
     });
   });
+
+  // test for user info
+  describe("#userInfo", async () => { 
+    it("should return username with specific username", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/info',
+          body: {
+            username: 'test',
+            email: 'test@test.com',
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.viewInfo(req, mockres);
+      // console.log(mockres);
+      const actualRes = mockres._getData();
+      console.log(actualRes);
+      assert.notDeepStrictEqual(actualRes, false);
+      return true;
+    });
+
+    // test for user that does not exist
+    it("Invalid user: should return false", async () => {
+      const req = httpMocks.createRequest(
+      {
+        method: "POST",
+        url: '/info',
+        body: {
+          username: 'tesasdsadts',
+          email: 'tesdsadast@tesst.com',
+        }
+      });
+
+    const mockres = httpMocks.createResponse();
+    
+    // post to router
+    await router.viewInfo(req, mockres);
+    // console.log(mockres);
+    const actualRes = mockres._getData();
+    console.log(actualRes);
+    assert.DeepStrictEqual(actualRes, false);
+    return true;
+  });
+
+  it("should return username of all username", async () => {
+    const req = httpMocks.createRequest(
+    {
+      method: "POST",
+      url: '/info',
+      body: {
+        username: 'all',
+        email: 'tesaddasst@tesst.com',
+      }
+    });
+
+  const mockres = httpMocks.createResponse();
+  
+  // post to router
+  await router.viewInfo(req, mockres);
+  // console.log(mockres);
+  const actualRes = mockres._getData();
+  console.log(actualRes);
+  assert.notDeepStrictEqual(actualRes, false);
+  return true;
+});
+
+
+  });
 });

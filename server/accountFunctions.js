@@ -109,6 +109,25 @@ async function deleteAccount(req, res, next) {
 
 }
 
+// API for frontend development
+async function viewInfo(req,res, next) {
+  var user = {
+    username: req.body.username,
+    email: req.body.email,
+  }
+  // check if the user wants all data (for development)
+  if (user.username === "all") {
+    var data = await db.userInfo();
+    res.send(data);
+  } else {
+    // otherwise just add normal data
+    var data = await db.findUserInfo(user);
+    // send response
+    res.send(data);
+  }
+
+}
+
 function editAccount(req, res, next) {
 
 }
@@ -129,4 +148,5 @@ module.exports = {
   authorize,
   deleteAccount,
   editAccount,
+  viewInfo
 };

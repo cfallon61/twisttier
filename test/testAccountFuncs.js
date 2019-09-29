@@ -54,7 +54,6 @@ describe("middleware / routing function tests", () => {
         await router.authorize(req, mockres, () => {});
 
         const actual = mockres._getHeaders();
-        // TODO assert 
         assert.notDeepStrictEqual(actual, undefined);
     });
 

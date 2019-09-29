@@ -85,7 +85,7 @@ describe('database functions test', function() {
         assert.notDeepStrictEqual(res, false);
       } 
     });
-    it('@test not exist: should return true', async () => {
+    it('@recreate doeJohn user, not an actual test', async () => {
       var user = {
         username: 'doeJohn',
         email: 'email@email.com',
@@ -107,9 +107,21 @@ describe('database functions test', function() {
       }
 
       var res = await db.createUser(user);
-
       assert.notDeepStrictEqual(res, true);
     });  
+    it ('@test email exists: should fail', async () => {
+      var user = {
+        username: 'jhfdjhfbh',
+        email: 'test@test.com',
+        name: "whatever",
+        password: "password",
+        bio: 'why am i the only one actually working?',
+      }
+
+      var res = await db.createUser(user);
+
+      assert.notDeepStrictEqual(res, true);
+    });
   });
 
  

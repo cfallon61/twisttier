@@ -172,7 +172,8 @@ function notLoggedIn(req, res, next) {
   else {
     res.setHeader('loggedIn', true);
     res.status(406); // TODO set header loggedin false
-}
+  }
+};
 
 app.use((err, req, res, next) =>{
   // TODO implement a log file for errors

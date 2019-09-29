@@ -128,4 +128,54 @@ describe("middleware / routing function tests", () => {
 
     });
   });
+
+  describe("#updateProfileInfo", async () => { 
+    it("username exists, should return true", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateProfileInfo',
+          body: {
+            email: "test@test.com",
+            username: "test",
+            password: "newPass",
+            name: "newName",
+            bio: "this is my new bio"
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.updateProfileInfo(req, mockres, () => {});
+      const actualRes = mockres._getData();
+        // console.log("actual:", actualRes);
+      assert.deepStrictEqual(actualRes, "true");
+    });
+
+    it("username does not exist, should return false", async () => {
+      const req = httpMocks.createRequest(
+      {
+        method: "POST",
+        url: '/updateProfileInfo',
+        body: {
+          email: "test@test.com",
+          username: "tesdsdt",
+          password: "newPassdasds",
+          name: "newNamdasdsae",
+          bio: "this is my nedasdsadasw bio"
+        }
+      });
+  
+    const mockres = httpMocks.createResponse();
+    
+    // post to router
+    await router.updateProfileInfo(req, mockres, () => {});
+    const actualRes = mockres._getData();
+      // console.log("actual:", actualRes);
+    assert.deepStrictEqual(actualRes, "false");
+  });
+  });
+
+
 });

@@ -121,10 +121,6 @@ async function viewInfo(req,res, next) {
   res.json(data);
 }
 
-function editAccount(req, res, next) {
-
-}
-
 async function addInterest(req, res, next){
 
 }
@@ -166,6 +162,29 @@ async function getTimeline(req, res, err){
   
 }
 
+// updates user profile information from request
+async function updateProfileInfo(req,res) {
+  var user = {
+    email: req.body.email,
+    username: req.body.username,
+    password: req.body.password,
+    name: req.body.name,
+    bio: req.body.bio
+  }
+
+  // TODO: might need to do some checking, depending on logic of frontend
+
+  // if all checking fine, update the user
+  var response = await db.updateUser(user);
+
+  // if successfully changed, return true
+  if (response === true){
+    res.send(true);
+  } else {
+    res.send(false);
+  }
+}
+
 
 
 
@@ -173,6 +192,6 @@ module.exports = {
   postCreateUser,
   authorize,
   deleteAccount,
-  editAccount,
-  getTimeline
+  getTimeline,
+  updateProfileInfo
 };

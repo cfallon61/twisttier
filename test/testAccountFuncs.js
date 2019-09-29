@@ -103,6 +103,8 @@ describe("middleware / routing function tests", () => {
     });
   });
 
+// TODO test for following multiple people with a different account
+//     create an account for each test, then delete the account after the test is run
   describe('#getTimeline', () => {
     it('@getTimeline bringMeDeath ', async () => {
       const req = httpMocks.createRequest(

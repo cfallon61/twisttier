@@ -241,26 +241,25 @@ async function getSpins(users) {
 async function addSpin(user, spin) {
   const client = await pool.connect();
   var rows = [];
-
+    
   try {
     var tablename = userSpinTableName(user);
     
     await client.query('BEGIN');
-   
+
     var args = [
-      spin.content, 
-      spin.tags,  
-      spin.edited, 
-      spin.likes, 
-      spin.quotes, 
-      spin.is_quote, 
-      spin.quote_origin, 
-      spin.like_list
+      spin.content,
+      spin.tags,
+      false,
+      0,
+      0,
+      spin.is_quote,
+      {},
+      []
     ];
 
-    var query = 
-      `INSERT INTO ${tablename}
-      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list)
+    var query = `INSERT INTO ${tablename} 
+      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[])`
     ;
 

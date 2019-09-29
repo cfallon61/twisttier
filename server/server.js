@@ -22,8 +22,6 @@ const pages = ['/', '/login', '/signup', '/timeline', '/settings']
 
 app.use(session(init.sessionSetup));
 app.use(express.json());
-// root
-app.use(express.static(root));
 
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
@@ -129,9 +127,9 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
-app.get('/*', (req, res) => { 
+app.get('/*', notLoggedIn, (req, res) => { 
 
-  if (pages.indexOf(req.url) != 1){
+  if (pages.indexOf(req.url) != -1){
 
     // check login status, if uid exists 
     // then the server will get the timeline for the user
@@ -143,9 +141,9 @@ app.get('/*', (req, res) => {
       res.sendFile(index); 
     }
   } 
-  else{
+  else {
     // TODO implement fetching of other user's timeline or error if not exist
-    console.log('TODO');
+    res.sendFile(path.join(root, req.url));
   }
 });
 
@@ -167,7 +165,7 @@ function notLoggedIn(req, res, next) {
   if (!req.clientSession.uid) {
     res.setHeader('loggedIn', false);
     console.log('not logged in')
-    next();
+    return next();
   }
   else {
     res.setHeader('loggedIn', true);

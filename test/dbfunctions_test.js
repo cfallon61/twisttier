@@ -13,8 +13,8 @@ describe('database functions test', function() {
     });
   });
 
-  describe.skip('#dp.addSpin()', async () => {
-    it('should return true', async () => {
+  describe('#dp.addSpin()', async () => {
+    it('checks if spin gets added successfully', async () => {
 
       user = {
         email: "jdoe@purdue.edu",
@@ -92,7 +92,7 @@ describe('database functions test', function() {
 
       var res = await db.createUser(user);
     });
-    
+
     it ('@test user exists: should fail', async () => {
       var user = {
         username: 'test',

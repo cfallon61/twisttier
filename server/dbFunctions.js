@@ -112,6 +112,7 @@ function userSpinTableName(username) {
   finally {
     client.release();
   }
+  console.log(rows);
   if (rows.length === 0 && TEST){
     return 'user exists';
   }
@@ -257,7 +258,7 @@ async function addSpin(user, spin) {
       0,
       0,
       spin.is_quote,
-      {},
+      spin.quote_origin,
       []
     ];
 
@@ -267,10 +268,11 @@ async function addSpin(user, spin) {
     ;
 
     var res = await client.query(query, args);
-      
-    rows = res.rows;
-    await client.query('COMMIT');
 
+    rows = res.rows;
+
+    await client.query('COMMIT');
+    
   } catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
@@ -278,7 +280,7 @@ async function addSpin(user, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : true);
+  return (true);
 };
 
 async function showNotification(user, res) {
@@ -305,7 +307,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster);
+    var tablename = userSpinTableName(user_poster.username);
     
     await client.query('BEGIN');
    
@@ -357,7 +359,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster);
+    var tablename = userSpinTableName(user_poster.username);
     await client.query('BEGIN');
     
     var args = [spin.id];

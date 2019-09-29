@@ -135,8 +135,24 @@ describe('database functions test', function() {
       };
 
       var res = await db.updateUser(user);
-      console.log(res);
+      
+      // assert
+      assert.deepStrictEqual(res, true);
+    });
 
+    it('Entry does not exist in database: should return false', async () => {
+      user = {
+        email: "test@test.com",
+        username: "tessdadassdt",
+        password: "newPass",
+        name: "newNdsaame",
+        bio: "this is mdsy new bio"
+      };
+
+      var res = await db.updateUser(user);
+      
+      // assert
+      assert.deepStrictEqual(res, false);
     });
   });
 

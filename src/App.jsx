@@ -7,7 +7,8 @@ import Nav from 'react-bootstrap/Nav';
 import Home from './components/Home.js';
 import Login from './components/Login.js';
 import Signup from './components/Signup.js';
-
+import UserSettings from './components/UserSettings.js';
+import UserFeed from './components/UserFeed.js';
 
 class App extends Component {
 
@@ -17,20 +18,16 @@ class App extends Component {
       <div className="App">
         <Router>
           <div className="App-header">
-
             <Navbardemo className="Navbardemo" />
             <Switch>
               <Route path="/" component={Home} exact />
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
+              <Route path="/userSettings" component={UserSettings} />
+              <Route path="/prototype/feed" component={UserFeed}/>
             </Switch>
           </div>
-
-
-
         </Router>
-
-
       </div>
     );
   }

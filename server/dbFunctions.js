@@ -1,7 +1,6 @@
 // file with the main database interaction functions
 
 const credentials = require('./config.json');
-const helper = require('./helpers.js');
 const dotenv = require('dotenv').config();
 const bcrypt = require('bcrypt');
 // import postgres lib
@@ -11,7 +10,7 @@ const pool = new Pool(credentials.database);
 
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
-const TEST = (process.env.TEST === "true" ? true : false);
+const TEST = (process.env.TEST === "true");
 
 
 // query the database to see if the user exists
@@ -30,14 +29,14 @@ var userExists = async function (user) {
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
     // so this is why the [0];
-    return rows;
+    return rows[0];
   }
   // return false if they dont already exist, this is good
   return false;
 }
 
 // forms the name of the table of individual users
-function userTableName(username) { 
+function userSpinTableName(username) { 
   var name = username + "_spins";
   return (TEST ? name + "_test" : name);
 };
@@ -64,7 +63,7 @@ function userTableName(username) {
     accountInfo.passhash = hash;
 
     // dynamically create tables based on if this is development or not
-    var tablename = userTableName(accountInfo.username);
+    var tablename = userSpinTableName(accountInfo.username);
     
     var args = [tablename, SPIN_TEMPLATE];
     
@@ -85,7 +84,11 @@ function userTableName(username) {
       accountInfo.bio,
       accountInfo.name,
       [], // followers
-      {}, // following
+      {
+        users: JSON.stringify([
+          { username: accountInfo.username, tags: [] }
+        ]),
+       }, // following
       [], // interests
       {}, // accessibility features
     ];
@@ -96,12 +99,10 @@ function userTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
 
     res = await client.query(query, args);
-    
     // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
     rows = res.rows;
-    
   } 
   catch (e) {
     await client.query('ROLLBACK');
@@ -110,6 +111,10 @@ function userTableName(username) {
   } 
   finally {
     client.release();
+  }
+  console.log(rows);
+  if (rows.length === 0 && TEST){
+    return 'user exists';
   }
 
   return (rows.length === 0 ? false : true);
@@ -125,7 +130,7 @@ async function deleteUser(username){
   var rows = [];
 
   try{
-    var tablename = userTableName(username);
+    var tablename = userSpinTableName(username);
 
     // delete spin table
     var query =  `DROP TABLE ${tablename}`;
@@ -151,6 +156,7 @@ async function deleteUser(username){
 };
 
 
+
 // Function to update the last login time
 // return true on success, false on error
 async function updateLoginTime(username){
@@ -158,7 +164,7 @@ async function updateLoginTime(username){
   var rows;
   try{
     await client.query('BEGIN');
-    const tablename = userTableName(username);
+    const tablename = userSpinTableName(username);
     const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
     var res = await client.query(query, [username]);
     rows = res.rows;
@@ -175,13 +181,117 @@ async function updateLoginTime(username){
   return (rows.length === 0 ? false : true);
 };
 
+// @brief get the spins made by a user
+// @return list of spins which match the tags supplied
+//          if tags are empty then it returns all user spins
+async function getSpins(users) {
+  // add each user to a list of users
+  const baseQuery = `SELECT * FROM `;
+  var query = '';
+  var tagList = []
+  var followed = JSON.parse(users.users);
+  
+  // ful SQL injection vulnerability mode: Engaged
+  // for each user in the user list, append their spin table to a query string
+  // and also search for tags associated with the supplied followed users list 
+  // in the followed user's posts
+  followed.forEach((item, index) => {
+    // select * from <username_spins>  
+    query += baseQuery + userSpinTableName(item.username);
 
-async function getSpins(user, res) {
+    if (item.tags.length > 0) {
+      tagList.push(item.tags);
+      // supposed to search in the range of a list supplied
+      // hopefully postgres decides to parse this correctly
+      // select * from <username_spins> where @> tags
+      var where = ' WHERE @> $' + String(tagList.length);
+  
+      // for each tag in the tag list, append it to a where statement
+      // item.tags.forEach((tag, i) => {
+      //   where += tag + ' IN tags';
+      //   // if i is not the last index, append an or
+      //   if (i < item.tags.length - 1){
+      //     where += ' OR ';
+      //   }
+      // });
+      // append the conditions to the select query
+      query += where;
+    }
 
+    // if last item in list do not append union
+    if (index < followed.length - 1)
+    {
+      query += ' UNION ALL';
+    }
+
+  });
+  // final string:
+  // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // ...
+  // ORDER BY date;
+  query += ' ORDER BY date DESC';
+  
+  console.log(query);
+  var res = await pool.query(query, tagList);
+  return res.rows;
 };
 
+// Adds the users spin into their spin table
+// @param user = user who created the spin
+// @param spin = spin to be added into the user's spin table
+// @return true if success and false if failure
 async function addSpin(user, spin) {
-  
+  const client = await pool.connect();
+    
+  try {
+    var tablename = userSpinTableName(user.username);
+    await client.query('BEGIN');
+
+    var args = [
+      spin.content,
+      spin.tags,
+      spin.edited,
+      spin.likes,
+      spin.quotes,
+      spin.is_quote,
+      spin.quote_origin,
+      spin.like_list
+    ];
+
+    var query = `INSERT INTO ${tablename} 
+      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
+      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[])`
+    ;
+
+    await client.query(query, args);
+
+    await client.query('COMMIT');
+
+    if (spin.likes == -1) {
+      await client.query('BEGIN');
+      console.log("goes through here");
+
+      var query = 
+        `DELETE FROM ${tablename} 
+        WHERE likes=-1`
+      ;
+      
+      await client.query(query);
+
+      await client.query('COMMIT');
+    }
+    
+  } catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+  }
+  finally {
+    client.release();
+  }
+  return (true);
 };
 
 async function showNotification(user, res) {
@@ -208,7 +318,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userTableName(user_poster);
+    var tablename = userSpinTableName(user_poster.username);
     
     await client.query('BEGIN');
    
@@ -260,7 +370,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userTableName(user_poster);
+    var tablename = userSpinTableName(user_poster.username);
     await client.query('BEGIN');
     
     var args = [spin.id];
@@ -306,6 +416,7 @@ async function reSpin(user, res) {
 async function getQuoteOrigin(user, res) {
 
 };
+
 
 // error handler
 pool.on('error', (err, client) => {

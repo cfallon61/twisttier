@@ -6,7 +6,7 @@ const db = require('../server/dbFunctions');
 
 
 describe("middleware / routing function tests", () => {
-  describe.skip("#createUser !exist", async () => { 
+  describe("#createUser !exist", async () => { 
     it("should return a redirect to the upload profile image page", async () => {
         const req = httpMocks.createRequest(
         {
@@ -23,10 +23,15 @@ describe("middleware / routing function tests", () => {
 
       const mockres = httpMocks.createResponse();
       // post to router
-      await router.postCreateUser(req, mockres);
+      await router.postCreateUser(req, mockres, () => {});
       const actualRes = mockres._getData();
-      
-      assert.notDeepStrictEqual(actualRes, false);
+
+      if (actualRes === 'user exists'){
+        assert.notDeepStrictEqual(actualRes, 'user exists');
+      }
+      else{
+        assert.notDeepStrictEqual(actualRes, false);
+      }
       return true;
     });
   });
@@ -49,7 +54,6 @@ describe("middleware / routing function tests", () => {
         await router.authorize(req, mockres, () => {});
 
         const actual = mockres._getHeaders();
-        // TODO assert 
         assert.notDeepStrictEqual(actual, undefined);
     });
 
@@ -92,8 +96,36 @@ describe("middleware / routing function tests", () => {
 
       const actual = mockres._getHeaders();
       const expected = {error : 'Username invalid'};
-
+        // console.log("actual: ", actual);
+        // console.log("expected: ", expected);
       assert.deepStrictEqual(actual, expected);
+    });
+  });
+
+// TODO test for following multiple people with a different account
+//     create an account for each test, then delete the account after the test is run
+  describe('#getTimeline', () => {
+    it('@getTimeline bringMeDeath ', async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/timeline',
+          body: {
+            username: 'doeJohn',
+          }
+      });
+
+      const mockRes = httpMocks.createResponse();
+      await router.getTimeline(req, mockRes, () => {});
+
+      const actualRes = mockRes._getJSONData();
+
+      if (mockRes.getHeader('error') != undefined){
+        assert.fail();
+      }
+
+      // console.log(actualRes);
+
     });
   });
 });

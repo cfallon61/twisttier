@@ -18,6 +18,8 @@ const images = path.join(__dirname, '../profileImages');
 const port = process.env.PORT || 8080;
 const app = express();
 
+const pages = ['/', '/login', '/signup', '/timeline', '/settings']
+
 app.use(session(init.sessionSetup));
 app.use(express.json());
 // root
@@ -104,6 +106,8 @@ app.post('/uploadProfileImage', upload, (req, res, next) =>
   res.status(200).send("good job you uploaded a picture");
 });
 
+
+// TODO send responses to front based on login / logout
 app.post('/logout', loggedIn, (req, res) =>{
   req.clientSession.uid = null;
   req.clientSession.destroy();
@@ -112,6 +116,7 @@ app.post('/logout', loggedIn, (req, res) =>{
 app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   // if the authorize function signals an error, send an unauthorized message
   if (res.getHeader('error')){
+    console.log(res);
     res.status(401).send('Unauthorized');
   }
   else {
@@ -120,28 +125,53 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
 }); 
 
+
+
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
-app.get('/*', (req, res) => { res.sendFile(index); });
+app.get('/*', (req, res) => { 
+
+  if (pages.indexOf(req.url) != 1){
+
+    // check login status, if uid exists 
+    // then the server will get the timeline for the user
+    // if not it will default to whatever the defualt page behavior is
+    if (req.url === '/timeline' && req.clientSession.uid){
+      res.send(users.getTimeline(req, res, () => { console.log('timeline got'); }))
+    }
+    else{
+      res.sendFile(index); 
+    }
+  } 
+  else{
+    // TODO implement fetching of other user's timeline or error if not exist
+    console.log('TODO');
+  }
+});
 
 
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
   if (req.clientSession.uid) {
+    res.setHeader('loggedIn', true);
+    console.log('logged in')
     next();
   }
   else {
-    res.status(406).sendFile(index); // TODO route this however 
+    res.setHeader('loggedIn', false);
+    res.status(406); // TODO route this however 
   }
 };
 
 function notLoggedIn(req, res, next) {
   if (!req.clientSession.uid) {
+    res.setHeader('loggedIn', false);
+    console.log('not logged in')
     next();
   }
   else {
-    res.status(406).sendFile(index); // TODO IDK where to route this behavior
-  }
+    res.setHeader('loggedIn', true);
+    res.status(406); // TODO set header loggedin false
 }
 
 app.use((err, req, res, next) =>{

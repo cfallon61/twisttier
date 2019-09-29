@@ -14,6 +14,10 @@ describe('database functions test', function() {
   });
 
   describe('#dp.addSpin()', async () => {
+    // when testing addSpin put spin.likes as -1
+    // that way it knows to delete after it was put
+    // we will implement a deleteSpin after sprint
+    // this is just temporary
     it('checks if spin gets added successfully', async () => {
 
       user = {
@@ -23,9 +27,9 @@ describe('database functions test', function() {
 
       spin = {
         content: 'god is upon us',
-        tags: [],
+        tags: ['God is Chris', 'Nazim is Devil'],
         edited: false,
-        likes: 0,
+        likes: -1,
         quotes: 0,
         is_quote: false,
         quote_origin: {},

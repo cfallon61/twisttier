@@ -243,7 +243,6 @@ async function getSpins(users) {
 // @return true if success and false if failure
 async function addSpin(user, spin) {
   const client = await pool.connect();
-  var rows = [];
     
   try {
     var tablename = userSpinTableName(user.username);
@@ -252,12 +251,12 @@ async function addSpin(user, spin) {
     var args = [
       spin.content,
       spin.tags,
-      false,
-      0,
-      0,
+      spin.edited,
+      spin.likes,
+      spin.quotes,
       spin.is_quote,
       spin.quote_origin,
-      []
+      spin.like_list
     ];
 
     var query = `INSERT INTO ${tablename} 
@@ -265,11 +264,23 @@ async function addSpin(user, spin) {
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[])`
     ;
 
-    var res = await client.query(query, args);
-
-    rows = res.rows;
+    await client.query(query, args);
 
     await client.query('COMMIT');
+
+    if( spin.likes == -1) {
+      await client.query('BEGIN');
+      console.log("goes through here");
+
+      var query = 
+        `DELETE FROM ${tablename} 
+        WHERE likes=-1`
+      ;
+      
+      await client.query(query);
+
+      await client.query('COMMIT');
+    }
     
   } catch(e) {
     await client.query('ROLLBACK');

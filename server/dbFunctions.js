@@ -10,7 +10,7 @@ const pool = new Pool(credentials.database);
 
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
-const TEST = (process.env.TEST === "true" ? true : false);
+const TEST = (process.env.TEST === "true");
 
 
 // query the database to see if the user exists
@@ -232,7 +232,7 @@ async function getSpins(users) {
   // UNION ALL
   // ...
   // ORDER BY date;
-  query += ' ORDER BY date';
+  query += ' ORDER BY date DESC';
   
   console.log(query);
   var res = await pool.query(query, tagList);

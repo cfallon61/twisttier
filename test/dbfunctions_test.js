@@ -14,7 +14,7 @@ describe('database functions test', function() {
   });
 
   describe('#dp.addSpin()', async () => {
-    it('should return true', async () => {
+    it('checks if spin gets added successfully', async () => {
 
       user = {
         email: "jdoe@purdue.edu",

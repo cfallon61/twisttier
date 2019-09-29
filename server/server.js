@@ -136,11 +136,7 @@ app.get('/*', (req, res) => {
     // check login status, if uid exists 
     // then the server will get the timeline for the user
     // if not it will default to whatever the defualt page behavior is
-    if (req.clientSession.uid){
-      res.setHeader('loggedIn', true);
-    }
-
-    if (req.url === '/timeline'){
+    if (req.url === '/timeline' && req.clientSession.uid){
       res.send(users.getTimeline(req, res, () => { console.log('timeline got'); }))
     }
     else{
@@ -157,22 +153,25 @@ app.get('/*', (req, res) => {
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
   if (req.clientSession.uid) {
+    res.setHeader('loggedIn', true);
     console.log('logged in')
     next();
   }
   else {
+    res.setHeader('loggedIn', false);
     res.status(406); // TODO route this however 
   }
 };
 
 function notLoggedIn(req, res, next) {
   if (!req.clientSession.uid) {
+    res.setHeader('loggedIn', false);
     console.log('not logged in')
     next();
   }
   else {
-    res.status(406); // TODO IDK where to route this behavior
-  }
+    res.setHeader('loggedIn', true);
+    res.status(406); // TODO set header loggedin false
 }
 
 app.use((err, req, res, next) =>{

@@ -124,6 +124,20 @@ describe('database functions test', function() {
     });
   });
 
- 
+  describe('#updateUserInfo',  () => {
+    it('Changed info successfully: should return true', async () => {
+      user = {
+        email: "test@test.com",
+        username: "test",
+        password: "newPass",
+        name: "newName",
+        bio: "this is my new bio"
+      };
+
+      var res = await db.updateUser(user);
+      console.log(res);
+
+    });
+  });
 
 });

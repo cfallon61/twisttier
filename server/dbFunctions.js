@@ -162,15 +162,15 @@ async function updateUser(user) {
   // extract the info to be inserted
   const hash = await bcrypt.hash(user.password, 10);
 
-  var args = {
-    email: user.email,
-    password: hash,
-    name: user.name,
-    username: user.username,
-    bio: user.bio
-  };
+  // var args = {
+  //   email: user.email,
+  //   password: hash,
+  //   name: user.name,
+  //   bio: user.bio,
+  //   username: user.username
+  // };
   
-
+  var args = [user.email, hash, user.name, user.bio, user.username];
   // connect to database
   var client = await pool.connect();
   
@@ -180,17 +180,17 @@ async function updateUser(user) {
     await client.query('BEGIN');
 
     const query =   `UPDATE ${USER_TABLE} 
-                    SET email = $1 ,
-                        username = $2,
-                        password = $3,
-                        name = $4,
-                        bio = $5
+                    SET email = $1,
+                        passhash = $2,
+                        name = $3,
+                        bio = $4
                     WHERE 
-                        USERNAME = $1`;
+                        USERNAME = $5`;
 
     var res = await client.query(query, args);
     rows = res.rows;
-    
+    console.log("HERE!!! ", rows);
+
     // end transaction
     await client.query('COMMIT');
   
@@ -204,9 +204,10 @@ async function updateUser(user) {
   }
 
   if (rows.length === 0) {
-    return false
+    return false;
   } else {
-    return true
+    console.log(rows);
+    return true;
   }
 }
 
@@ -489,5 +490,6 @@ module.exports = {
   createUser,
   userExists,
   deleteUser,
-  updateLoginTime
+  updateLoginTime,
+  updateUser
 };

@@ -155,7 +155,60 @@ async function deleteUser(username){
   return (rows.length === 0 ? true : false);
 };
 
+// function to update user info (used by edit account)
+async function updateUser(user) {
+  var rows;
 
+  // extract the info to be inserted
+  const hash = await bcrypt.hash(user.password, 10);
+
+  var args = {
+    email: user.email,
+    password: hash,
+    name: user.name,
+    username: user.username,
+    bio: user.bio
+  };
+  
+
+  // connect to database
+  var client = await pool.connect();
+  
+  
+  try{
+    // begin transaction
+    await client.query('BEGIN');
+
+    const query =   `UPDATE ${USER_TABLE} 
+                    SET email = $1 ,
+                        username = $2,
+                        password = $3,
+                        name = $4,
+                        bio = $5
+                    WHERE 
+                        USERNAME = $1`;
+
+    var res = await client.query(query, args);
+    rows = res.rows;
+    
+    // end transaction
+    await client.query('COMMIT');
+  
+  }
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(e);
+  }
+  finally {
+    client.release();
+  }
+
+  if (rows.length === 0) {
+    return false
+  } else {
+    return true
+  }
+}
 
 // Function to update the last login time
 // return true on success, false on error

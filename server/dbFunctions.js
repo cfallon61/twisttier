@@ -157,6 +157,11 @@ async function deleteUser(username){
 
 // function to update user info (used by edit account)
 async function updateUser(user) {
+<<<<<<< HEAD
+=======
+  var rows;
+  var msg;
+>>>>>>> 1ef18ac767578077520d7f50d15fae27154bca99
   // extract the info to be inserted
   const hash = await bcrypt.hash(user.password, 10);
   
@@ -173,6 +178,7 @@ async function updateUser(user) {
   try{
     // begin transaction
     await client.query('BEGIN');
+<<<<<<< HEAD
 
     const query = `UPDATE ${USER_TABLE} 
       SET email = $1, passhash = $2, name = $3, bio = $4
@@ -180,10 +186,25 @@ async function updateUser(user) {
     ;
 
     await client.query(query, args);
+=======
+    // update and return the username of updated row
+    var query =   `UPDATE ${USER_TABLE} 
+                    SET email = $1,
+                        passhash = $2,
+                        name = $3,
+                        bio = $4
+                    WHERE 
+                        username = $5
+                    RETURNING
+                        username`;
+
+    var res = await client.query(query, args);
+>>>>>>> 1ef18ac767578077520d7f50d15fae27154bca99
 
     // end transaction
     await client.query('COMMIT');
-  
+
+   
   }
   catch (e) {
     await client.query('ROLLBACK');
@@ -193,7 +214,17 @@ async function updateUser(user) {
     client.release();
   }
 
+<<<<<<< HEAD
   return true;
+=======
+  // if any row was updated, return true
+  if (res.rows[0] != undefined) {
+    return true;
+  } else {
+    return false;
+  }
+
+>>>>>>> 1ef18ac767578077520d7f50d15fae27154bca99
 }
 
 // Function to update the last login time

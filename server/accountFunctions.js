@@ -46,7 +46,7 @@ async function authorize(req, res, next) {
     username : req.body.username,
     password : req.body.password,
   };
-
+  
   var userData = await db.userExists(user);
 
   if (userData === false)
@@ -115,17 +115,10 @@ async function viewInfo(req,res, next) {
     username: req.body.username,
     email: req.body.email,
   }
-  // check if the user wants all data (for development)
-  if (user.username === "all") {
-    var data = await db.userInfo();
-    res.send(data);
-  } else {
-    // otherwise just add normal data
-    var data = await db.findUserInfo(user);
-    // send response
-    res.send(data);
-  }
 
+  var data = await db.userExists(user);
+  // send response
+  res.json(data);
 }
 
 function editAccount(req, res, next) {
@@ -138,6 +131,33 @@ async function addInterest(req, res, next){
 
 async function removeInterest(req, res, next) {
 
+}
+
+
+
+// @brief: generic get timeline function
+//         will also be used for when typing in a user's username in 
+//         the address bar. this wont work i don't think
+// TODO Figure out how to extend this function for searching in address bar
+async function getTimeline(req, res, next){
+  var user = {
+    username : req.body.username,
+  };
+  // get user's data
+  var data = await db.userExists(user);
+  if (data === false){
+    res.setHeader('error', 'user not found');
+    return next();
+  }
+
+  var following = data['following'];
+
+  
+  var followedSpins = await db.getSpins(following);
+  
+  // TODO error check here and make sure that it returns good data
+  return followedSpins;
+  
 }
 
 

@@ -37,7 +37,7 @@ var userExists = async function (user) {
 }
 
 // forms the name of the table of individual users
-function userTableName(username) { 
+function userSpinTableName(username) { 
   var name = username + "_spins";
   return (TEST ? name + "_test" : name);
 };
@@ -64,7 +64,7 @@ function userTableName(username) {
     accountInfo.passhash = hash;
 
     // dynamically create tables based on if this is development or not
-    var tablename = userTableName(accountInfo.username);
+    var tablename = userSpinTableName(accountInfo.username);
     
     var args = [tablename, SPIN_TEMPLATE];
     
@@ -125,7 +125,7 @@ async function deleteUser(username){
   var rows = [];
 
   try{
-    var tablename = userTableName(username);
+    var tablename = userSpinTableName(username);
 
     // delete spin table
     var query =  `DROP TABLE ${tablename}`;
@@ -159,7 +159,7 @@ async function updateLoginTime(username){
   var rows;
   try{
     await client.query('BEGIN');
-    const tablename = userTableName(username);
+    const tablename = userSpinTableName(username);
     const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
     var res = await client.query(query, [username]);
     rows = res.rows;
@@ -176,9 +176,62 @@ async function updateLoginTime(username){
   return (rows.length === 0 ? false : true);
 };
 
+// @brief get the spins made by a user
+// @return list of spins which match the tags supplied
+//          if tags are empty then it returns all user spins
+async function getSpins(users) {
+  var spins = [];
+  var userList = [];
+  // add each user to a list of users
+  const baseQuery = `SELECT * FROM `;
+  var query = '';
+  var tagList = []
+  
+  // ful SQL injection vulnerability mode: Engaged
+  // for each user in the user list, append their spin table to a query string
+  // and also search for tags associated with the supplied followed users list 
+  // in the followed user's posts
+  users.forEach((item, index) => {
+    // select * from <username_spins>  
+    query += baseQuery + userSpinTableName(item.username);
 
-async function getSpins(user, res) {
+    if (item.tags.length > 0) {
+      tagList.push(item.tags);
+      // supposed to search in the range of a list supplied
+      // hopefully postgres decides to parse this correctly
+      // select * from <username_spins> where @> tags
+      var where = ' WHERE @> $' + String(tagList.length);
+  
+      // for each tag in the tag list, append it to a where statement
+      // item.tags.forEach((tag, i) => {
+      //   where += tag + ' IN tags';
+      //   // if i is not the last index, append an or
+      //   if (i < item.tags.length - 1){
+      //     where += ' OR ';
+      //   }
+      // });
+      // append the conditions to the select query
+      query += where;
+    }
 
+    // if last item in list do not append union
+    if (index < users.length - 1)
+    {
+      query += ' UNION ALL';
+    }
+
+  });
+  // final string:
+  // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // ...
+  // ORDER BY date;
+  query += ' ORDER BY date';
+  
+
+  var res = await pool.query(query, tagList);
 };
 
 // Adds the users spin into their spin table
@@ -190,7 +243,7 @@ async function addSpin(user, spin) {
   var rows = [];
 
   try {
-    var tablename = userTableName(user);
+    var tablename = userSpinTableName(user);
     
     await client.query('BEGIN');
    
@@ -250,7 +303,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userTableName(user_poster);
+    var tablename = userSpinTableName(user_poster);
     
     await client.query('BEGIN');
    
@@ -302,7 +355,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userTableName(user_poster);
+    var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');
     
     var args = [spin.id];
@@ -349,47 +402,6 @@ async function getQuoteOrigin(user, res) {
 
 };
 
-// API that returns information of all users in the user database
-async function userInfo () {
-  
-  // query for all user info
-  var query = `SELECT * FROM ${USER_TABLE}`;
-  var res = await pool.query(query);
-
-  var rows = res.rows; 
-
-  // if any information received, return the info, false otherwise
-  if (rows.length != 0) {
-  
-    return res.rows;
-  
-  } else {
-    
-    return false;
-  }
-
-}
-
-async function findUserInfo (user) {
-  
-  // query with username and email
-  var params = [user.email, user.username];
-  var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
-  var res = await pool.query(query, params);
-
-  var rows = res.rows; 
-
-  // return info or false
-  if (rows.length != 0) {
-  
-    return res.rows;
-  
-  } else {
-
-    return false;
-  }
-  
-}
 
 // error handler
 pool.on('error', (err, client) => {
@@ -409,7 +421,5 @@ module.exports = {
   createUser,
   userExists,
   deleteUser,
-  updateLoginTime,
-  userInfo,
-  findUserInfo
+  updateLoginTime
 };

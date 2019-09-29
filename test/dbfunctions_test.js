@@ -103,31 +103,4 @@ describe('database functions test', function() {
 
   });
 
-  describe('#db.findUserInfo()', async () => {
-    it('@test findUserInfo(): should return particular info', async () => {
-      var user = {
-        username: 'test',
-        email: 'test@test.com',
-      }
-
-      var res = await db.findUserInfo(user);
-      // console.log("Response:", res);
-
-      assert.notDeepStrictEqual(res, false);
-    });
-
-    it('@test findUserInfo(): should return false', async () => {
-      var user = {
-        username: 'tesdasd',
-        email: 'teseqwexsqsdm',
-      }
-
-      var res = await db.findUserInfo(user);
-      // console.log("Response:", res);
-
-      assert.deepStrictEqual(res, false);
-    });
-
-  });
-
 });

@@ -9,7 +9,7 @@ const index  = path.join(__dirname, '../build/index.html');
 function validUsername(username){
 
 }
-
+// checking new push
 // @desc: express middleware function to interface with the database
 // @return: none
 async function postCreateUser(req, res, next) {
@@ -46,7 +46,7 @@ async function authorize(req, res, next) {
     username : req.body.username,
     password : req.body.password,
   };
-
+  
   var userData = await db.userExists(user);
 
   if (userData === false)
@@ -55,7 +55,7 @@ async function authorize(req, res, next) {
     res.setHeader('Error', 'Username invalid');
     return next();
   }
-  var match = await bcrypt.compare(user.password, userData[0].passhash);
+  var match = await bcrypt.compare(user.password, userData.passhash);
  
   // password doesn't match
   if (!match){
@@ -109,6 +109,18 @@ async function deleteAccount(req, res, next) {
 
 }
 
+// API for frontend development
+async function viewInfo(req,res, next) {
+  var user = {
+    username: req.body.username,
+    email: req.body.email,
+  }
+
+  var data = await db.userExists(user);
+  // send response
+  res.json(data);
+}
+
 function editAccount(req, res, next) {
 
 }
@@ -123,10 +135,44 @@ async function removeInterest(req, res, next) {
 
 
 
+// @brief: generic get timeline function
+//         will also be used for when typing in a user's username in 
+//         the address bar. this wont work i don't think
+// TODO Figure out how to extend this function for searching in address bar
+async function getTimeline(req, res, err){
+  var user = {
+    username : req.body.username,
+  };
+  // get user's data
+  var data = await db.userExists(user);
+
+  if (data === false){
+    res.setHeader('error', 'user not found');
+    return next();
+  }
+
+  var following = data.following;
+  console.log(following);
+  
+  var followedSpins = await db.getSpins(following);
+
+  if (followedSpins.length === 0){
+    res.setHeader('error', 'no spins found :(')
+  }
+
+  res.json(followedSpins);
+  
+  // TODO error check here and make sure that it returns good data
+  
+}
+
+
+
 
 module.exports = {
   postCreateUser,
   authorize,
   deleteAccount,
   editAccount,
+  getTimeline
 };

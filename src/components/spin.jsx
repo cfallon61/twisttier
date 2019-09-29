@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './spin.css'
 
+/**
+ * The spin component that displays username, message content and user timestamp.
+ */
 class Spin extends Component
 {
     state = {

@@ -1,12 +1,15 @@
 import React, {Component} from 'react';
-import {Spin} from './spin';
+import Spin from './spin.jsx';
 import './feed.css';
 
 class Feed extends Component
 {
-    state = {
-        spins : []
+    constructor(props)
+    {
+        super(props);
+        this.state = {spins:[]};
     }
+
     render() 
     {
         return (
@@ -18,7 +21,9 @@ class Feed extends Component
 
     addSpin(Spin)
     {
-        this.state.spins.push(Spin);
-    }
-
+        let updatedList = this.state.spins.push(Spin);
+        this.setState({spins: updatedList});
+    } 
 }
+
+export default Feed;

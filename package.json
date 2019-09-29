@@ -20,13 +20,14 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
-    "bcrypt": "https://github.com/kelektiv/node.bcrypt.js.git#master",
+    "bcrypt": "git+https://github.com/kelektiv/node.bcrypt.js.git#master",
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
     "core-js": "^3.2.1",
     "dotenv": "^8.1.0",
     "express": "latest",
+    "express-validator": "^6.2.0",
     "jquery": "^3.4.1",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "latest",
@@ -36,10 +37,8 @@
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
-    "react-router-dom": "^5.0.1",
-    "react-scripts": "^3.1.2",
-    "express-validator": "^6.2.0"
-        
+    "react-router-dom": "^5.1.0",
+    "react-scripts": "^3.1.2"
   },
   "devDependencies": {
     "assert": "latest",
@@ -48,5 +47,17 @@
   "engines": {
     "node": "12.10.0"
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://localhost:8080",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

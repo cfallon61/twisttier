@@ -13,6 +13,34 @@ describe('database functions test', function() {
     });
   });
 
+  describe('#dp.addSpin()', async () => {
+    // when testing addSpin put spin.likes as -1
+    // that way it knows to delete after it was put
+    // we will implement a deleteSpin after sprint
+    // this is just temporary
+    it('checks if spin gets added successfully', async () => {
+
+      user = {
+        email: "jdoe@purdue.edu",
+        username: "doeJohn"
+      };
+
+      spin = {
+        content: 'god is upon us',
+        tags: ['God is Chris', 'Chris is God'],
+        edited: false,
+        likes: -1,
+        quotes: 0,
+        is_quote: false,
+        quote_origin: {},
+        like_list: []
+      };
+
+      var res = await db.addSpin(user, spin);
+
+      assert.notDeepStrictEqual(res, false);
+    });
+  });
   describe("#db.userExists()", async () => {
     it("should return user data for this user", async () => {
       user = {
@@ -37,7 +65,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe.skip("#db.createUser()", () => {
+  describe("#db.createUser()", () => {
 
     it ('@test not exist: should return true', async () => {
       var user = {
@@ -50,9 +78,25 @@ describe('database functions test', function() {
 
       var res = await db.createUser(user);
 
-      assert.deepStrictEqual(res, true); 
+      if (res === 'user exists') {
+        assert.deepStrictEqual(res, 'user exists');
+      }
+      else {
+        assert.notDeepStrictEqual(res, false);
+      } 
     });
- 
+    it('@recreate doeJohn user, not an actual test', async () => {
+      var user = {
+        username: 'doeJohn',
+        email: 'email@email.com',
+        name: "Harvey",
+        password: "password",
+        bio: 'my name is Harvey Hinkelberg, but they call me john',
+      }
+
+      var res = await db.createUser(user);
+    });
+
     it ('@test user exists: should fail', async () => {
       var user = {
         username: 'test',
@@ -63,26 +107,23 @@ describe('database functions test', function() {
       }
 
       var res = await db.createUser(user);
-
       assert.notDeepStrictEqual(res, true);
     });  
-  });
+    it ('@test email exists: should fail', async () => {
+      var user = {
+        username: 'jhfdjhfbh',
+        email: 'test@test.com',
+        name: "whatever",
+        password: "password",
+        bio: 'why am i the only one actually working?',
+      }
 
-  describe.skip('#db.deleteUser()', () => {
-    it('@test delete user exist: should return true', async () => {
-      var username = 'bringMeDeath';
+      var res = await db.createUser(user);
 
-      var res = await db.deleteUser(username);
-
-      assert.deepStrictEqual(res, true);
-    });
-
-    it ('@test delete user !exist: should fail', async () => {
-      var username = "fsdhjklasdf9p834y";
-      var res = await db.deleteUser(username);
-
-      assert.notDeepStrictEqual(res, false);
+      assert.notDeepStrictEqual(res, true);
     });
   });
+
+ 
 
 });

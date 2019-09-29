@@ -12,12 +12,19 @@ class Signup extends Component {
     this.state = {
       email : "",
       password : "",
-      repeatedPassword: ""
+      repeatedPassword: "",
+      username : "",
+      name : "",
+      bio : ""
+
     };
 
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleRepeatedPassChange = this.handleRepeatedPassChange.bind(this);
+    this.handleUsernameChange = this.handleUsernameChange.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleBioChange = this.handleBioChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -36,6 +43,19 @@ class Signup extends Component {
     this.setState({repeatedPassword : event.target.value});
   }
 
+  handleUsernameChange(event)
+  {
+    this.setState({username : event.target.value});
+  }  
+  handleNameChange(event)
+  {
+    this.setState({name : event.target.value});
+  } 
+  handleBioChange(event)
+  {
+    this.setState({bio : event.target.value});
+  }
+
   handleSubmit(event)
   {
     event.preventDefault();
@@ -47,7 +67,10 @@ class Signup extends Component {
     }
     let writtenInfo = {
       email : this.state.email,
-      password : this.state.password
+      password : this.state.password,
+      username : this.state.username,
+      name : this.state.name,
+      bio : this.state.bio
     }
 
     fetch("/create_user", {
@@ -89,6 +112,22 @@ class Signup extends Component {
                 <Form.Group controlId="formConfirmPasswrd">
                     <Form.Label>Confirm Password</Form.Label>
                     <Form.Control type="password" placeholder="Confirm Password" onChange={this.handleRepeatedPassChange}/>
+                </Form.Group>
+
+                 {/* Move this section to another page (NewProfile)? */}
+                 <Form.Group controlId="formNewUsername">
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control type="username" placeholder="Username" onChange={this.handleUsernameChange} />
+                </Form.Group>
+
+                <Form.Group controlId="formNewName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control type="name" placeholder="Name" onChange={this.handleNameChange}/>
+                </Form.Group>
+
+                <Form.Group controlId="formNewBio">
+                    <Form.Label>Bio</Form.Label>
+                    <Form.Control type="bio" placeholder="Insert Bio Here" onChange={this.handleBioChange}/>
                 </Form.Group>
 
                 <Button variant="primary" type="submit">Create Account</Button>

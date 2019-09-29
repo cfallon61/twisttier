@@ -107,7 +107,6 @@ describe('database functions test', function() {
       }
 
       var res = await db.createUser(user);
-
       assert.notDeepStrictEqual(res, true);
     });  
     it ('@test email exists: should fail', async () => {

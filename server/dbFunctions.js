@@ -29,7 +29,7 @@ var userExists = async function (user) {
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
     // so this is why the [0];
-    return rows;
+    return rows[0];
   }
   // return false if they dont already exist, this is good
   return false;
@@ -84,7 +84,11 @@ function userSpinTableName(username) {
       accountInfo.bio,
       accountInfo.name,
       [], // followers
-      {}, // following
+      {
+        users: JSON.stringify([
+          { username: accountInfo.username, tags: [] }
+        ]),
+       }, // following
       [], // interests
       {}, // accessibility features
     ];
@@ -95,12 +99,10 @@ function userSpinTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
 
     res = await client.query(query, args);
-    
     // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
     rows = res.rows;
-    
   } 
   catch (e) {
     await client.query('ROLLBACK');
@@ -182,18 +184,17 @@ async function updateLoginTime(username){
 // @return list of spins which match the tags supplied
 //          if tags are empty then it returns all user spins
 async function getSpins(users) {
-  var spins = [];
-  var userList = [];
   // add each user to a list of users
   const baseQuery = `SELECT * FROM `;
   var query = '';
   var tagList = []
+  var followed = JSON.parse(users.users);
   
   // ful SQL injection vulnerability mode: Engaged
   // for each user in the user list, append their spin table to a query string
   // and also search for tags associated with the supplied followed users list 
   // in the followed user's posts
-  users.forEach((item, index) => {
+  followed.forEach((item, index) => {
     // select * from <username_spins>  
     query += baseQuery + userSpinTableName(item.username);
 
@@ -217,7 +218,7 @@ async function getSpins(users) {
     }
 
     // if last item in list do not append union
-    if (index < users.length - 1)
+    if (index < followed.length - 1)
     {
       query += ' UNION ALL';
     }
@@ -232,8 +233,9 @@ async function getSpins(users) {
   // ORDER BY date;
   query += ' ORDER BY date';
   
-
+  console.log(query);
   var res = await pool.query(query, tagList);
+  return res.rows;
 };
 
 // Adds the users spin into their spin table

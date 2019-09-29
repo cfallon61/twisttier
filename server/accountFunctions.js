@@ -55,7 +55,7 @@ async function authorize(req, res, next) {
     res.setHeader('Error', 'Username invalid');
     return next();
   }
-  var match = await bcrypt.compare(user.password, userData[0].passhash);
+  var match = await bcrypt.compare(user.password, userData.passhash);
  
   // password doesn't match
   if (!match){
@@ -139,24 +139,30 @@ async function removeInterest(req, res, next) {
 //         will also be used for when typing in a user's username in 
 //         the address bar. this wont work i don't think
 // TODO Figure out how to extend this function for searching in address bar
-async function getTimeline(req, res, next){
+async function getTimeline(req, res, err){
   var user = {
     username : req.body.username,
   };
   // get user's data
   var data = await db.userExists(user);
+
   if (data === false){
     res.setHeader('error', 'user not found');
     return next();
   }
 
-  var following = data['following'];
-
+  var following = data.following;
+  console.log(following);
   
   var followedSpins = await db.getSpins(following);
+
+  if (followedSpins.length === 0){
+    res.setHeader('error', 'no spins found :(')
+  }
+
+  res.json(followedSpins);
   
   // TODO error check here and make sure that it returns good data
-  return followedSpins;
   
 }
 
@@ -168,5 +174,5 @@ module.exports = {
   authorize,
   deleteAccount,
   editAccount,
-  viewInfo
+  getTimeline
 };

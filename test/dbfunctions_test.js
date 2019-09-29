@@ -61,7 +61,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe.skip("#db.createUser()", () => {
+  describe("#db.createUser()", () => {
 
     it ('@test not exist: should return true', async () => {
       var user = {
@@ -74,7 +74,12 @@ describe('database functions test', function() {
 
       var res = await db.createUser(user);
 
-      assert.deepStrictEqual(res, true); 
+      if (res === 'user exists') {
+        assert.notDeepStrictEqual(res, 'user exists');
+      }
+      else {
+        assert.notDeepStrictEqual(res, false);
+      } 
     });
  
     it ('@test user exists: should fail', async () => {
@@ -92,15 +97,6 @@ describe('database functions test', function() {
     });  
   });
 
-  describe('#db.userInfo()', async () => {
-    it('@test userInfo: should return all info', async () => {
-      
-      var res = await db.userInfo();
-      // console.log("Response:", res);
-
-      assert.notDeepStrictEqual(res, false);
-    });
-
-  });
+ 
 
 });

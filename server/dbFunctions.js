@@ -1,7 +1,6 @@
 // file with the main database interaction functions
 
 const credentials = require('./config.json');
-const helper = require('./helpers.js');
 const dotenv = require('dotenv').config();
 const bcrypt = require('bcrypt');
 // import postgres lib
@@ -111,7 +110,10 @@ function userSpinTableName(username) {
   finally {
     client.release();
   }
-  console.log("rows", rows);
+  if (rows.length === 0 && TEST){
+    return 'user exists';
+  }
+
   return (rows.length === 0 ? false : true);
 };
 
@@ -243,8 +245,7 @@ async function addSpin(user, spin) {
   var rows = [];
     
   try {
-    var tablename = userSpinTableName(user);
-    
+    var tablename = userSpinTableName(user.username);
     await client.query('BEGIN');
 
     var args = [

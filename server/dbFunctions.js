@@ -157,39 +157,29 @@ async function deleteUser(username){
 
 // function to update user info (used by edit account)
 async function updateUser(user) {
-  var rows;
-
   // extract the info to be inserted
   const hash = await bcrypt.hash(user.password, 10);
-
-  // var args = {
-  //   email: user.email,
-  //   password: hash,
-  //   name: user.name,
-  //   bio: user.bio,
-  //   username: user.username
-  // };
   
-  var args = [user.email, hash, user.name, user.bio, user.username];
+  var args = [
+    user.email, 
+    hash, user.name, 
+    user.bio, 
+    user.username
+  ];
+  
   // connect to database
   var client = await pool.connect();
-  
   
   try{
     // begin transaction
     await client.query('BEGIN');
 
-    const query =   `UPDATE ${USER_TABLE} 
-                    SET email = $1,
-                        passhash = $2,
-                        name = $3,
-                        bio = $4
-                    WHERE 
-                        USERNAME = $5`;
+    const query = `UPDATE ${USER_TABLE} 
+      SET email = $1, passhash = $2, name = $3, bio = $4
+      WHERE USERNAME = $5`
+    ;
 
-    var res = await client.query(query, args);
-    rows = res.rows;
-    console.log("HERE!!! ", rows);
+    await client.query(query, args);
 
     // end transaction
     await client.query('COMMIT');
@@ -203,12 +193,7 @@ async function updateUser(user) {
     client.release();
   }
 
-  if (rows.length === 0) {
-    return false;
-  } else {
-    console.log(rows);
-    return true;
-  }
+  return true;
 }
 
 // Function to update the last login time
@@ -324,7 +309,7 @@ async function addSpin(user, spin) {
 
     await client.query('COMMIT');
 
-    if (spin.likes == -1) {
+    if (spin.likes === -1) {
       await client.query('BEGIN');
       console.log("goes through here");
 

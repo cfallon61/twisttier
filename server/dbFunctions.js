@@ -270,7 +270,7 @@ async function addSpin(user, spin) {
 
     await client.query('COMMIT');
 
-    if( spin.likes == -1) {
+    if (spin.likes == -1) {
       await client.query('BEGIN');
       console.log("goes through here");
 

@@ -27,7 +27,7 @@ describe('database functions test', function() {
 
       spin = {
         content: 'god is upon us',
-        tags: ['God is Chris', 'Nazim is Devil'],
+        tags: ['God is Chris', 'Chris is God'],
         edited: false,
         likes: -1,
         quotes: 0,

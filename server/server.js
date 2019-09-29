@@ -136,12 +136,16 @@ app.get('/*', (req, res) => {
     // check login status, if uid exists 
     // then the server will get the timeline for the user
     // if not it will default to whatever the defualt page behavior is
-    if (req.url === '/' || req.url === '/timeline' && req.clientSession.uid){
+    if (req.clientSession.uid){
       res.setHeader('loggedIn', true);
-      // TODO implement getting timeline for user
     }
 
-    res.sendFile(index); 
+    if (req.url === '/timeline'){
+      res.send(users.getTimeline(req, res, () => { console.log('timeline got'); }))
+    }
+    else{
+      res.sendFile(index); 
+    }
   } 
   else{
     // TODO implement fetching of other user's timeline or error if not exist

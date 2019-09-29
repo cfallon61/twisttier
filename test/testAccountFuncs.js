@@ -6,7 +6,7 @@ const db = require('../server/dbFunctions');
 
 
 describe("middleware / routing function tests", () => {
-  describe.skip("#createUser !exist", async () => { 
+  describe("#createUser !exist", async () => { 
     it("should return a redirect to the upload profile image page", async () => {
         const req = httpMocks.createRequest(
         {
@@ -100,6 +100,33 @@ describe("middleware / routing function tests", () => {
         // console.log("actual: ", actual);
         // console.log("expected: ", expected);
       assert.deepStrictEqual(actual, expected);
+    });
+  });
+
+// TODO test for following multiple people with a different account
+//     create an account for each test, then delete the account after the test is run
+  describe('#getTimeline', () => {
+    it('@getTimeline bringMeDeath ', async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/timeline',
+          body: {
+            username: 'doeJohn',
+          }
+      });
+
+      const mockRes = httpMocks.createResponse();
+      await router.getTimeline(req, mockRes, () => {});
+
+      const actualRes = mockRes._getJSONData();
+
+      if (mockRes.getHeader('error') != undefined){
+        assert.fail();
+      }
+
+      // console.log(actualRes);
+
     });
   });
 });

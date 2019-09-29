@@ -79,13 +79,24 @@ describe('database functions test', function() {
       var res = await db.createUser(user);
 
       if (res === 'user exists') {
-        assert.notDeepStrictEqual(res, 'user exists');
+        assert.deepStrictEqual(res, 'user exists');
       }
       else {
         assert.notDeepStrictEqual(res, false);
       } 
     });
- 
+    it('@test not exist: should return true', async () => {
+      var user = {
+        username: 'doeJohn',
+        email: 'email@email.com',
+        name: "Harvey",
+        password: "password",
+        bio: 'my name is Harvey Hinkelberg, but they call me john',
+      }
+
+      var res = await db.createUser(user);
+    });
+
     it ('@test user exists: should fail', async () => {
       var user = {
         username: 'test',

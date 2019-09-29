@@ -1,20 +1,23 @@
-[
-  {
-    "username": "user1",
-    "tags": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "username": "user2",
-    "tags": [
-      1,
-      2,
-      3,
-      4
-    ]
-  }
-]
+{
+  "users": 
+  [
+    {
+      "username": "user1",
+      "tags": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "username": "user2",
+      "tags": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ]
+}

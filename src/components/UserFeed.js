@@ -15,7 +15,8 @@ class UserFeed extends Component
     constructor(props)
     {
         super(props);
-        this.username = this.props.username;
+        this.username = this.props.match.params.username;
+        console.log(this.username);
     }
 
     render()

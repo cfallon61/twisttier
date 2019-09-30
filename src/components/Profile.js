@@ -20,7 +20,7 @@ class Profile extends Component{
         //GET User info from server.
         var Userinfo = {
             profilePic : "",
-            username : "tarcan",
+            username : this.props.username,
             description : "This is my profile description.",
             tags : [
                 "soccer", "music"

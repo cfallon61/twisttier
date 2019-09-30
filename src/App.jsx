@@ -24,7 +24,7 @@ class App extends Component {
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
               <Route path="/userSettings" component={UserSettings} />
-              <Route path="/prototype/feed" render={(props) => <UserFeed {...props} username={"tarcan"}/>}/>
+              <Route path="/:username" component={UserFeed}/>
             </Switch>
           </div>
         </Router>

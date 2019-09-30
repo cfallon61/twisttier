@@ -130,7 +130,7 @@ describe("middleware / routing function tests", () => {
   });
 
   describe("#updateProfileInfo", async () => { 
-    it("username exists, should return id of user", async () => {
+    it("username exists, should user updated", async () => {
         const req = httpMocks.createRequest(
         {
           method: "POST",
@@ -154,29 +154,29 @@ describe("middleware / routing function tests", () => {
     });
     // updateprofileInfo should return next() if fail not false, 
     // need a test for that
-    // it("username does not exist, should return false", async () => {
-    //   const req = httpMocks.createRequest(
-    //   {
-    //     method: "POST",
-    //     url: '/updateProfileInfo',
-    //     body: {
-    //       email: "test@test.com",
-    //       username: "tesdsdt",
-    //       password: "newPassdasds",
-    //       name: "newNamdasdsae",
-    //       bio: "this is my nedasdsadasw bio"
-    //     }
-    //   });
+    it("username does not exist, should return user not found", async () => {
+      const req = httpMocks.createRequest(
+      {
+        method: "POST",
+        url: '/updateProfileInfo',
+        body: {
+          email: "test@test.com",
+          username: "tesdsdt",
+          password: "newPassdasds",
+          name: "newNamdasdsae",
+          bio: "this is my nedasdsadasw bio"
+        }
+      });
   
-    //   const mockres = httpMocks.createResponse();
+      const mockres = httpMocks.createResponse();
     
-    //   // post to router
-    //   await router.updateProfileInfo(req, mockres, () => {});
-    //   console.log(mockres);
-    //   const actualRes = mockres._getData();
-    //   // console.log("actual:", actualRes);
-    //   assert.notequal(updateProfileInfo.data, next());
-    // });
+      // post to router
+      await router.updateProfileInfo(req, mockres, () => {});
+      // console.log(mockres);
+      const actualRes = mockres.getHeader("message");
+      // console.log("actual:", actualRes);
+      assert.equal(actualRes, "user not found");
+    });
   });
 
 

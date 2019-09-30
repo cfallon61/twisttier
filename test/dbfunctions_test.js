@@ -33,8 +33,8 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(user, spin);
-      var spin_id = await db.deleteSpin(user, res[0].id);
-      assert.equal(res[0].id, spin_id[0].id);
+      var spin_id = await db.deleteSpin(user, res.id);
+      assert.equal(res.id, spin_id.id);
     });
   });
   describe("#db.userExists()", async () => {
@@ -132,7 +132,7 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res[0].id, 1);
+      assert.deepStrictEqual(res.id, 1);
     });
 
     it('Entry does not exist in database: should return false', async () => {

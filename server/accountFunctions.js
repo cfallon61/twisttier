@@ -177,13 +177,13 @@ async function updateProfileInfo(req,res) {
   // if all checking fine, update the user
   var response = await db.updateUser(user);
 
-  // if successfully changed, return true
   if (response === false){
-    res.send(false);
+    res.setHeader('error', 'user not found');
+    console.log('error: user not found');
+    return next();
   }
-  else {
-    res.send(true);
-  }
+
+  res.json(response.id);
 }
 
 

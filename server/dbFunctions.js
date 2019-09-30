@@ -197,7 +197,7 @@ async function updateUser(user) {
     client.release();
   }
 
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 }
 
 // Function to update the last login time
@@ -322,7 +322,7 @@ async function addSpin(user, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 async function deleteSpin(user, spin_id) {
@@ -350,7 +350,7 @@ async function deleteSpin(user, spin_id) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 }
 
 async function showNotification(user, res) {

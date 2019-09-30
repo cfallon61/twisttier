@@ -148,9 +148,9 @@ describe("middleware / routing function tests", () => {
       
       // post to router
       await router.updateProfileInfo(req, mockres, () => {});
-      const actualRes = mockres._getData();
-
-      assert.equal(actualRes, 1);
+      const actualRes = mockres.getHeader('message');
+        // console.log(actualRes);
+      assert.equal(actualRes, "user updated");
     });
     // updateprofileInfo should return next() if fail not false, 
     // need a test for that

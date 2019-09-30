@@ -131,6 +131,7 @@ async function deleteUser(username){
 
   try{
     var tablename = userSpinTableName(username);
+    await client.query('BEGIN');
 
     // delete spin table
     var query =  `DROP TABLE ${tablename}`;
@@ -156,34 +157,37 @@ async function deleteUser(username){
 };
 
 // function to update user info (used by edit account)
+// returns id of user on success and false on failure
 async function updateUser(user) {
   // extract the info to be inserted
-  const hash = await bcrypt.hash(user.password, 10);
-  
-  var args = [
-    user.email, 
-    hash, user.name, 
-    user.bio, 
-    user.username
-  ];
-  
+  const hash = await bcrypt.hash(user.password, 10);  
   // connect to database
   var client = await pool.connect();
-  
-  try{
+  var rows = [];
+
+  try {
     // begin transaction
     await client.query('BEGIN');
 
-    const query = `UPDATE ${USER_TABLE} 
-      SET email = $1, passhash = $2, name = $3, bio = $4
-      WHERE USERNAME = $5`
+    var args = [
+      user.email, 
+      hash, 
+      user.name, 
+      user.bio, 
+      user.username
+    ];
+
+    var query = `UPDATE ${USER_TABLE} 
+      SET email = $1, passhash = $2, name = $3, bio = $4 
+      WHERE username = $5 
+      RETURNING id`
     ;
 
-    await client.query(query, args);
-
+    var res = await client.query(query, args);
+    rows = res.rows;
+    
     // end transaction
     await client.query('COMMIT');
-   
   }
   catch (e) {
     await client.query('ROLLBACK');
@@ -193,7 +197,7 @@ async function updateUser(user) {
     client.release();
   }
 
-  return true;
+  return (rows.length === 0 ? false : rows);
 }
 
 // Function to update the last login time
@@ -281,10 +285,11 @@ async function getSpins(users) {
 // Adds the users spin into their spin table
 // @param user = user who created the spin
 // @param spin = spin to be added into the user's spin table
-// @return true if success and false if failure
+// @return spin id if success, false if failure
 async function addSpin(user, spin) {
   const client = await pool.connect();
-    
+  var rows = [];
+
   try {
     var tablename = userSpinTableName(user.username);
     await client.query('BEGIN');
@@ -302,26 +307,13 @@ async function addSpin(user, spin) {
 
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
-      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[])`
+      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
+      RETURNING id`
     ;
 
-    await client.query(query, args);
-
+    var res = await client.query(query, args);
+    rows = res.rows;
     await client.query('COMMIT');
-
-    if (spin.likes === -1) {
-      await client.query('BEGIN');
-      console.log("goes through here");
-
-      var query = 
-        `DELETE FROM ${tablename} 
-        WHERE likes=-1`
-      ;
-      
-      await client.query(query);
-
-      await client.query('COMMIT');
-    }
     
   } catch(e) {
     await client.query('ROLLBACK');
@@ -330,8 +322,36 @@ async function addSpin(user, spin) {
   finally {
     client.release();
   }
-  return (true);
+  return (rows.length === 0 ? false : rows);
 };
+
+async function deleteSpin(user, spin_id) {
+  const client = await pool.connect();
+  var rows = [];
+
+  try {
+    var tablename = userSpinTableName(user.username);
+    await client.query('BEGIN');
+
+    var query = 
+      `DELETE FROM ${tablename} 
+      WHERE id=$1 
+      RETURNING id`
+    ;
+
+    var res = await client.query(query, [spin_id]);
+    rows = res.rows;
+    await client.query('COMMIT');
+    
+  } catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+  }
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? false : rows);
+}
 
 async function showNotification(user, res) {
 
@@ -416,7 +436,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     var query = `SELECT like_list FROM ${tablename} 
     WHERE id = $1`;
 
-    var res = await client.query(query);
+    var res = await client.query(query, args);
     var index = res[0].indexOf(user_like.username);
     if (index > -1) {
 
@@ -476,5 +496,6 @@ module.exports = {
   userExists,
   deleteUser,
   updateLoginTime,
-  updateUser
+  updateUser,
+  deleteSpin
 };

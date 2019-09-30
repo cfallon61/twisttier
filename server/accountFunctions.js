@@ -170,7 +170,7 @@ async function updateProfileInfo(req,res) {
     password: req.body.password,
     name: req.body.name,
     bio: req.body.bio
-  }
+  };
 
   // TODO: might need to do some checking, depending on logic of frontend
 
@@ -178,10 +178,11 @@ async function updateProfileInfo(req,res) {
   var response = await db.updateUser(user);
 
   // if successfully changed, return true
-  if (response === true){
-    res.send(true);
-  } else {
+  if (response === false){
     res.send(false);
+  }
+  else {
+    res.send(true);
   }
 }
 

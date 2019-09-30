@@ -14,10 +14,6 @@ describe('database functions test', function() {
   });
 
   describe('#dp.addSpin()', async () => {
-    // when testing addSpin put spin.likes as -1
-    // that way it knows to delete after it was put
-    // we will implement a deleteSpin after sprint
-    // this is just temporary
     it('checks if spin gets added successfully', async () => {
 
       user = {
@@ -29,7 +25,7 @@ describe('database functions test', function() {
         content: 'god is upon us',
         tags: ['God is Chris', 'Chris is God'],
         edited: false,
-        likes: -1,
+        likes: 0,
         quotes: 0,
         is_quote: false,
         quote_origin: {},
@@ -37,8 +33,8 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(user, spin);
-
-      assert.notDeepStrictEqual(res, false);
+      var spin_id = await db.deleteSpin(user, res[0].id);
+      assert.equal(res[0].id, spin_id[0].id);
     });
   });
   describe("#db.userExists()", async () => {
@@ -125,19 +121,18 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('Changed info successfully: should return true', async () => {
+    it('Changed info successfully: should return the id', async () => {
       user = {
         email: "test@test.com",
         username: "test",
         password: "newPass",
         name: "newName",
-        bio: "this is my new bio"
+        bio: "i hate my new bio"
       };
 
       var res = await db.updateUser(user);
-      
       // assert
-      assert.deepStrictEqual(res, true);
+      assert.deepStrictEqual(res[0].id, 1);
     });
 
     it('Entry does not exist in database: should return false', async () => {

@@ -110,7 +110,7 @@ async function deleteAccount(req, res, next) {
 }
 
 // API for frontend development
-async function viewInfo(req,res, next) {
+async function viewInfo(req,res) {
   var user = {
     username: req.body.username,
     email: req.body.email,
@@ -118,7 +118,25 @@ async function viewInfo(req,res, next) {
 
   var data = await db.userExists(user);
   // send response
-  res.json(data);
+  // console.log(data);
+
+  // protect certain information such as password
+  var responseObject = {
+    email: data.email,
+    username: data.username,
+    bio :  data.bio,
+    create_date: data.create_date,
+    last_login: data.last_login,
+    name: data.name,
+    followers: data.followers,
+    following: data.following,
+    interests: data.interests,
+    accessibility_features: data.accessibility_features,
+    profile_pic: data.profile_pic,
+  };
+  
+  // console.log(responseObject);
+  res.json(responseObject);
 }
 
 async function addInterest(req, res, next){
@@ -190,6 +208,16 @@ async function updateProfileInfo(req,res, next) {
 
 }
 
+// // info for front end development
+// async function viewInfo(req,res) {
+//   var user = {
+//     username: req.body.username,
+//     email: req.body.email,
+//   }
+//   var data = await db.findUserInfo(user);
+//   // send response
+//   res.send(data);
+// }
 
 
 
@@ -198,5 +226,6 @@ module.exports = {
   authorize,
   deleteAccount,
   getTimeline,
-  updateProfileInfo
+  updateProfileInfo,
+  viewInfo
 };

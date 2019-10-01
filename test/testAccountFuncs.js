@@ -180,4 +180,26 @@ describe("middleware / routing function tests", () => {
   });
 
 
+  describe("#get info", async () => { 
+    it("username exists, should user updated", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateProfileInfo',
+          body: {
+            email: "test@test.com",
+            username: "test",
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.viewInfo(req, mockres, () => {});
+      // const actualRes = mockres.getHeader('message');
+        // console.log(actualRes);
+      // assert.equal(actualRes, "user updated");
+    });
+    
+  });
 });

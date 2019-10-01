@@ -123,7 +123,11 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
 }); 
 
-
+// endpoint for getting userInfo
+app.post('/info', users.viewInfo, (req, res) =>
+{
+  
+});
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
@@ -146,6 +150,8 @@ app.get('/*', notLoggedIn, (req, res) => {
     res.sendFile(path.join(root, req.url));
   }
 });
+
+
 
 
 function loggedIn(req, res, next) {

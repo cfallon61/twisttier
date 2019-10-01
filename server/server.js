@@ -94,6 +94,7 @@ app.post('/create_user',
   });
 
 
+// TODO add route for update user info and use express validator
 
 // TODO ADD COOKIE / SESSION VALIDATION
 // handle profile image uploading
@@ -109,13 +110,13 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
 
 // TODO send responses to front based on login / logout
 app.get('/logout', loggedIn, (req, res) => {
-  console.log('logout');
-  console.log(req.cookies);
+  console.log(req.clientSession.uid, 'logging out');
+  // console.log(req.cookies);
   req.clientSession.uid = null;
   req.clientSession.destroy((err) => { if (err) throw err; } );
   res.clearCookie('clientSession');
   res.clearCookie('tracker');
-  console.log(res.cookies);
+  // console.log(res.cookies);
   res.redirect('/');
 });
 
@@ -142,7 +143,7 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
 });
 
 
-app.post('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
+app.get('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
   if (res.getHeader('error') != undefined) {
     res.status(406);
   }
@@ -152,8 +153,8 @@ app.post('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
 // @brief: get a supplied user's timeline
 // @respond: json with posts made if user exists, 
 //           404 not found error if user not exist
-app.post('/api/timeline/:username', notLoggedIn, users.getTimeline, (req, res) => {
-  if (res.getHeader('error') === 'user not found'){
+app.get('/api/timeline/:username', users.getTimeline, (req, res) => {
+  if (res.getHeader('error') != undefined){
     res.status(404)
   }
 });
@@ -161,8 +162,8 @@ app.post('/api/timeline/:username', notLoggedIn, users.getTimeline, (req, res) =
 // @brief: get a supplied user's posts
 // @respond: json with posts made if user exists, 
 //           404 not found error if user not exist
-app.post('/api/posts/:username', notLoggedIn, users.getPosts, (req, res) => {
-  if (res.getHeader('error') === 'user not found') {
+app.get('/api/posts/:username', users.getPosts, (req, res) => {
+  if (res.getHeader('error') != undefined) {
     res.status(404)
   }
 });
@@ -170,7 +171,6 @@ app.post('/api/posts/:username', notLoggedIn, users.getPosts, (req, res) => {
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
 app.get('/*', (req, res) => {
-  // TODO implement fetching of other user's timeline or error if not exist
   res.sendFile(index);
 });
 
@@ -182,7 +182,7 @@ function loggedIn(req, res, next) {
     return next();
   }
   else {
-    res.redirect('/'); // TODO route this however 
+    res.redirect('/timeline'); // TODO route this however 
   }
 
 };

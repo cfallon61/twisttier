@@ -119,7 +119,7 @@ function userSpinTableName(username) {
     return 'user exists';
   }
 
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 
@@ -140,7 +140,7 @@ async function deleteUser(username){
 
     var res = await client.query(query);
 
-    query = `DELETE FROM ${USER_TABLE} WHERE username=$1`;
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING id`;
 
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
@@ -155,7 +155,7 @@ async function deleteUser(username){
   finally {
     client.release();
   }
-  return (rows.length === 0 ? true : false);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 // function to update user info (used by edit account)

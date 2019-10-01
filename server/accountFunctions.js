@@ -183,11 +183,13 @@ async function getTimeline(req, res, err){
 // updates user profile information from request
 async function updateProfileInfo(req,res, next) {
   var user = {
-    email: req.body.email,
-    username: req.body.username,
+    id: req.body.id,
     password: req.body.password,
+    bio: req.body.bio,
     name: req.body.name,
-    bio: req.body.bio
+    interests: req.body.interests,
+    accessibility_features: req.body.accessibility_features,
+    profile_pic: req.body.profile_pic
   };
 
   // TODO: might need to do some checking, depending on logic of frontend

@@ -160,7 +160,10 @@ async function deleteUser(username){
 // returns id of user on success and false on failure
 async function updateUser(user) {
   // extract the info to be inserted
-  const hash = await bcrypt.hash(user.password, 10);  
+  var hash = 'passhash'
+  if (user.password != undefined) {
+    hash = await bcrypt.hash(user.password, 10);
+  }
   // connect to database
   var client = await pool.connect();
   var rows = [];
@@ -170,22 +173,24 @@ async function updateUser(user) {
     await client.query('BEGIN');
 
     var args = [
-      user.email, 
+      user.id,
       hash, 
-      user.name, 
       user.bio, 
-      user.username
+      user.name, 
+      user.interests,
+      user.accessibility_features,
+      user.profile_pic
     ];
 
     var query = `UPDATE ${USER_TABLE} 
-      SET email = $1, passhash = $2, name = $3, bio = $4 
-      WHERE username = $5 
-      RETURNING username`
+      SET passhash = $2, bio = $3, name = $4, interests = $5, 
+      accessibility_features = $6, profile_pic = $7
+      WHERE id = $1 
+      RETURNING id`
     ;
 
     var res = await client.query(query, args);
     rows = res.rows;
-    // console.log("ROWS: ", rows);
     
     // end transaction
     await client.query('COMMIT');
@@ -197,18 +202,9 @@ async function updateUser(user) {
   finally {
     client.release();
   }
-  // why do we need the value of rows? can return just true or false
-  // return (rows.length === 0 ? false : rows[0]);
-
-  // using username instead of id because keeps on changinf for different
-  // users but taking the username makes the testing easier
-  if (res.rows[0] != undefined) {
-    return true;
-  } else {
-    return false;
-  }
-
-
+  
+  // returns id of user if success otherwise false
+  return (rows.length === 0 ? false : rows[0].id);
 }
 
 // Function to update the last login time

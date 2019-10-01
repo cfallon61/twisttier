@@ -7,6 +7,7 @@ class Profile extends Component{
     constructor(props)
     {
         super(props);
+        this.username = this.props.username;
         this.state = {
             profilePic : "",//base64 string format
             username : this.props.username,
@@ -18,21 +19,29 @@ class Profile extends Component{
     componentDidMount()
     {
         //GET User info from server.
-        var Userinfo = {
-            profilePic : "",
-            username : this.props.username,
-            description : "This is my profile description.",
-            tags : [
-                "soccer", "music"
-            ]
-        }
-
+        let userInfo = this.getUserInformation()
         this.setState(Userinfo);
+    }
+
+    getUserInformation()
+    {
+        return fetch(`/api/users/${this.username}`, {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        })
+        .then(function(data){
+            return data.json();
+        })
+        .catch(function(err){
+            console.log(err);
+        })
+        ;
     }
 
     render()
     {
-        //TODO: Add tags.
         let tagViews = []
         let currentTags = this.state.tags;
         for(var i = 0; i < currentTags.length; i++)
@@ -61,6 +70,11 @@ class Profile extends Component{
         this.setState({description : desc})
     }
 
+    addTag(tag)
+    {
+        let updatedList = this.state.tags.push(tag);
+        this.setState({tags : updatedList});
+    }
 }
 
 export default Profile;

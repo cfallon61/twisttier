@@ -254,5 +254,6 @@ module.exports = {
   deleteAccount,
   getTimeline,
   updateProfileInfo,
-  getUserInfo
+  getUserInfo,
+  getPosts
 };

@@ -15,12 +15,12 @@ class UserFeed extends Component
     constructor(props)
     {
         super(props);
-        getUserInformation(this.props.match.params.username);
+        // getUserInformation(this.props.match.params.username);
         this.username = this.props.match.params.username;
         console.log(this.username);
     }
 
-    getUserInformation()
+    getUserInformation(something)
     {
         
     }

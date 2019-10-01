@@ -142,7 +142,7 @@ async function getUserInfo(req,res, next) {
       profile_pic: data.profile_pic,
     };
     
-    res.json(responseObject);
+    res.json(JSON.stringify(responseObject));
   }
 
 }

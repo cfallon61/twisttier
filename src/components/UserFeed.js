@@ -28,19 +28,29 @@ class UserFeed extends Component
 
     getUserSpins(username)
     {
-        var spinExample = {
-            content: "Here you go!",
-            username: username,
-            timestamp: "9/24/19 2:05 PM"
-        };
-        var spinExample2 = {
-            content: "Another message!",
-            username: username,
-            timestamp: "9/24/19 2:20 PM"
-        };
-        let spinList = [spinExample, spinExample2];
+        fetch(`/api/posts/${username}`, {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            }
+        }).then(function(res){
+            if(res.status === "200")
+            {
+                return res.json();
+            }
+            else{
+                if(res.headers.error)
+                {
+                    alert(res.headers.error);
+                }
+                else{
+                    alert("Response didn't send 200.")
+                }
+            }
+        }).catch(function(err){
+            alert(err);
+        });
 
-        return spinList;
     }
 
     render()

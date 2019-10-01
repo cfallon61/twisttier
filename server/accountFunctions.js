@@ -111,9 +111,10 @@ async function deleteAccount(req, res, next) {
 
 // API for frontend development
 async function getUserInfo(req,res, next) {
+
   var user = {
-    username: req.body.username,
-    email: req.body.email,
+    // send the username as a url parameter ex: /api/users/bringMeDeath
+    username: req.params.username,
   }
 
   var data = await db.userExists(user);
@@ -150,13 +151,36 @@ async function removeInterest(req, res, next) {
 
 
 
+async function getPosts(req, res, next){
+  var user = {
+    username: req.params.username,
+  };
+  // get user's data
+  var data = await db.userExists(user);
+
+  if (data === false) {
+    res.setHeader('error', 'user not found');
+    return next();
+  }
+  var request = { users: JSON.stringify([{ username: user.username, tags: [] }]) }
+  var spins = await db.getSpins(request);
+
+  if (spins.length === 0) {
+    res.setHeader('alert', 'no spins found :(')
+  }
+
+  res.json(spins);
+
+  // TODO error check here and make sure that it returns good data
+}
+
 // @brief: generic get timeline function
 //         will also be used for when typing in a user's username in 
 //         the address bar. this wont work i don't think
 // TODO Figure out how to extend this function for searching in address bar
-async function getTimeline(req, res, err){
+async function getTimeline(req, res, next){
   var user = {
-    username : req.body.username,
+    username : req.params.username,
   };
   // get user's data
   var data = await db.userExists(user);
@@ -172,7 +196,7 @@ async function getTimeline(req, res, err){
   var followedSpins = await db.getSpins(following);
 
   if (followedSpins.length === 0){
-    res.setHeader('error', 'no spins found :(')
+    res.setHeader('alert', 'no spins found :(')
   }
 
   res.json(followedSpins);

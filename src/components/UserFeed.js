@@ -3,6 +3,7 @@ import Feed from './feed.jsx';
 import Spin from './spin.jsx';
 import Profile from "./Profile.js";
 import { template } from '@babel/core';
+import Error from './Error.js';
 
 // Styling the user feed.
 const pageStyle = {
@@ -21,7 +22,12 @@ class UserFeed extends Component
         this.username = this.props.match.params.username;
         let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
-            spins : spins
+            spins : spins,
+            error : {
+                exist : false, 
+                errorMessage : "",
+                status : ""
+            }
         }
         console.log(this.username);
     }
@@ -39,16 +45,10 @@ class UserFeed extends Component
                 return res.json();
             }
             else{
-                if(res.headers.error)
-                {
-                    alert(res.headers.error);
-                }
-                else{
-                    alert("Response didn't send 200.")
-                }
+                this.setState({error: {exist: true, message: res.headers.error, status:res.status}});
             }
         }).catch(function(err){
-            alert(err);
+            this.setState({error: {exist: true, message: err, status:"404"}});
         });
 
     }
@@ -57,7 +57,9 @@ class UserFeed extends Component
     {
         //Right now we will use three parts of the spin.
         //content, username and timestamp.
-        
+        if(this.state.error.exist) {
+            return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
+        }
         let feed = new Feed();
         if(this.state.spins != undefined && this.state.spins.length > 0) 
         {

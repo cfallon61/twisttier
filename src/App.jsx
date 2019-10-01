@@ -10,6 +10,7 @@ import Signup from './components/Signup.js';
 import UserSettings from './components/UserSettings.js';
 import UserFeed from './components/UserFeed.js';
 import PrivateRoute from 'react-private-route';
+import Error from './components/Error.js';
 
 class App extends Component {
 
@@ -26,6 +27,7 @@ class App extends Component {
               <Route path="/signup" component={Signup} />
               <Route path="/userSettings" component={UserSettings} />
               <Route path="/profile/:username" component={UserFeed}/>
+              <Route component={(props) => <Error message="Page cannot found." statusCode="404"></Error>}/>
             </Switch>
           </div>
         </Router>

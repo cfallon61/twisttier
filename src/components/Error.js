@@ -6,29 +6,19 @@ const textStyle = {
 
 class Error extends Component {
 
-    state = {
-        message : "Unknown error.",
-        statusCode : "500"
+    constructor(props)
+    {
+        super(props);
     }
-
     render()
     {
         return (
             <div>
-                <h1 style={textStyle}>{this.state.message}</h1>
-                <h3 style={textStyle}>Status Code: {this.state.statusCode}</h3>
+                <h1 style={textStyle}>{this.props.message}</h1>
+                <h3 style={textStyle}>Status Code: {this.props.statusCode}</h3>
             </div>
         );
     }
-
-    /**
-     * Sets the message and code state for the error component.
-     * @param {*} message Message to update.
-     * @param {*} code Status code to update.
-     */
-    setMessageAndStatusCode(message, code)
-    {
-        this.state.message = message;
-        this.state.statusCode = code;
-    }
 }
+
+export default Error;

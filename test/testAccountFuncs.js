@@ -109,8 +109,8 @@ describe("middleware / routing function tests", () => {
       const req = httpMocks.createRequest(
         {
           method: "POST",
-          url: '/timeline',
-          body: {
+          url: '/api/timeline/doeJohn',
+          params: {
             username: 'doeJohn',
           }
       });
@@ -175,7 +175,7 @@ describe("middleware / routing function tests", () => {
       // post to router
       await router.updateProfileInfo(req, mockres, () => {});
       // console.log(mockres);
-      const actualRes = mockres.getHeader("message");
+      const actualRes = mockres.getHeader("error");
       // console.log("actual:", actualRes);
       assert.equal(actualRes, "user not found");
     });
@@ -207,15 +207,36 @@ describe("middleware / routing function tests", () => {
     });
   });
 
+  describe('#getPosts', async () => {
+    it('@test get posts doeJohn', async () => {
+        const req = httpMocks.createRequest(
+          {
+            method: "POST",
+            url: '/api/timeline/post',
+            params: {
+              username: 'doeJohn',
+            }
+        });
+  
+        const mockRes = httpMocks.createResponse();
+        await router.getPosts(req, mockRes, () => {});
+  
+        const actualRes = mockRes._getJSONData();
+  
+        if (mockRes.getHeader('error') != undefined){
+          assert.fail();
+        }
+    });
+  });
+
 
   describe("#get info", async () => { 
-    it("username exists, should user updated", async () => {
+    it("@username exists: ", async () => {
         const req = httpMocks.createRequest(
         {
           method: "POST",
-          url: '/updateProfileInfo',
-          body: {
-            email: "test@test.com",
+          url: '/api/users/test',
+          params: {
             username: "test",
           }
         });
@@ -223,10 +244,12 @@ describe("middleware / routing function tests", () => {
       const mockres = httpMocks.createResponse();
       
       // post to router
-      await router.viewInfo(req, mockres, () => {});
-      // const actualRes = mockres.getHeader('message');
-        // console.log(actualRes);
-      // assert.equal(actualRes, "user updated");
+      await router.getUserInfo(req, mockres, () => {});
+      const actualRes = mockres.getHeader('error');
+      if (actualRes != undefined){
+        console.log(mockres);
+        assert.notDeepStrictEqual(actualRes, undefined);
+      }
     });
     
   });

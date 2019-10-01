@@ -110,15 +110,21 @@ async function deleteAccount(req, res, next) {
 }
 
 // API for frontend development
-async function viewInfo(req,res, next) {
+async function getUserInfo(req,res, next) {
   var user = {
     username: req.body.username,
     email: req.body.email,
   }
 
   var data = await db.userExists(user);
-  // send response
-  res.json(data);
+
+  if (!data){
+    res.setHeader('error', 'user not found');
+  }
+  else {
+    // send response
+    res.json(data);
+  }
 }
 
 async function addInterest(req, res, next){
@@ -198,5 +204,6 @@ module.exports = {
   authorize,
   deleteAccount,
   getTimeline,
-  updateProfileInfo
+  updateProfileInfo,
+  getUserInfo
 };

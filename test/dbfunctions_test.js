@@ -151,30 +151,19 @@ describe('database functions test', function() {
     });
   });
 
+  
   describe('#deleteUser',  () => {
-    it('User does not exist: should return false', async () => {
+    
+    it.skip('user exists: should return true', async () => {
       user = {
-        username: "bringdasdasdsad",
+        username: "bringMeDeath",
       };
 
       var res = await db.deleteUser(user);
+
       // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, true);
     });
-
-    // test for delete that should return true, commented out to not delete
-    // the user from database
-    //TODO: create a create user request to recreate the user
-    // it('user exists: should return true', async () => {
-    //   user = {
-    //     username: "bringMeDeath",
-    //   };
-
-    //   var res = await db.deleteUser(user);
-
-    //   // assert
-    //   assert.deepStrictEqual(res, true);
-    // });
   });
 
 });

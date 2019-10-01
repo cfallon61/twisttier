@@ -123,7 +123,9 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
 }); 
 
+app.post('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
 
+});
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages

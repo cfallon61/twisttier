@@ -31,8 +31,17 @@ class Profile extends Component{
                 'Content-Type' : 'application/json'
             }
         })
-        .then(function(data){
-            return data.json();
+        .then(function(res){
+            if(res.status === "200")
+            {
+                return data.json();
+            }
+            else{
+                if(res.headers.error)
+                {
+                    alert(res.headers.error);
+                }
+            }
         })
         .catch(function(err){
             console.log(err);

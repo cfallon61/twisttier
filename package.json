@@ -40,7 +40,8 @@
     "react-dom": "^16.10.1",
     "react-private-route": "^1.1.2",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^3.1.2"
+    "react-scripts": "^3.1.2",
+    "cookie-parser": "latest"
   },
   "devDependencies": {
     "assert": "latest",

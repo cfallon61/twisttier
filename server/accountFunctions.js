@@ -50,7 +50,7 @@ async function authorize(req, res, next) {
     email : req.body.email
   };
 
-  // console.log(user);
+  console.log(user);
   
   var userData = await db.userExists(user);
   // console.log(userData);

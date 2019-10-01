@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('client-sessions');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -21,6 +22,7 @@ const app = express();
 const pages = ['/', '/login', '/signup', '/timeline', '/settings']
 
 app.use(session(init.sessionSetup));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
 
@@ -106,11 +108,24 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
 
 
 // TODO send responses to front based on login / logout
-app.post('/logout', loggedIn, (req, res) => {
+app.get('/logout', loggedIn, (req, res) => {
+  console.log('logout');
+  console.log(req.cookies);
   req.clientSession.uid = null;
-  req.clientSession.destroy();
+  req.clientSession.destroy((err) => { if (err) throw err; } );
+  res.clearCookie('clientSession');
+  res.clearCookie('tracker');
+  console.log(res.cookies);
+  res.redirect('/');
 });
 
+// @brief: route handler for checking if a user is logged in
+//         will redirect to / if already logged in, otherwise 
+//         will continue to login page
+app.get('/login', notLoggedIn, (req, res) => {
+  console.log('GET /login');
+  res.sendFile(index);
+});
 
 
 app.post('/login', notLoggedIn, users.authorize, (req, res) => {
@@ -121,6 +136,7 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
   else {
     req.clientSession.uid = req.body.username;
+    res.cookie('loggedIn', true, {maxAge: 60 * 60 * 24});
     res.sendFile(index);
   }
 });
@@ -161,26 +177,24 @@ app.get('/*', (req, res) => {
 
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
-  if (req.clientSession.uid) {
-    res.setHeader('loggedIn', true);
-    console.log('logged in')
-    next();
-  }
-  else {
-    res.setHeader('loggedIn', false);
-    res.status(406); // TODO route this however 
-  }
-};
-
-function notLoggedIn(req, res, next) {
-  if (!req.clientSession.uid) {
-    res.setHeader('loggedIn', false);
-    console.log('not logged in')
+  if (req.clientSession.uid && req.cookies.loggedIn) {
+    console.log(req.clientSession.uid, 'is logged in')
     return next();
   }
   else {
-    res.setHeader('loggedIn', true);
-    res.status(406); // TODO set header loggedin false
+    res.redirect('/'); // TODO route this however 
+  }
+
+};
+
+function notLoggedIn(req, res, next) {
+  console.log(req.cookies);
+  if (!req.clientSession.uid || !req.cookies.loggedIn) {
+    console.log('user is not logged in')
+    return next();
+  }
+  else {
+    res.redirect('/'); // TODO set header loggedin false
   }
 };
 

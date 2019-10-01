@@ -116,7 +116,7 @@ app.post('/logout', loggedIn, (req, res) => {
 app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   // if the authorize function signals an error, send an unauthorized message
   if (res.getHeader('error')) {
-    console.log(res);
+    // console.log(res);
     res.status(401).send('Unauthorized');
   }
   else {
@@ -155,7 +155,7 @@ app.post('/api/posts/:username', notLoggedIn, users.getPosts, (req, res) => {
 // TODO limit to non user pages, other pages are assumed to be user pages
 app.get('/*', (req, res) => {
   // TODO implement fetching of other user's timeline or error if not exist
-  res.sendFile(path.join(root, req.url));
+  res.sendFile(index);
 });
 
 

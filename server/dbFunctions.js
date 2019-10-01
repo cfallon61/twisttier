@@ -18,6 +18,7 @@ const TEST = (process.env.TEST === "true");
 var userExists = async function (user) {
   
   var params = [user.email, user.username];
+  // console.log(params);
   
   var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
   var res = await pool.query(query, params);
@@ -25,6 +26,7 @@ var userExists = async function (user) {
   // need to get rows, which is a list
 
   var rows = res.rows;
+  // console.log(res);
   // console.log(rows);
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
@@ -52,7 +54,7 @@ function userSpinTableName(username) {
   if (existing != false){
     return existing; // return the rows
   }
-
+  console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -96,7 +98,7 @@ function userSpinTableName(username) {
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
       name, followers, following, interests, accessibility_features) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
 
     res = await client.query(query, args);
     // tell server we are done (end of transaction)

@@ -24,6 +24,7 @@ class UserFeed extends Component
     }
 
     getUserInformation(something){
+
         let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
             spins : spins
@@ -31,7 +32,9 @@ class UserFeed extends Component
         console.log(this.username);
     }
 
-    getUserSpins(username)    {
+    getUserSpins(username)
+    {
+
         var spinExample = {
             content: "Here you go!",
             username: username,

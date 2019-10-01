@@ -15,6 +15,8 @@ function validUsername(username){
 async function postCreateUser(req, res, next) {
   const errors = validationResult(req);
 
+  console.log('postCreateUser called');
+
   if (!errors.isEmpty()) {
     res.setHeader('error', errors.array());
     return next();
@@ -45,9 +47,13 @@ async function authorize(req, res, next) {
   const user = {
     username : req.body.username,
     password : req.body.password,
+    email : req.body.email
   };
+
+  // console.log(user);
   
   var userData = await db.userExists(user);
+  // console.log(userData);
 
   if (userData === false)
   {

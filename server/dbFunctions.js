@@ -160,9 +160,8 @@ async function deleteUser(username){
 // returns id of user on success and false on failure
 async function updateUser(user) {
   // extract the info to be inserted
-  var hash = 'passhash'
   if (user.password != undefined) {
-    hash = await bcrypt.hash(user.password, 10);
+    var hash = await bcrypt.hash(user.password, 10);
   }
   // connect to database
   var client = await pool.connect();
@@ -188,6 +187,16 @@ async function updateUser(user) {
       WHERE id = $1 
       RETURNING id`
     ;
+
+    if (user.password === undefined) {
+      args.splice(1,1);
+      query = `UPDATE ${USER_TABLE} 
+        SET bio = $2, name = $3, interests = $4, 
+        accessibility_features = $5, profile_pic = $6
+        WHERE id = $1 
+        RETURNING id`
+      ;
+    }
 
     var res = await client.query(query, args);
     rows = res.rows;

@@ -121,27 +121,45 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('Changed info successfully: should return true', async () => {
+    it('Changed info successfully: should return user id', async () => {
       user = {
-        email: "test@tsadaest.com",
-        username: "bringMeDeath",
-        password: "newPass",
-        name: "newName",
-        bio: "i hate my new bio"
+        id: 1,
+        password: 'passwordsr4losers',
+        bio: 'i hate my life', 
+        name: 'test', 
+        interests: [],
+        accessibility_features: {},
+        profile_pic: []
       };
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, true);
+      assert.deepStrictEqual(res, 1);
+    });
+    it('Changed info successfully with no password given: should return user id', async () => {
+      user = {
+        id: 6,
+        bio: 'Harvey hates my life', 
+        name: 'Harvey', 
+        interests: [],
+        accessibility_features: {},
+        profile_pic: []
+      };
+
+      var res = await db.updateUser(user);
+      // assert
+      assert.deepStrictEqual(res, 6);
     });
 
     it('Entry does not exist in database: should return false', async () => {
       user = {
-        email: "test@test.com",
-        username: "tessdadassdt",
-        password: "newPass",
-        name: "newNdsaame",
-        bio: "this is mdsy new bio"
+        id: -1,
+        password: 'i do not exist',
+        bio: 'doesnotexist', 
+        name: 'existingispain', 
+        interests: [],
+        accessibility_features: {},
+        profile_pic: []
       };
 
       var res = await db.updateUser(user);

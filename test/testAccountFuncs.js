@@ -130,17 +130,19 @@ describe("middleware / routing function tests", () => {
   });
 
   describe("#updateProfileInfo", async () => { 
-    it("username exists, should user updated", async () => {
+    it("id exists, returns user updated", async () => {
         const req = httpMocks.createRequest(
         {
           method: "POST",
           url: '/updateProfileInfo',
           body: {
-            email: "test@test.com",
-            username: "test",
-            password: "newPass",
-            name: "newName",
-            bio: "I hate my new bio"
+            id: 1,
+            password: 'passwordsr4losers',
+            bio: 'i hate my life', 
+            name: 'test', 
+            interests: [],
+            accessibility_features: {},
+            profile_pic: []
           }
         });
 
@@ -152,19 +154,19 @@ describe("middleware / routing function tests", () => {
         // console.log(actualRes);
       assert.equal(actualRes, "user updated");
     });
-    // updateprofileInfo should return next() if fail not false, 
-    // need a test for that
-    it("username does not exist, should return user not found", async () => {
+    it("id does not exist, should return user not found", async () => {
       const req = httpMocks.createRequest(
       {
         method: "POST",
         url: '/updateProfileInfo',
         body: {
-          email: "test@test.com",
-          username: "tesdsdt",
-          password: "newPassdasds",
-          name: "newNamdasdsae",
-          bio: "this is my nedasdsadasw bio"
+          id: -1,
+          password: 'i do not exist',
+          bio: 'doesnotexist', 
+          name: 'existingispain', 
+          interests: [],
+          accessibility_features: {},
+          profile_pic: []
         }
       });
   
@@ -177,7 +179,55 @@ describe("middleware / routing function tests", () => {
       // console.log("actual:", actualRes);
       assert.equal(actualRes, "user not found");
     });
+    // updateprofileInfo should return next() if fail not false, 
+    // need a test for that
+    it("id does exist but no password given, should user updated", async () => {
+      const req = httpMocks.createRequest(
+      {
+        method: "POST",
+        url: '/updateProfileInfo',
+        body: {
+          id: 6,
+          bio: 'yellow', 
+          name: 'Harvey', 
+          interests: [],
+          accessibility_features: {},
+          profile_pic: []
+        }
+      });
+  
+      const mockres = httpMocks.createResponse();
+    
+      // post to router
+      await router.updateProfileInfo(req, mockres, () => {});
+      // console.log(mockres);
+      const actualRes = mockres.getHeader("message");
+      // console.log("actual:", actualRes);
+      assert.equal(actualRes, "user updated");
+    });
   });
 
 
+  describe("#get info", async () => { 
+    it("username exists, should user updated", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateProfileInfo',
+          body: {
+            email: "test@test.com",
+            username: "test",
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.viewInfo(req, mockres, () => {});
+      // const actualRes = mockres.getHeader('message');
+        // console.log(actualRes);
+      // assert.equal(actualRes, "user updated");
+    });
+    
+  });
 });

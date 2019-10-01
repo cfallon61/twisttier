@@ -110,48 +110,34 @@ async function deleteAccount(req, res, next) {
 }
 
 // API for frontend development
-<<<<<<< HEAD
 async function getUserInfo(req,res, next) {
-=======
-async function viewInfo(req,res) {
->>>>>>> 48f106797101206e406021152ed1f1364ec720cd
   var user = {
     username: req.body.username,
     email: req.body.email,
   }
 
   var data = await db.userExists(user);
-<<<<<<< HEAD
 
   if (!data){
     res.setHeader('error', 'user not found');
   }
   else {
-    // send response
-    res.json(data);
+    // protect certain information such as password
+    var responseObject = {
+      username: data.username,
+      bio :  data.bio,
+      create_date: data.create_date,
+      last_login: data.last_login,
+      name: data.name,
+      followers: data.followers,
+      following: data.following,
+      interests: data.interests,
+      profile_pic: data.profile_pic,
+    };
+    
+    res.json(responseObject);
   }
-=======
-  // send response
-  // console.log(data);
 
-  // protect certain information such as password
-  var responseObject = {
-    email: data.email,
-    username: data.username,
-    bio :  data.bio,
-    create_date: data.create_date,
-    last_login: data.last_login,
-    name: data.name,
-    followers: data.followers,
-    following: data.following,
-    interests: data.interests,
-    accessibility_features: data.accessibility_features,
-    profile_pic: data.profile_pic,
-  };
-  
-  // console.log(responseObject);
-  res.json(responseObject);
->>>>>>> 48f106797101206e406021152ed1f1364ec720cd
 }
 
 async function addInterest(req, res, next){
@@ -244,9 +230,5 @@ module.exports = {
   deleteAccount,
   getTimeline,
   updateProfileInfo,
-<<<<<<< HEAD
   getUserInfo
-=======
-  viewInfo
->>>>>>> 48f106797101206e406021152ed1f1364ec720cd
 };

@@ -68,55 +68,40 @@ class Login extends Component {
     });
   }
   render() {
-    return ( <
-      div className = "LoginSignup" >
-      <
-      Container >
-      <
-      h1 > Login < /h1>
-
-      <
-      Form onSubmit = {
-        this.handleSubmit
-      } >
-      <
-      Form.Group controlId = "formBasicEmail" >
-      <
-      Form.Label > Email address < /Form.Label> <
-      Form.Control type = "email"
-      width = "50%"
-      placeholder = "Email"
-      onChange = {
-        this.handleEmailChange
-      }
-      style = {
-        {}
-      }
-      /> <
-      /Form.Group>
-
-      <
-      Form.Group controlId = "formBasicPasswrd" >
-      <
-      Form.Label > Password < /Form.Label> <
-      Form.Control type = "password"
-      placeholder = "Password"
-      onChange = {
-        this.handlePasswordChange
-      }
-      /> <
-      /Form.Group>
-
-      <
-      Button variant = "primary"
-      type = "submit" > Login < /Button> <
-      /Form> <
-      Nav.Link >
-      <
-      Link to = "/signup" > Don 't have an account? Signup!</Link> <
-      /Nav.Link> <
-      /Container> <
-      /div>
+    return ( 
+    <div className = "LoginSignup">
+        <Container >
+        <h1>Login</h1>
+        <Form onSubmit = {this.handleSubmit} >
+          <Form.Group controlId = "formBasicEmail" >
+            <Form.Label>Email address</Form.Label> 
+            <Form.Control type = "email"
+            width = "50%"
+            placeholder = "Email"
+            onChange = {
+              this.handleEmailChange
+            }
+            style = {
+              {}
+            }
+            />
+          </Form.Group>
+          <Form.Group controlId = "formBasicPasswrd" >
+            <Form.Label>Password</Form.Label> 
+            <Form.Control type = "password"
+            placeholder = "Password"
+            onChange = {
+              this.handlePasswordChange
+            }
+            /> 
+          </Form.Group>
+          <Button variant = "primary" type = "submit">Login</Button> 
+        </Form> 
+        <Nav.Link>
+          <Link to = "/signup">Don't have an account? Signup!</Link> 
+        </Nav.Link> 
+        </Container> 
+      </div>
     );
   }
 

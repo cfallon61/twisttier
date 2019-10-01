@@ -56,6 +56,11 @@ class Profile extends Component{
         );
     }
 
+    changeDescription(desc)
+    {
+        this.setState({description : desc})
+    }
+
 }
 
 export default Profile;

@@ -59,6 +59,7 @@ class Signup extends Component {
   handleSubmit(event)
   {
     event.preventDefault();
+    
     if(this.state.password != this.state.repeatedPassword)
     {
       //Passwords do not match.
@@ -72,7 +73,7 @@ class Signup extends Component {
       name : this.state.name,
       bio : this.state.bio
     }
-
+    console.log("Submit successful");
     fetch("/create_user", {
       method : 'POST',
       headers : {
@@ -82,6 +83,7 @@ class Signup extends Component {
       body : JSON.stringify(writtenInfo)
     }).then(function(res){
       //Response returned.
+      console.log("Got response...");
       if(res.status === "406")
       {
         alert("User cannot be created.");
@@ -113,8 +115,6 @@ class Signup extends Component {
                     <Form.Label>Confirm Password</Form.Label>
                     <Form.Control type="password" placeholder="Confirm Password" onChange={this.handleRepeatedPassChange}/>
                 </Form.Group>
-
-                 {/* Move this section to another page (NewProfile)? */}
                  <Form.Group controlId="formNewUsername">
                     <Form.Label>Username</Form.Label>
                     <Form.Control type="username" placeholder="Username" onChange={this.handleUsernameChange} />

@@ -18,17 +18,17 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: "",
+      emailOrUsername: "",
       password: ""
     }
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleEmailChange = this.handleEmailChange.bind(this);
+    this.handleUserOrEmailChange = this.handleUserOrEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
   }
 
-  handleEmailChange(event) {
+  handleUserOrEmailChange(event) {
     this.setState({
-      email: event.target.value
+      emailOrUsername: event.target.value
     });
   }
 
@@ -39,15 +39,39 @@ class Login extends Component {
   }
 
   /**
+   * Determines whether the first field is username or password.
+   */
+  getAppropiateState(field)
+  {
+    //Email regex taken from https://www.w3resource.com/javascript/form emailOrUsername-validation.php
+    let resultState = {};
+    var emailOrPasswordRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    var usernameRegex = /^(_|[a-zA-Z])([a-zA-Z]|_|[0-9])*$/;
+    if(emailOrPasswordRegex.test(field))
+    {
+      resultState.email = field;
+    }
+    else if(usernameRegex.test(field))
+    {
+      resultState.username = field;
+    }
+    else{
+      resultState.error = "The field you enter is not a valid entry.";
+    }
+
+    return resultState;
+  }
+
+  /**
    * When the submit event is triggered, the properties will be in the state.
    * @param {*} event The submit event.
    */
   handleSubmit(event) {
     event.preventDefault();
-    let writtenCredentials = {
-      email: this.state.email,
-      password: this.state.password
-    };
+
+    let writtenCredentials = this.getAppropiateState(this.state.emailOrUsername);
+    writtenCredentials.password = this.state.password;
+    console.log(writtenCredentials);
     fetch("/login", {
       method: 'POST',
       headers: {
@@ -59,7 +83,7 @@ class Login extends Component {
       //Success!
       if (res.status === "401") {
         //TODO: Replace alert with custom feedback component.
-        alert("There is no user with this email. Please sign up.");
+        alert("There is no user with this emailOrUsername. Please sign up.");
       }
       //Redirecting to home page. 
       window.location.href = "/";
@@ -74,17 +98,8 @@ class Login extends Component {
         <h1>Login</h1>
         <Form onSubmit = {this.handleSubmit} >
           <Form.Group controlId = "formBasicEmail" >
-            <Form.Label>Email address</Form.Label> 
-            <Form.Control type = "email"
-            width = "50%"
-            placeholder = "Email"
-            onChange = {
-              this.handleEmailChange
-            }
-            style = {
-              {}
-            }
-            />
+            <Form.Label>Username or email address</Form.Label> 
+            <Form.Control width = "50%" placeholder = "Email" onChange = {this.handleUserOrEmailChange}/>
           </Form.Group>
           <Form.Group controlId = "formBasicPasswrd" >
             <Form.Label>Password</Form.Label> 

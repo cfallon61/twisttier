@@ -59,10 +59,16 @@ class UserFeed extends Component
         //content, username and timestamp.
         
         let feed = new Feed();
-        for(var i = 0; i < this.state.spins.length; i++)
+        if(this.state.spins != undefined && this.state.spins.length > 0) 
         {
-            var spin = this.state.spins[i];
-            feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp}/>);
+            for(var i = 0; i < this.state.spins.length; i++)
+            {
+                var spin = this.state.spins[i];
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp}/>);
+            }
+        }
+        else{
+            feed.addSpin(<h6>This user currently has no spins...</h6>);
         }
         /**
          * The view organized by these parts:

@@ -34,7 +34,7 @@ class Profile extends Component{
         .then(function(res){
             if(res.status === "200")
             {
-                return data.json();
+                return res.json();
             }
             else{
                 if(res.headers.error)

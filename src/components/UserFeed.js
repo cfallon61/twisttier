@@ -18,14 +18,12 @@ class UserFeed extends Component
     constructor(props)
     {
         super(props);
-<<<<<<< HEAD
         // getUserInformation(this.props.match.params.username);
         this.username = this.props.match.params.username;
         console.log(this.username);
     }
 
-    getUserInformation(something)
-=======
+    getUserInformation(something){
         let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
             spins : spins
@@ -33,9 +31,7 @@ class UserFeed extends Component
         console.log(this.username);
     }
 
-    getUserSpins(username)
->>>>>>> c942a78dc2486a2ec46512feebdd602463a673b1
-    {
+    getUserSpins(username)    {
         var spinExample = {
             content: "Here you go!",
             username: username,

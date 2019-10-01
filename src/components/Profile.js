@@ -20,7 +20,7 @@ class Profile extends Component{
     {
         //GET User info from server.
         let userInfo = this.getUserInformation()
-        this.setState(Userinfo);
+        this.setState(userInfo);
     }
 
     getUserInformation()

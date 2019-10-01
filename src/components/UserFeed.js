@@ -18,26 +18,23 @@ class UserFeed extends Component
     constructor(props)
     {
         super(props);
-        let userInfo = getUserInformation(this.props.match.params.username);
-        let spins = getUserSpins(this.props.match.params.username);
-        this.username = this.props.match.params.username;
+        let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
-            userinfo : userInfo,
             spins : spins
         }
         console.log(this.username);
     }
 
-    getUserSpins()
+    getUserSpins(username)
     {
         var spinExample = {
             content: "Here you go!",
-            username: this.username,
+            username: username,
             timestamp: "9/24/19 2:05 PM"
         };
         var spinExample2 = {
             content: "Another message!",
-            username: this.username,
+            username: username,
             timestamp: "9/24/19 2:20 PM"
         };
         let spinList = [spinExample, spinExample2];
@@ -51,9 +48,9 @@ class UserFeed extends Component
         //content, username and timestamp.
         
         let feed = new Feed();
-        for(var i = 0; i < spinList.length; i++)
+        for(var i = 0; i < this.state.spins.length; i++)
         {
-            var spin = spinList[i];
+            var spin = this.state.spins[i];
             feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp}/>);
         }
         /**

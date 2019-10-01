@@ -163,7 +163,7 @@ async function getTimeline(req, res, err){
 }
 
 // updates user profile information from request
-async function updateProfileInfo(req,res) {
+async function updateProfileInfo(req,res, next) {
   var user = {
     email: req.body.email,
     username: req.body.username,
@@ -178,12 +178,16 @@ async function updateProfileInfo(req,res) {
   var response = await db.updateUser(user);
 
   if (response === false){
-    res.setHeader('error', 'user not found');
-    console.log('error: user not found');
+    // if use use header, we need to return next, otherwise, res.send has an
+    // in-built call to next()
+    res.setHeader('message', 'user not found');
+    // console.log('error: user not found');
+    return next();
+  } else {
+    res.setHeader('message', 'user updated');
     return next();
   }
 
-  res.json(response.id);
 }
 
 

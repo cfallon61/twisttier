@@ -121,10 +121,10 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('Changed info successfully: should return the id', async () => {
+    it('Changed info successfully: should return true', async () => {
       user = {
-        email: "test@test.com",
-        username: "test",
+        email: "test@tsadaest.com",
+        username: "bringMeDeath",
         password: "newPass",
         name: "newName",
         bio: "i hate my new bio"
@@ -132,7 +132,7 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res.id, 1);
+      assert.deepStrictEqual(res, true);
     });
 
     it('Entry does not exist in database: should return false', async () => {
@@ -145,10 +145,36 @@ describe('database functions test', function() {
       };
 
       var res = await db.updateUser(user);
-      
+      console.log("FALSE Response: ", res);
       // assert
       assert.deepStrictEqual(res, false);
     });
+  });
+
+  describe('#deleteUser',  () => {
+    it('User does not exist: should return false', async () => {
+      user = {
+        username: "bringdasdasdsad",
+      };
+
+      var res = await db.deleteUser(user);
+      // assert
+      assert.deepStrictEqual(res, false);
+    });
+
+    // test for delete that should return true, commented out to not delete
+    // the user from database
+    //TODO: create a create user request to recreate the user
+    // it('user exists: should return true', async () => {
+    //   user = {
+    //     username: "bringMeDeath",
+    //   };
+
+    //   var res = await db.deleteUser(user);
+
+    //   // assert
+    //   assert.deepStrictEqual(res, true);
+    // });
   });
 
 });

@@ -180,11 +180,12 @@ async function updateUser(user) {
     var query = `UPDATE ${USER_TABLE} 
       SET email = $1, passhash = $2, name = $3, bio = $4 
       WHERE username = $5 
-      RETURNING id`
+      RETURNING username`
     ;
 
     var res = await client.query(query, args);
     rows = res.rows;
+    // console.log("ROWS: ", rows);
     
     // end transaction
     await client.query('COMMIT');
@@ -196,8 +197,18 @@ async function updateUser(user) {
   finally {
     client.release();
   }
+  // why do we need the value of rows? can return just true or false
+  // return (rows.length === 0 ? false : rows[0]);
 
-  return (rows.length === 0 ? false : rows[0]);
+  // using username instead of id because keeps on changinf for different
+  // users but taking the username makes the testing easier
+  if (res.rows[0] != undefined) {
+    return true;
+  } else {
+    return false;
+  }
+
+
 }
 
 // Function to update the last login time

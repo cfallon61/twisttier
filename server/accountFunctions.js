@@ -110,13 +110,18 @@ async function deleteAccount(req, res, next) {
 }
 
 // API for frontend development
+<<<<<<< HEAD
 async function getUserInfo(req,res, next) {
+=======
+async function viewInfo(req,res) {
+>>>>>>> 48f106797101206e406021152ed1f1364ec720cd
   var user = {
     username: req.body.username,
     email: req.body.email,
   }
 
   var data = await db.userExists(user);
+<<<<<<< HEAD
 
   if (!data){
     res.setHeader('error', 'user not found');
@@ -125,6 +130,28 @@ async function getUserInfo(req,res, next) {
     // send response
     res.json(data);
   }
+=======
+  // send response
+  // console.log(data);
+
+  // protect certain information such as password
+  var responseObject = {
+    email: data.email,
+    username: data.username,
+    bio :  data.bio,
+    create_date: data.create_date,
+    last_login: data.last_login,
+    name: data.name,
+    followers: data.followers,
+    following: data.following,
+    interests: data.interests,
+    accessibility_features: data.accessibility_features,
+    profile_pic: data.profile_pic,
+  };
+  
+  // console.log(responseObject);
+  res.json(responseObject);
+>>>>>>> 48f106797101206e406021152ed1f1364ec720cd
 }
 
 async function addInterest(req, res, next){
@@ -171,11 +198,13 @@ async function getTimeline(req, res, err){
 // updates user profile information from request
 async function updateProfileInfo(req,res, next) {
   var user = {
-    email: req.body.email,
-    username: req.body.username,
+    id: req.body.id,
     password: req.body.password,
+    bio: req.body.bio,
     name: req.body.name,
-    bio: req.body.bio
+    interests: req.body.interests,
+    accessibility_features: req.body.accessibility_features,
+    profile_pic: req.body.profile_pic
   };
 
   // TODO: might need to do some checking, depending on logic of frontend
@@ -196,6 +225,16 @@ async function updateProfileInfo(req,res, next) {
 
 }
 
+// // info for front end development
+// async function viewInfo(req,res) {
+//   var user = {
+//     username: req.body.username,
+//     email: req.body.email,
+//   }
+//   var data = await db.findUserInfo(user);
+//   // send response
+//   res.send(data);
+// }
 
 
 
@@ -205,5 +244,9 @@ module.exports = {
   deleteAccount,
   getTimeline,
   updateProfileInfo,
+<<<<<<< HEAD
   getUserInfo
+=======
+  viewInfo
+>>>>>>> 48f106797101206e406021152ed1f1364ec720cd
 };

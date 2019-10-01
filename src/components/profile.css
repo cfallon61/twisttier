@@ -1,0 +1,36 @@
+.profile-container {
+    padding-top : 10px;
+    
+}
+
+.profile-info {
+    background-color : darkslategrey;
+    margin : auto;
+    border-radius : 10px;
+    border : solid 3px;
+    max-width : 20vw;
+    box-shadow: 5px 7px 5px;
+    margin-bottom: 10vh;
+}
+
+.tag-info {
+    background-color : rgb(99, 163, 163);
+    color: white;
+    margin : auto;
+    border-radius : 10px;
+    border : solid 3px;
+    max-width : 20vw;
+    margin: auto;
+    box-shadow: 4px 5px 4px white;
+}
+
+.tag-entry{
+    text-decoration: none;
+    border: solid 2px black;
+    background-color: salmon;
+}
+
+.tag-list{
+    display: grid;
+    grid-template-columns: 1fr
+}

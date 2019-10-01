@@ -123,8 +123,15 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   }
 }); 
 
+<<<<<<< HEAD
 app.post('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
 
+=======
+// endpoint for getting userInfo
+app.post('/info', users.viewInfo, (req, res) =>
+{
+  
+>>>>>>> 48f106797101206e406021152ed1f1364ec720cd
 });
 
 // wtf this actually fricken fixed it i am PISSED
@@ -148,6 +155,8 @@ app.get('/*', notLoggedIn, (req, res) => {
     res.sendFile(path.join(root, req.url));
   }
 });
+
+
 
 
 function loggedIn(req, res, next) {

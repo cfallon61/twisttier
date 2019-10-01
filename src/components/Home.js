@@ -12,6 +12,12 @@ class Home extends Component{
         };  
     }
 
+    componentDidMount()
+    {
+        //Decide which page to show.
+        
+    }
+
     render()
     {
         if(this.state.loggedIn)
@@ -30,4 +36,4 @@ class Home extends Component{
     }
 }
 
-export default Home
+export default Home;

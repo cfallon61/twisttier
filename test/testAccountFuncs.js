@@ -181,7 +181,11 @@ describe("middleware / routing function tests", () => {
     });
     // updateprofileInfo should return next() if fail not false, 
     // need a test for that
+<<<<<<< HEAD
+    it.skip("username does not exist, should return user not found", async () => {
+=======
     it("id does exist but no password given, should user updated", async () => {
+>>>>>>> 48f106797101206e406021152ed1f1364ec720cd
       const req = httpMocks.createRequest(
       {
         method: "POST",

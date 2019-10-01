@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { withRouter } from 'react-router-dom';
+import './LoginSignup.css';
+import Container from 'react-bootstrap/Container'
 
 const LOCAL_URL = "localhost:8080";
 class Login extends Component
@@ -65,12 +67,14 @@ class Login extends Component
   render()
   {
     return (
-        <div>
+        <div className="LoginSignup">
+          <Container>
             <h1>Login</h1>
+ 
             <Form onSubmit={this.handleSubmit}>
               <Form.Group controlId="formBasicEmail">
                 <Form.Label>Email address</Form.Label>
-                <Form.Control type="email" width="50%" placeholder="Email" onChange={this.handleEmailChange} />
+                <Form.Control type="email" width="50%" placeholder="Email" onChange={this.handleEmailChange} style={{}}/>
               </Form.Group>
 
               <Form.Group controlId="formBasicPasswrd">
@@ -83,6 +87,7 @@ class Login extends Component
           <Nav.Link>
             <Link to="/signup">Don't have an account? Signup!</Link>
           </Nav.Link>
+          </Container>
         </div>
     );
   }

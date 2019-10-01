@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
+import './LoginSignup.css'
+import Container from 'react-bootstrap/Container'
 
 const LOCAL_URL = "localhost:8080";
 
@@ -98,8 +100,9 @@ class Signup extends Component {
   render()
   {
     return (
-        <div>
-          <h1>Signup</h1>
+        <div className="LoginSignup">
+          <Container>
+          <h1>Sign Up</h1>
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group controlId="formNewEmail">
                     <Form.Label>Email address</Form.Label>
@@ -132,7 +135,7 @@ class Signup extends Component {
 
                 <Button variant="primary" type="submit">Create Account</Button>
             </Form>
-
+            </Container>
         </div>
     )
   }

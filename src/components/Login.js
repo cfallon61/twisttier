@@ -39,15 +39,15 @@ class Login extends Component {
   }
 
   /**
-   * Determines whether the first field is username or password.
+   * Determines whether the first field is username or email.
    */
   getAppropiateState(field)
   {
     //Email regex taken from https://www.w3resource.com/javascript/form emailOrUsername-validation.php
     let resultState = {};
-    var emailOrPasswordRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    var emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     var usernameRegex = /^(_|[a-zA-Z])([a-zA-Z]|_|[0-9])*$/;
-    if(emailOrPasswordRegex.test(field))
+    if(emailRegex.test(field))
     {
       resultState.email = field;
     }

@@ -90,4 +90,4 @@ class Timeline extends Component
     }
 } 
 
-export default UserFeed;
+export default Timeline;

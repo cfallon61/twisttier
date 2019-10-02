@@ -66,7 +66,11 @@ async function authorize(req, res, next) {
     res.setHeader('Error', 'Incorrect Password');
   }
   else {
-    console.log('authenticated');
+    if(typeof user.username === 'undefined' || user.username === "")
+    {
+      //1st index is the username
+      user.username = userData[1];
+    }
     updateLoginTimeBool = db.updateLoginTime(user.username);
     
     // check whether login time was successfully updated
@@ -74,7 +78,6 @@ async function authorize(req, res, next) {
       console.log('Login time could not be updated');
       res.setHeader('Error', 'Login time could not be updated');
     }
-
   }
   return next();
 

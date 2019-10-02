@@ -27,7 +27,7 @@ class App extends Component {
               <Route path="/signup" component={Signup} />
               <Route path="/userSettings" component={UserSettings} />
               <Route path="/profile/:username" component={UserFeed}/>
-              <Route component={(props) => <Error message="Page cannot found." statusCode="404"></Error>}/>
+              <Route component={(props) => <Error message="Page cannot be found." statusCode="404"></Error>}/>
             </Switch>
           </div>
         </Router>

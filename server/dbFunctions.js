@@ -17,14 +17,27 @@ const TEST = (process.env.TEST === "true");
 // parameter user is object of form {email: [email], username: [username]}
 var userExists = async function (user) {
   
-  var params = [user.email, user.username];
-  // console.log(params);
-  
-  var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
+  var params = [];
+  console.log(user);
+  var query = `SELECT * FROM ${USER_TABLE} `;
+  if(user.email === "")
+  {
+    query += `WHERE USERNAME=$1`;
+    params.push(user.username);
+  }
+  else if(user.username === "")
+  {
+    query += `WHERE EMAIL=$1`;
+    params.push(user.email);
+  }
+  else{
+    //Unexpected error here.
+    return false;
+  }
   var res = await pool.query(query, params);
   // response is a json 
   // need to get rows, which is a list
-
+  console.log(res);
   var rows = res.rows;
   // console.log(res);
   // console.log(rows);

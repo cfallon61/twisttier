@@ -19,6 +19,7 @@ class Timeline extends Component
     constructor(props)
     {
         super(props);
+        this.username = this.props.username;
         let spins = this.getTimelineSpins(this.props.username);
         this.state = {
             spins : spins,
@@ -31,7 +32,7 @@ class Timeline extends Component
         console.log(this.username);
     }
 
-    getUserSpins(username)
+    getTimelineSpins(username)
     {
         fetch(`/api/timeline/${username}`, {
             method: "POST",
@@ -82,6 +83,7 @@ class Timeline extends Component
                     <Profile username={this.username}/>
                 </div>
                 <div className="user-feed-middle">
+                    <h4>Hello {this.username}!</h4>
                     {feed.render()}
                 </div>
             </div>

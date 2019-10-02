@@ -50,10 +50,12 @@ class Login extends Component {
     if(emailRegex.test(field))
     {
       resultState.email = field;
+      resultState.username = "";
     }
     else if(usernameRegex.test(field))
     {
       resultState.username = field;
+      resultState.email = "";
     }
     else{
       resultState.error = "The field you enter is not a valid entry.";
@@ -84,6 +86,7 @@ class Login extends Component {
       if (res.status === "401") {
         //TODO: Replace alert with custom feedback component.
         alert("There is no user with this emailOrUsername. Please sign up.");
+        return;
       }
       //Redirecting to home page. 
       window.location.href = "/";

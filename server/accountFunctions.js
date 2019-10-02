@@ -13,12 +13,12 @@ async function postCreateUser(req, res, next) {
   const errors = validationResult(req);
 
   console.log('postCreateUser called');
+  console.log(req.body);
 
   if (!errors.isEmpty()) {
     res.setHeader('error', errors.array());
     return next();
   }
-
   var accountInfo = {
     email: req.body.email,
     password: req.body.password,

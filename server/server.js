@@ -19,8 +19,6 @@ const images = path.join(__dirname, '../profileImages');
 const port = process.env.PORT || 8080;
 const app = express();
 
-const pages = ['/', '/login', '/signup', '/timeline', '/settings']
-
 app.use(session(init.sessionSetup));
 app.use(cookieParser());
 app.use(express.json());
@@ -116,7 +114,6 @@ app.get('/logout', loggedIn, (req, res) => {
   req.clientSession.destroy((err) => { if (err) throw err; } );
   res.clearCookie('clientSession');
   res.clearCookie('tracker');
-  // console.log(res.cookies);
   res.redirect('/');
 });
 
@@ -143,7 +140,7 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
 });
 
 
-app.get('/api/users/:username', notLoggedIn, users.getUserInfo, (req, res) => {
+app.post('/api/users/:username', users.getUserInfo, (req, res) => {
   if (res.getHeader('error') != undefined) {
     res.status(406);
   }
@@ -162,7 +159,8 @@ app.get('/api/timeline/:username', users.getTimeline, (req, res) => {
 // @brief: get a supplied user's posts
 // @respond: json with posts made if user exists, 
 //           404 not found error if user not exist
-app.get('/api/posts/:username', users.getPosts, (req, res) => {
+app.post('/api/posts/:username', users.getPosts, (req, res) => {
+  console.log(res);
   if (res.getHeader('error') != undefined) {
     res.status(404)
   }
@@ -171,6 +169,7 @@ app.get('/api/posts/:username', users.getPosts, (req, res) => {
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
 app.get('/*', (req, res) => {
+  console.log('GET', req.originalUrl);
   res.sendFile(index);
 });
 

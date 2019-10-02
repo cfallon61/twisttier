@@ -3,12 +3,9 @@ const { check, validationResult } = require('express-validator');
 const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const path   = require('path');
-const index  = path.join(__dirname, '../build/index.html');
 
-function validUsername(username){
 
-}
+
 // checking new push
 // @desc: express middleware function to interface with the database
 // @return: none
@@ -78,8 +75,9 @@ async function authorize(req, res, next) {
       res.setHeader('Error', 'Login time could not be updated');
     }
 
-    return next();
   }
+  return next();
+
 }
 
 // checks whether the account to be deleted exists or not, deletes it,
@@ -110,19 +108,19 @@ async function deleteAccount(req, res, next) {
   else {
     res.setHeader('error', 'deletion failed');
   }
+  return next();
 
 }
 
 // API for frontend development
 async function getUserInfo(req,res, next) {
-
+  console.log('get user info')
   var user = {
     // send the username as a url parameter ex: /api/users/bringMeDeath
     username: req.params.username,
   }
 
   var data = await db.userExists(user);
-
   if (!data){
     res.setHeader('error', 'user not found');
   }
@@ -139,10 +137,12 @@ async function getUserInfo(req,res, next) {
       interests: data.interests,
       profile_pic: data.profile_pic,
     };
-    
+    // console.log(responseObject);
     res.json(JSON.stringify(responseObject));
+    
   }
-
+  // console.log(res);
+  return next();
 }
 
 async function addInterest(req, res, next){
@@ -174,8 +174,9 @@ async function getPosts(req, res, next){
   if (spins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
-
+  console.log(spins);
   res.json(JSON.stringify(spins));
+  return next();
 
   // TODO error check here and make sure that it returns good data
 }
@@ -205,6 +206,7 @@ async function getTimeline(req, res, next){
   }
 
   res.json(JSON.stringify(followedSpins));
+  return next();
   
   // TODO error check here and make sure that it returns good data
   

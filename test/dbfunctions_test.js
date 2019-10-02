@@ -145,6 +145,21 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, 6);
     });
 
+    it('@test change user , does not exist: should return false', async () => {
+      user = {
+        id: 675,
+        bio: 'Harvey hates my life', 
+        name: 'Harvey', 
+        interests: [],
+        accessibility_features: {},
+        profile_pic: []
+      };
+
+      var res = await db.updateUser(user);
+      // assert
+      assert.deepStrictEqual(res, false);
+    });
+
   });
 
   

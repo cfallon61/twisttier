@@ -202,7 +202,7 @@ async function updateUser(user) {
 
     var res = await client.query(query, args);
     rows = res.rows;
-    console.log("ROWS: ", rows);
+    // console.log("ROWS: ", rows);
     
     // end transaction
     await client.query('COMMIT');

@@ -17,8 +17,7 @@ class Signup extends Component {
       repeatedPassword: "",
       username : "",
       name : "",
-      bio : "",
-      image : undefined
+      bio : ""
     };
 
     this.handleEmailChange = this.handleEmailChange.bind(this);
@@ -27,7 +26,7 @@ class Signup extends Component {
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleBioChange = this.handleBioChange.bind(this);
-    this.handleImageChange = this.handleImageChange.bind(this);
+    this.imageFile = React.createRef();
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -60,11 +59,6 @@ class Signup extends Component {
     this.setState({bio : event.target.value});
   }
 
-  handleImageChange(event)
-  {
-    this.setState({image : event.target.files[0]});
-  }
-
   handleSubmit(event)
   {
     event.preventDefault();
@@ -75,25 +69,19 @@ class Signup extends Component {
       alert("Passwords do not match.");
       return;
     }
-    let writtenInfo = {
-      email : this.state.email,
-      password : this.state.password,
-      username : this.state.username,
-      name : this.state.name,
-      bio : this.state.bio,
-      image : this.state.image
-    }
-    console.log("Submit successful");
-    console.log(this.state.image);
+    var formdata = new FormData();
+    formdata.append('email', this.state.email);
+    formdata.append('password', this.state.password);
+    formdata.append('username', this.state.username);
+    formdata.append('name', this.state.name);
+    formdata.append('bio', this.state.bio);
+    formdata.append('profileImage', this.imageFile.current.files[0]);
+    console.log(this.imageFile.current.files[0]);
+
     fetch("/create_user", {
       method : 'POST',
-      headers : {
-        enctype : 'multipart/form-data',
-        'Content-Type' : 'application/json',
-        'type': 'file'
-      },
       redirect : 'follow',
-      body : JSON.stringify(writtenInfo)
+      body : formdata 
     }).then(function(res){
       //Response returned.
       console.log("Got response...");
@@ -146,7 +134,7 @@ class Signup extends Component {
 
                 <Form.Group>
                   <Form.Label>Profile Image</Form.Label>
-                  <Form.Control type="file" accept="image/*" onChange={this.handleImageChange}/>
+                  <Form.Control type="file" accept="image/*" ref={this.imageFile}/>
                 </Form.Group>
 
                 <Button variant="primary" type="submit">Create Account</Button>

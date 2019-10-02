@@ -9,6 +9,8 @@ import Login from './components/Login.js';
 import Signup from './components/Signup.js';
 import UserSettings from './components/UserSettings.js';
 import UserFeed from './components/UserFeed.js';
+import PrivateRoute from 'react-private-route';
+import Error from './components/Error.js';
 
 class App extends Component {
 
@@ -20,11 +22,12 @@ class App extends Component {
           <div className="App-header">
             <Navbardemo className="Navbardemo" />
             <Switch>
-              <Route path="/" component={Home} exact />
+              <PrivateRoute path="/" component={Home} exact isAuthenticated={true} redirect="/login" />
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
               <Route path="/userSettings" component={UserSettings} />
-              <Route path="/:username" component={UserFeed}/>
+              <Route path="/profile/:username" component={UserFeed}/>
+              <Route component={(props) => <Error message="Page cannot found." statusCode="404"></Error>}/>
             </Switch>
           </div>
         </Router>

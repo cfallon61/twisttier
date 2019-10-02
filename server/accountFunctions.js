@@ -3,17 +3,16 @@ const { check, validationResult } = require('express-validator');
 const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const path   = require('path');
-const index  = path.join(__dirname, '../build/index.html');
 
-function validUsername(username){
 
-}
+
 // checking new push
 // @desc: express middleware function to interface with the database
 // @return: none
 async function postCreateUser(req, res, next) {
   const errors = validationResult(req);
+
+  console.log('postCreateUser called');
 
   if (!errors.isEmpty()) {
     res.setHeader('error', errors.array());
@@ -45,9 +44,13 @@ async function authorize(req, res, next) {
   const user = {
     username : req.body.username,
     password : req.body.password,
+    email : req.body.email
   };
+
+  // console.log(user);
   
   var userData = await db.userExists(user);
+  // console.log(userData);
 
   if (userData === false)
   {
@@ -61,7 +64,6 @@ async function authorize(req, res, next) {
   if (!match){
     console.log('invalid password');
     res.setHeader('Error', 'Incorrect Password');
-    return next();
   }
   else {
     console.log('authenticated');
@@ -71,11 +73,11 @@ async function authorize(req, res, next) {
     if (!updateLoginTimeBool) {
       console.log('Login time could not be updated');
       res.setHeader('Error', 'Login time could not be updated');
-      return next();
     }
 
-    return next();
   }
+  return next();
+
 }
 
 // checks whether the account to be deleted exists or not, deletes it,
@@ -106,37 +108,41 @@ async function deleteAccount(req, res, next) {
   else {
     res.setHeader('error', 'deletion failed');
   }
+  return next();
 
 }
 
 // API for frontend development
-async function viewInfo(req,res) {
+async function getUserInfo(req,res, next) {
+  console.log('get user info')
   var user = {
-    username: req.body.username,
-    email: req.body.email,
+    // send the username as a url parameter ex: /api/users/bringMeDeath
+    username: req.params.username,
   }
 
   var data = await db.userExists(user);
-  // send response
-  // console.log(data);
-
-  // protect certain information such as password
-  var responseObject = {
-    email: data.email,
-    username: data.username,
-    bio :  data.bio,
-    create_date: data.create_date,
-    last_login: data.last_login,
-    name: data.name,
-    followers: data.followers,
-    following: data.following,
-    interests: data.interests,
-    accessibility_features: data.accessibility_features,
-    profile_pic: data.profile_pic,
-  };
-  
-  // console.log(responseObject);
-  res.json(responseObject);
+  if (!data){
+    res.setHeader('error', 'user not found');
+  }
+  else {
+    // protect certain information such as password
+    var responseObject = {
+      username: data.username,
+      bio :  data.bio,
+      create_date: data.create_date,
+      last_login: data.last_login,
+      name: data.name,
+      followers: data.followers,
+      following: data.following,
+      interests: data.interests,
+      profile_pic: data.profile_pic,
+    };
+    // console.log(responseObject);
+    res.json(JSON.stringify(responseObject));
+    
+  }
+  // console.log(res);
+  return next();
 }
 
 async function addInterest(req, res, next){
@@ -148,14 +154,39 @@ async function removeInterest(req, res, next) {
 }
 
 
+// @brief: copy pasta from getTimeline because I am lazy
+//         same thing, but does a hack which converts the 
+//         user list to a following list. 
+async function getPosts(req, res, next){
+  var user = {
+    username: req.params.username,
+  };
+  // get user's data
+  var data = await db.userExists(user);
+
+  if (data === false) {
+    res.setHeader('error', 'user not found');
+    return next();
+  }
+  var request = { users: JSON.stringify([{ username: user.username, tags: [] }]) }
+  var spins = await db.getSpins(request);
+
+  if (spins.length === 0) {
+    res.setHeader('alert', 'no spins found :(')
+  }
+  console.log(spins);
+  res.json(JSON.stringify(spins));
+  return next();
+
+  // TODO error check here and make sure that it returns good data
+}
 
 // @brief: generic get timeline function
 //         will also be used for when typing in a user's username in 
 //         the address bar. this wont work i don't think
-// TODO Figure out how to extend this function for searching in address bar
-async function getTimeline(req, res, err){
+async function getTimeline(req, res, next){
   var user = {
-    username : req.body.username,
+    username : req.params.username,
   };
   // get user's data
   var data = await db.userExists(user);
@@ -166,15 +197,16 @@ async function getTimeline(req, res, err){
   }
 
   var following = data.following;
-  console.log(following);
+  // console.log(following);
   
   var followedSpins = await db.getSpins(following);
 
   if (followedSpins.length === 0){
-    res.setHeader('error', 'no spins found :(')
+    res.setHeader('alert', 'no spins found :(')
   }
 
-  res.json(followedSpins);
+  res.json(JSON.stringify(followedSpins));
+  return next();
   
   // TODO error check here and make sure that it returns good data
   
@@ -198,29 +230,15 @@ async function updateProfileInfo(req,res, next) {
   var response = await db.updateUser(user);
 
   if (response === false){
-    // if use use header, we need to return next, otherwise, res.send has an
-    // in-built call to next()
-    res.setHeader('message', 'user not found');
-    // console.log('error: user not found');
-    return next();
+    // if use use header, we need to return next
+    res.setHeader('error', 'user not found');
   } else {
     res.setHeader('message', 'user updated');
-    return next();
   }
+  return next();
+
 
 }
-
-// // info for front end development
-// async function viewInfo(req,res) {
-//   var user = {
-//     username: req.body.username,
-//     email: req.body.email,
-//   }
-//   var data = await db.findUserInfo(user);
-//   // send response
-//   res.send(data);
-// }
-
 
 
 module.exports = {
@@ -229,5 +247,6 @@ module.exports = {
   deleteAccount,
   getTimeline,
   updateProfileInfo,
-  viewInfo
+  getUserInfo,
+  getPosts
 };

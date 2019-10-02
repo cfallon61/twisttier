@@ -18,6 +18,7 @@ const TEST = (process.env.TEST === "true");
 var userExists = async function (user) {
   
   var params = [user.email, user.username];
+  // console.log(params);
   
   var query = `SELECT * FROM ${USER_TABLE} WHERE EMAIL=$1 OR USERNAME=$2`;
   var res = await pool.query(query, params);
@@ -25,6 +26,7 @@ var userExists = async function (user) {
   // need to get rows, which is a list
 
   var rows = res.rows;
+  // console.log(res);
   // console.log(rows);
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
@@ -52,7 +54,7 @@ function userSpinTableName(username) {
   if (existing != false){
     return existing; // return the rows
   }
-
+  console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -96,7 +98,7 @@ function userSpinTableName(username) {
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
       name, followers, following, interests, accessibility_features) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON)`;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
 
     res = await client.query(query, args);
     // tell server we are done (end of transaction)
@@ -117,7 +119,7 @@ function userSpinTableName(username) {
     return 'user exists';
   }
 
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 
@@ -138,7 +140,7 @@ async function deleteUser(username){
 
     var res = await client.query(query);
 
-    query = `DELETE FROM ${USER_TABLE} WHERE username=$1`;
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING id`;
 
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
@@ -153,16 +155,15 @@ async function deleteUser(username){
   finally {
     client.release();
   }
-  return (rows.length === 0 ? true : false);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 // function to update user info (used by edit account)
 // returns id of user on success and false on failure
 async function updateUser(user) {
   // extract the info to be inserted
-  var hash = 'passhash'
   if (user.password != undefined) {
-    hash = await bcrypt.hash(user.password, 10);
+    var hash = await bcrypt.hash(user.password, 10);
   }
   // connect to database
   var client = await pool.connect();
@@ -188,6 +189,16 @@ async function updateUser(user) {
       WHERE id = $1 
       RETURNING id`
     ;
+
+    if (user.password === undefined) {
+      args.splice(1,1);
+      query = `UPDATE ${USER_TABLE} 
+        SET bio = $2, name = $3, interests = $4, 
+        accessibility_features = $5, profile_pic = $6
+        WHERE id = $1 
+        RETURNING id`
+      ;
+    }
 
     var res = await client.query(query, args);
     rows = res.rows;

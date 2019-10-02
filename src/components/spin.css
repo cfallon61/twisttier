@@ -2,45 +2,51 @@
     max-width: 50vw;
     max-height: 20vh;
     margin: auto;
-    border: 3px solid black; 
+    border: 3px solid darkmagenta; 
     border-radius:50px;
     padding: 20px;
-    box-shadow: 5px 10px 5px;
+    background-color: lightgray;
+    color: black;
+    font-weight: 600;
+    display: block;
+
 }
 
 .username-section{
     text-align: left;
+    font-weight: 600;
     padding-left: 1vw;
     vertical-align: 1;
     max-height: 5vh;
-    max-width: 40vw;
+    max-width: 45vw;
 }
 
 .username-section::after{
     content:' ';
-    width: 40vw;
+    width: 45vw;
     display:block;
-    border:2px solid black;
+    border:1.5px solid darkmagenta;
+    
 }
 
 
 .spin-content{
     text-align: left;
     padding-left: 1vw;
-    max-height: 12vh;
-    max-width: 40vw;
+    max-height: 15vh;
+    max-width: 45vw;
 }
 
 .spin-content::after{
     content:' ';
-    width: 40vw;
+    width: 45vw;
     display:block;
-    border:2px solid black;
+    border:1.5px solid darkmagenta;
 }
 
 .time-section{
     text-align: right;
     padding-left: 1vw;
     max-height: 3vh;
-    max-width: 40vw;
+    max-width: 45vw;
 }

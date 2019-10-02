@@ -7,12 +7,6 @@ const assert = require('assert');
 const bcrypt = require('bcrypt');
 
 describe('database functions test', function() {
-  describe('getSpins', function () {
-    it('should return an array of jsons', function () {
-  
-    });
-  });
-
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
@@ -121,7 +115,7 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('Changed info successfully: should return user id', async () => {
+    it('@test change user info with password: should return user id', async () => {
       user = {
         id: 1,
         password: 'passwordsr4losers',
@@ -136,7 +130,7 @@ describe('database functions test', function() {
       // assert
       assert.deepStrictEqual(res, 1);
     });
-    it('Changed info successfully with no password given: should return user id', async () => {
+    it('@test change user info not password: should return user id', async () => {
       user = {
         id: 6,
         bio: 'Harvey hates my life', 
@@ -151,48 +145,21 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, 6);
     });
 
-    it('Entry does not exist in database: should return false', async () => {
-      user = {
-        id: -1,
-        password: 'i do not exist',
-        bio: 'doesnotexist', 
-        name: 'existingispain', 
-        interests: [],
-        accessibility_features: {},
-        profile_pic: []
-      };
-
-      var res = await db.updateUser(user);
-      console.log("FALSE Response: ", res);
-      // assert
-      assert.deepStrictEqual(res, false);
-    });
   });
 
+  
   describe('#deleteUser',  () => {
-    it('User does not exist: should return false', async () => {
+    
+    it.skip('user exists: should return true', async () => {
       user = {
-        username: "bringdasdasdsad",
+        username: "bringMeDeath",
       };
 
       var res = await db.deleteUser(user);
+
       // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, true);
     });
-
-    // test for delete that should return true, commented out to not delete
-    // the user from database
-    //TODO: create a create user request to recreate the user
-    // it('user exists: should return true', async () => {
-    //   user = {
-    //     username: "bringMeDeath",
-    //   };
-
-    //   var res = await db.deleteUser(user);
-
-    //   // assert
-    //   assert.deepStrictEqual(res, true);
-    // });
   });
 
 });

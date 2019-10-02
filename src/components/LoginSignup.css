@@ -1,0 +1,13 @@
+.LoginSignup {
+    font-weight: 600;
+    background-color: lightgray;
+    font-family: sans-serif;
+    color: darkmagenta;
+    display: block;
+    text-align: center;
+    align-items: center;
+    max-width: 300vh;
+    max-height: 100vh;
+    justify-content: center;
+    padding: 10px;
+}

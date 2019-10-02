@@ -19,7 +19,7 @@ class Timeline extends Component
     constructor(props)
     {
         super(props);
-        let spins = this.getTimelineSpins(this.props.match.params.username);
+        let spins = this.getTimelineSpins(this.props.username);
         this.state = {
             spins : spins,
             error : {

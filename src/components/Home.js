@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Button from 'react-bootstrap/Button';
 import Spin from './spin.jsx';
+import Timeline from './Timeline.js';
 
 class Home extends Component{
 
@@ -8,7 +9,8 @@ class Home extends Component{
     {
         super(props);
         this.state = {
-            loggedIn : false
+            loggedIn : false,
+            username : ""
         };  
     }
 
@@ -22,7 +24,7 @@ class Home extends Component{
     {
         if(this.state.loggedIn)
         {
-            //User timeline view
+            return <Timeline username={this.username}/>;
         }
         else
         {

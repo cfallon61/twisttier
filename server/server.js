@@ -80,15 +80,19 @@ app.post('/create_user',
   check('name').isLength({ max: 25, min: 1 }),
   check('username').isLength({ max: 15, min: 1 })],
   notLoggedIn,
+  upload,
   users.postCreateUser, (req, res) => {
+
+    console.log(req.file.path);
 
     if (res.getHeader('error') != undefined) {
       res.status(406);
     }
     else {
       req.clientSession.uid = req.body.username;
-      res.sendFile(index);
     }
+    res.sendFile(index);
+
   });
 
 

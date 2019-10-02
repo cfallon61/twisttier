@@ -83,7 +83,6 @@ app.post('/create_user',
   upload,
   users.postCreateUser, (req, res) => {
 
-    console.log(req.file.path);
 
     if (res.getHeader('error') != undefined) {
       res.status(406);

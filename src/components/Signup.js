@@ -88,7 +88,9 @@ class Signup extends Component {
     fetch("/create_user", {
       method : 'POST',
       headers : {
-        enctype : 'multipart/form-data'
+        enctype : 'multipart/form-data',
+        'Content-Type' : 'application/json',
+        'type': 'file'
       },
       redirect : 'follow',
       body : JSON.stringify(writtenInfo)

@@ -3,6 +3,7 @@ git_password
 
 # local environment variable file
 .env
+.vscode
 
 node_modules
 node_modules/*

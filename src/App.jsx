@@ -11,6 +11,8 @@ import UserSettings from './components/UserSettings.js';
 import UserFeed from './components/UserFeed.js';
 import PrivateRoute from 'react-private-route';
 import Error from './components/Error.js';
+import {NotificationContainer} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 class App extends Component {
 
@@ -21,6 +23,7 @@ class App extends Component {
         <Router>
           <div className="App-header">
             <Navbardemo className="Navbardemo" />
+            <NotificationContainer/>
             <Switch>
               <PrivateRoute path="/" component={Home} exact isAuthenticated={true} redirect="/login" />
               <Route path="/login" component={Login} />

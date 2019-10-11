@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import './LoginSignup.css'
-import Container from 'react-bootstrap/Container'
+import Container from 'react-bootstrap/Container';
+import {NotificationManager} from 'react-notifications';
 
 const LOCAL_URL = "localhost:8080";
 
@@ -66,7 +67,7 @@ class Signup extends Component {
     if(this.state.password != this.state.repeatedPassword)
     {
       //Passwords do not match.
-      alert("Passwords do not match.");
+      NotificationManager.error("Passwords do not match.");
       return;
     }
     var formdata = new FormData();
@@ -76,7 +77,6 @@ class Signup extends Component {
     formdata.append('name', this.state.name);
     formdata.append('bio', this.state.bio);
     formdata.append('profileImage', this.imageFile.current.files[0]);
-    console.log(this.imageFile.current.files[0]);
 
     fetch("/create_user", {
       method : 'POST',
@@ -84,16 +84,15 @@ class Signup extends Component {
       body : formdata 
     }).then(function(res){
       //Response returned.
-      console.log("Got response...");
       if(res.status === "406")
       {
-        alert("User cannot be created.");
+        NotificationManager.error("User cannot be created.");
         return;
       }
-      alert("User created.");
+      NotificationManager.success("User created.");
       window.location.href = "/login";
     }).catch(function(err){
-      alert(err);
+      NotificationManager.error(err);
     });
   }
   render()
@@ -105,21 +104,21 @@ class Signup extends Component {
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group controlId="formNewEmail">
                     <Form.Label>Email address</Form.Label>
-                    <Form.Control type="email" placeholder="Email" onChange={this.handleEmailChange} />
+                    <Form.Control type="email" placeholder="Email" onChange={this.handleEmailChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formNewPasswrd">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
+                    <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formConfirmPasswrd">
                     <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control type="password" placeholder="Confirm Password" onChange={this.handleRepeatedPassChange}/>
+                    <Form.Control type="password" placeholder="Confirm Password" onChange={this.handleRepeatedPassChange} required/>
                 </Form.Group>
                  <Form.Group controlId="formNewUsername">
                     <Form.Label>Username</Form.Label>
-                    <Form.Control type="username" placeholder="Username" onChange={this.handleUsernameChange} />
+                    <Form.Control type="username" placeholder="Username" onChange={this.handleUsernameChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formNewName">

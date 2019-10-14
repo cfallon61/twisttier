@@ -30,8 +30,11 @@ async function postCreateUser(req, res, next) {
   var userCreated = await db.createUser(accountInfo);
 
   // userCreated is the empty rows or false, return error
-  if (userCreated != true) {
+  if (!userCreated) {
     res.setHeader('errors', userCreated);
+  }
+  else {
+    res.setHeader('username', userCreated.username);
   }
 
   return next();
@@ -55,7 +58,7 @@ async function authorize(req, res, next) {
   if (userData === false)
   {
     console.log('invalid username');
-    res.setHeader('Error', 'Username invalid');
+    res.setHeader('error', 'Username invalid');
     return next();
   }
   var match = await bcrypt.compare(user.password, userData.passhash);
@@ -63,7 +66,7 @@ async function authorize(req, res, next) {
   // password doesn't match
   if (!match){
     console.log('invalid password');
-    res.setHeader('Error', 'Incorrect Password');
+    res.setHeader('error', 'Incorrect Password');
   }
   else {
     if(typeof user.username === 'undefined' || user.username === "")
@@ -76,10 +79,10 @@ async function authorize(req, res, next) {
     // check whether login time was successfully updated
     if (!updateLoginTimeBool) {
       console.log('Login time could not be updated');
-      res.setHeader('Error', 'Login time could not be updated');
+      res.setHeader('error', 'Login time could not be updated');
     }
   }
-  return next();
+  return next(req, res, user);
 
 }
 
@@ -141,6 +144,8 @@ async function getUserInfo(req,res, next) {
       profile_pic: data.profile_pic,
     };
     // console.log(responseObject);
+    // TODO change this to not be a .json response
+    // need to get clever with how to send response back
     res.json(JSON.stringify(responseObject));
     
   }
@@ -216,9 +221,8 @@ async function getTimeline(req, res, next){
 }
 
 // updates user profile information from request
-async function updateProfileInfo(req,res, next) {
+async function updateProfileInfo(req, res, next) {
   var user = {
-    id: req.body.id,
     password: req.body.password,
     bio: req.body.bio,
     name: req.body.name,
@@ -230,15 +234,29 @@ async function updateProfileInfo(req,res, next) {
   // TODO: might need to do some checking, depending on logic of frontend
 
   // if all checking fine, update the user
-  var response = await db.updateUser(user);
+  var username = await db.updateUser(user);
 
-  if (response === false){
+  if (username === false){
     // if use use header, we need to return next
     res.setHeader('error', 'user not found');
   } else {
-    res.setHeader('message', 'user updated');
+    res.setHeader('username', username);
   }
   return next();
+
+}
+
+async function createSpin(req, res, next){
+  var spin = {
+    content: req.body.spinBody,
+    tags: req.body.tags,
+    edited: false,
+    likes: 0,
+    quotes: 0,
+    is_quote: req.body.is_quote,
+    quote_origin: undefined, // TODO define how this works I still don't understand the whole quote origin thing
+    like_list: []
+  };
 
 
 }

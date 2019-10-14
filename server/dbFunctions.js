@@ -132,7 +132,7 @@ function userSpinTableName(username) {
     return 'user exists';
   }
 
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 
@@ -153,7 +153,7 @@ async function deleteUser(username){
 
     var res = await client.query(query);
 
-    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING id`;
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING username`;
 
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
@@ -168,7 +168,7 @@ async function deleteUser(username){
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 // function to update user info (used by edit account)
@@ -200,7 +200,7 @@ async function updateUser(user) {
       SET passhash = $2, bio = $3, name = $4, interests = $5, 
       accessibility_features = $6, profile_pic = $7
       WHERE id = $1 
-      RETURNING id`
+      RETURNING username`
     ;
 
     if (user.password === undefined) {
@@ -209,7 +209,7 @@ async function updateUser(user) {
         SET bio = $2, name = $3, interests = $4, 
         accessibility_features = $5, profile_pic = $6
         WHERE id = $1 
-        RETURNING id`
+        RETURNING username`
       ;
     }
 
@@ -229,7 +229,7 @@ async function updateUser(user) {
   }
   
   // returns id of user if success otherwise false
-  return (rows.length === 0 ? false : rows[0].id);
+  return (rows.length === 0 ? false : rows[0].username);
 }
 
 // Function to update the last login time
@@ -340,7 +340,7 @@ async function addSpin(user, spin) {
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
-      RETURNING id`
+      RETURNING username`
     ;
 
     var res = await client.query(query, args);
@@ -382,7 +382,7 @@ async function deleteSpin(user, spin_id) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].id);
 }
 
 async function showNotification(user, res) {

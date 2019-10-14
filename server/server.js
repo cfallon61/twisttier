@@ -113,11 +113,7 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
 app.get('/logout', loggedIn, (req, res) => {
   console.log(req.clientSession.uid, 'logging out');
   // console.log(req.cookies);
-  req.clientSession.uid = null;
-  req.clientSession.destroy((err) => { if (err) throw err; } );
-  res.clearCookie('clientSession');
-  res.clearCookie('tracker');
-  res.redirect('/');
+  deleteSession(req, res);
 });
 
 // @brief: route handler for checking if a user is logged in
@@ -129,14 +125,14 @@ app.get('/login', notLoggedIn, (req, res) => {
 });
 
 
-app.post('/login', notLoggedIn, users.authorize, (req, res) => {
+app.post('/login', notLoggedIn, users.authorize, (req, res, user) => {
   // if the authorize function signals an error, send an unauthorized message
   if (res.getHeader('error')) {
     // console.log(res);
     res.status(401).send('Unauthorized');
   }
   else {
-    req.clientSession.uid = req.body.username;
+    req.clientSession.uid = user.username;
     res.cookie('loggedIn', true, {maxAge: 60 * 60 * 24});
     res.sendFile(index);
   }
@@ -153,7 +149,7 @@ app.post('/api/users/:username', users.getUserInfo, (req, res) => {
 // @brief: get a supplied user's timeline
 // @respond: json with posts made if user exists, 
 //           404 not found error if user not exist
-app.get('/api/timeline/:username', users.getTimeline, (req, res) => {
+app.post('/api/timeline/:username', users.getTimeline, (req, res) => {
   if (res.getHeader('error') != undefined){
     res.status(404)
   }
@@ -169,6 +165,16 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
   }
 });
 
+
+// @brief: update a user's profile information
+// @respond: IDK man i'm tired 
+app.post('/api/update/:username', loggedIn, users.updateProfileInfo, (req, res) => {
+  if (res.getHeader('error') != undefined){
+    res.status(406)
+  }
+  res.sendFile(index);
+});
+
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
 app.get('/*', (req, res) => {
@@ -176,6 +182,31 @@ app.get('/*', (req, res) => {
   res.sendFile(index);
 });
 
+
+
+
+
+// @brief:  endpoint for deleting account
+// @author: Chris Fallon 
+app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
+  if (res.getHeader('error') != undefined) {
+    res.status(406);
+    res.sendFile(index);
+  }
+  else {
+    deleteSession(req, res);
+  }
+});
+
+
+function deleteSession(req, res) {
+  req.clientSession.uid = null;
+  req.clientSession.destroy((err) => { if (err) throw err; });
+  res.clearCookie('clientSession');
+  res.clearCookie('tracker');
+  res.redirect('/');
+  return 0;
+}
 
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever

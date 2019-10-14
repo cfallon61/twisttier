@@ -12,6 +12,8 @@ import {
 } from 'react-router-dom';
 import './LoginSignup.css';
 import Container from 'react-bootstrap/Container'
+import {NotificationManager} from 'react-notifications';
+import { emptyStatement } from '@babel/types';
 
 const LOCAL_URL = "localhost:8080";
 class Login extends Component {
@@ -19,7 +21,8 @@ class Login extends Component {
     super(props);
     this.state = {
       emailOrUsername: "",
-      password: ""
+      password: "",
+      notification : ""
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleUserOrEmailChange = this.handleUserOrEmailChange.bind(this);
@@ -73,7 +76,6 @@ class Login extends Component {
 
     let writtenCredentials = this.getAppropiateState(this.state.emailOrUsername);
     writtenCredentials.password = this.state.password;
-    console.log(writtenCredentials);
     fetch("/login", {
       method: 'POST',
       headers: {
@@ -81,45 +83,45 @@ class Login extends Component {
       },
       redirect: 'follow',
       body: JSON.stringify(writtenCredentials)
-    }).then(function (res) {
-      //Success!
-      if (res.status === "401") {
-        //TODO: Replace alert with custom feedback component.
-        alert("There is no user with this emailOrUsername. Please sign up.");
+    }).then( (res) => {
+      //Got response from server.
+      if (res.status === 401) {
+        NotificationManager.error("There is no user with this email or username. Please sign up.");
         return;
       }
       //Redirecting to home page. 
       window.location.href = "/";
     }).catch(function (error) {
-      alert(error); //This is internal errors, so it is useful to show for now.
+      NotificationManager.error(error);
     });
   }
   render() {
+    
     return ( 
-    <div className = "LoginSignup">
-        <Container >
-        <h1>Login</h1>
-        <Form onSubmit = {this.handleSubmit} >
-          <Form.Group controlId = "formBasicEmail" >
-            <Form.Label>Username or email address</Form.Label> 
-            <Form.Control width = "50%" placeholder = "Email" onChange = {this.handleUserOrEmailChange}/>
-          </Form.Group>
-          <Form.Group controlId = "formBasicPasswrd" >
-            <Form.Label>Password</Form.Label> 
-            <Form.Control type = "password"
-            placeholder = "Password"
-            onChange = {
-              this.handlePasswordChange
-            }
-            /> 
-          </Form.Group>
-          <Button variant = "primary" type = "submit">Login</Button> 
-        </Form> 
-        <Nav.Link>
-          <Link to = "/signup">Don't have an account? Signup!</Link> 
-        </Nav.Link> 
-        </Container> 
-      </div>
+        <div className = "LoginSignup">
+          <Container >
+          <h1>Login</h1>
+          <Form onSubmit = {this.handleSubmit} >
+            <Form.Group controlId = "formBasicEmail" >
+              <Form.Label>Username or email address</Form.Label> 
+              <Form.Control width = "50%" placeholder = "Email" onChange = {this.handleUserOrEmailChange}/>
+            </Form.Group>
+            <Form.Group controlId = "formBasicPasswrd" >
+              <Form.Label>Password</Form.Label> 
+              <Form.Control type = "password"
+              placeholder = "Password"
+              onChange = {
+                this.handlePasswordChange
+              }
+              /> 
+            </Form.Group>
+            <Button variant = "primary" type = "submit">Login</Button> 
+          </Form> 
+          <Nav.Link>
+            <Link to = "/signup">Don't have an account? Signup!</Link> 
+          </Nav.Link> 
+          </Container> 
+        </div>
     );
   }
 

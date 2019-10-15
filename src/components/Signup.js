@@ -84,7 +84,7 @@ class Signup extends Component {
       body : formdata 
     }).then(function(res){
       //Response returned.
-      if(res.status === "406")
+      if(res.status === 406)
       {
         NotificationManager.error("User cannot be created.");
         return;

@@ -20,20 +20,20 @@ class UserFeed extends Component
     {
         super(props);
         this.username = this.props.match.params.username;
-        let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
-            spins : spins,
+            spins : [],
             error : {
                 exist : false, 
-                errorMessage : "",
+                message : "",
                 status : ""
             }
         }
         console.log(this.username);
     }
 
-    getUserSpins(username)
+    updateUserSpins(username)
     {
+        console.log("Fetching...");
         fetch(`/api/posts/${username}`, {
             method: "POST",
             headers: {
@@ -42,15 +42,22 @@ class UserFeed extends Component
         }).then(function(res){
             if(res.status === "200")
             {
-                return res.json();
+                console.log(res);
             }
             else{
                 this.setState({error: {exist: true, message: res.headers.error, status:res.status}});
+                console.log(res.headers.error);
             }
         }).catch(function(err){
             this.setState({error: {exist: true, message: err, status:"404"}});
+            console.log(err);
         });
 
+    }
+
+    componentDidMount()
+    {
+        this.updateUserSpins();
     }
 
     render()

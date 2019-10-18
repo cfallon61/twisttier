@@ -139,7 +139,7 @@ function userSpinTableName(username) {
 // function that deletes user info
 // this function is to be called after the server has properly authenticated
 // @param username: the user's username
-// @return true on success, error on failure
+// @return deleted username on success, error on failure
 async function deleteUser(username){
   const client = await pool.connect();
   var rows = [];
@@ -162,12 +162,14 @@ async function deleteUser(username){
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    // console.log(`Error caught by error handler: ${ e }`);
     // return e;
   } 
   finally {
     client.release();
   }
+
+  // console.log(rows.length === 0 ? false : rows[0].username);
   return (rows.length === 0 ? false : rows[0].username);
 };
 

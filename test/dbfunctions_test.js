@@ -7,7 +7,7 @@ const assert = require('assert');
 const bcrypt = require('bcrypt');
 
 describe('database functions test', function() {
-  describe('#dp.addSpin()', async () => {
+  describe.skip('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
       user = {
@@ -31,7 +31,7 @@ describe('database functions test', function() {
       assert.equal(res.id, spin_id.id);
     });
   });
-  describe("#db.userExists()", async () => {
+  describe.skip("#db.userExists()", async () => {
     it("should return user data for this user", async () => {
       user = {
         email: "test@test.com",
@@ -55,7 +55,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe("#db.createUser()", () => {
+  describe.skip("#db.createUser()", () => {
 
     it ('@test not exist: should return true', async () => {
       var user = {
@@ -114,7 +114,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe('#updateUserInfo',  () => {
+  describe.skip('#updateUserInfo',  () => {
     it('@test change user info with password: should return user id', async () => {
       user = {
         id: 1,
@@ -165,16 +165,36 @@ describe('database functions test', function() {
   
   describe('#deleteUser',  () => {
     
-    it.skip('user exists: should return true', async () => {
+    it('user exists: should return username', async () => {
       user = {
-        username: "bringMeDeath",
+        username: "poop"
       };
-
+     
       var res = await db.deleteUser(user);
-
+      
+      console.log("DELETE response: ", res);
+      
       // assert
-      assert.deepStrictEqual(res, true);
+      assert.notDeepStrictEqual(res, false);
+
+    });
+
+    it('user does not exist: should return false', async () => {
+      user = {
+        username: "notExist"
+      };
+     
+      var res = await db.deleteUser(user);
+      
+      console.log("DELETE response: ", res);
+      
+      // assert
+      assert.deepStrictEqual(res, false);
+
     });
   });
+
+   
+ 
 
 });

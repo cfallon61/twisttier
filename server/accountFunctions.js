@@ -10,15 +10,15 @@ const bcrypt = require('bcrypt');
 // @desc: express middleware function to interface with the database
 // @return: none
 async function postCreateUser(req, res, next) {
-  const errors = validationResult(req);
 
   console.log('postCreateUser called');
   // console.log(req.body);
 
-  if (!errors.isEmpty()) {
-    res.setHeader('error', errors.array());
+  if (check_errors(req, res))
+  {
     return next();
   }
+
   var accountInfo = {
     email: req.body.email,
     password: req.body.password,
@@ -222,6 +222,12 @@ async function getTimeline(req, res, next){
 
 // updates user profile information from request
 async function updateProfileInfo(req, res, next) {
+
+  if (check_errors(req, res))
+  {
+    return next();
+  }
+  
   var user = {
     password: req.body.password,
     bio: req.body.bio,
@@ -230,8 +236,6 @@ async function updateProfileInfo(req, res, next) {
     accessibility_features: req.body.accessibility_features,
     profile_pic: req.body.profile_pic
   };
-
-  // TODO: might need to do some checking, depending on logic of frontend
 
   // if all checking fine, update the user
   var username = await db.updateUser(user);
@@ -246,7 +250,16 @@ async function updateProfileInfo(req, res, next) {
 
 }
 
+
+// @brief: middleware to create a post. sets 'error' header if 
+//         errors occur
+// @return: none
 async function createSpin(req, res, next){
+  if (check_errors(req, res))
+  {
+    return next();
+  }
+
   var spin = {
     content: req.body.spinBody,
     tags: req.body.tags,
@@ -254,9 +267,15 @@ async function createSpin(req, res, next){
     likes: 0,
     quotes: 0,
     is_quote: req.body.is_quote,
-    quote_origin: undefined, // TODO define how this works I still don't understand the whole quote origin thing
+    quote_origin: req.body.quote_origin, // TODO define how this works I still don't understand the whole quote origin thing
     like_list: []
   };
+
+  // if it is a quote but no original author is specified, error
+  if (spin.is_quote && quote_origin === undefined) {
+    res.setHeader("error", "no quote origin specified");
+    return next();
+  }
 
   var user = {
     username: req.clientSession.uid
@@ -272,6 +291,30 @@ async function createSpin(req, res, next){
   return next();
 }
 
+// @brief: middleware to delete a post. sets 'error' header if 
+//         errors occur
+// @return: none
+async function removeSpin(req, res, next)
+{
+
+
+  return next();
+}
+
+// @brief generic function for checking if a request has invalid input.
+// @return: true if there are errors present, false if none
+function check_errors(req, res){
+  const errors = validationResult(req);
+
+  // verify that the spin fits within the legnth bounds
+  if (!errors.isEmpty()) {
+    res.setHeader('error', errors.array());
+    return true;
+  }
+
+  return false;
+}
+
 
 module.exports = {
   postCreateUser,
@@ -281,5 +324,6 @@ module.exports = {
   updateProfileInfo,
   getUserInfo,
   getPosts,
-  createSpin
+  createSpin,
+  removeSpin
 };

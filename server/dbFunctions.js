@@ -348,7 +348,7 @@ async function addSpin(user, spin) {
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
-      RETURNING username`
+      RETURNING id`
     ;
 
     var res = await client.query(query, args);
@@ -362,8 +362,9 @@ async function addSpin(user, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].id);
 };
+
 
 async function deleteSpin(user, spin_id) {
   const client = await pool.connect();

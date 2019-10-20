@@ -18,7 +18,7 @@ const TEST = (process.env.TEST === "true");
 var userExists = async function (user) {
   
   var params = [];
-  console.log(user);
+  // console.log(user);
   var query = `SELECT * FROM ${USER_TABLE} `;
   if(user.email === "")
   {
@@ -61,13 +61,13 @@ function userSpinTableName(username) {
 // @return: object containing creation info
 //         true if creation successful, false if not
  async function createUser(accountInfo) {
-  
+
   // check if the user exists already
   var existing = await userExists(accountInfo);
   if (existing != false){
     return existing; // return the rows
   }
-  console.log('create user called')
+  // console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -84,11 +84,12 @@ function userSpinTableName(username) {
     
     // begins transaction
     await client.query('BEGIN');
-
+    
     // create the user table
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
-
+    // console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
     var res = await client.query(query);
+    
 
     args = [
       accountInfo.email,
@@ -114,7 +115,7 @@ function userSpinTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
 
     res = await client.query(query, args);
-    
+    // console.log("2nd res: ", res.rows);
     // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
@@ -128,7 +129,7 @@ function userSpinTableName(username) {
   finally {
     client.release();
   }
-  console.log(rows);
+  // console.log(rows);
   if (rows.length === 0 && TEST){
     return 'user exists';
   }
@@ -144,7 +145,7 @@ function userSpinTableName(username) {
 async function deleteUser(username){
   const client = await pool.connect();
   var rows = [];
-  console.log("Outside try");
+
   try{
 
     var tablename = userSpinTableName(username);
@@ -173,7 +174,7 @@ async function deleteUser(username){
   finally {
     client.release();
   }
-  console.log("Rows: ", rows);
+  // console.log("Rows: ", rows);
   // console.log(rows.length === 0 ? false : rows[0].username);
   return (rows.length === 0 ? false : rows[0].username);
   

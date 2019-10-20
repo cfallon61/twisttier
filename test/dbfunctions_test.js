@@ -55,6 +55,7 @@ describe('database functions test', function() {
     });
   });
 
+ 
   describe("#db.createUser()", () => {
 
     it ('@test not exist: should return true', async () => {
@@ -75,7 +76,7 @@ describe('database functions test', function() {
         assert.notDeepStrictEqual(res, false);
       } 
     });
-    it('@recreate doeJohn user, not an actual test', async () => {
+    it.skip('@recreate doeJohn user, not an actual test', async () => {
       var user = {
         username: 'doeJohn',
         email: 'email@email.com',
@@ -86,6 +87,21 @@ describe('database functions test', function() {
 
       var res = await db.createUser(user);
     });
+    
+    it ('@test email exists: should fail', async () => {
+      var user = {
+        username: 'jhfdjhfbh',
+        email: 'test@test.com',
+        name: "whatever",
+        password: "password",
+        bio: 'why am i the only one actually working?',
+      }
+
+      var res = await db.createUser(user);
+
+      assert.notDeepStrictEqual(res, true);
+    });
+    
     it('@recreate K, not an actual test', async () => {
       var user = {
         username: 'k',
@@ -110,19 +126,7 @@ describe('database functions test', function() {
       var res = await db.createUser(user);
       assert.notDeepStrictEqual(res, true);
     });  
-    it ('@test email exists: should fail', async () => {
-      var user = {
-        username: 'jhfdjhfbh',
-        email: 'test@test.com',
-        name: "whatever",
-        password: "password",
-        bio: 'why am i the only one actually working?',
-      }
-
-      var res = await db.createUser(user);
-
-      assert.notDeepStrictEqual(res, true);
-    });
+    
   });
 
   describe.skip('#updateUserInfo',  () => {
@@ -174,26 +178,13 @@ describe('database functions test', function() {
   });
 
   
-  describe.skip('#deleteUser',  () => {
+  describe('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
       username = "k";
      
       var res = await db.deleteUser(username);
       
-      // console.log("DELETE response: ", res);
-      
-      // var user = {
-      //   username: 'k',
-      //   email: 'newK@gmail.com',
-      //   name: "KurtK",
-      //   password: "Kpassword",
-      //   bio: 'K is my bio',
-      // }
-
-      // var res1 = await db.createUser(user);
-      // console.log(res1);
-
       // assert
       assert.notDeepStrictEqual(res, false);
 
@@ -206,7 +197,7 @@ describe('database functions test', function() {
      
       var res = await db.deleteUser(username);
       
-      console.log("DELETE response: ", res);
+      // console.log("DELETE response: ", res);
       
       // assert
       assert.deepStrictEqual(res, false);

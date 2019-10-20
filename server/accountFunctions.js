@@ -13,7 +13,7 @@ async function postCreateUser(req, res, next) {
   const errors = validationResult(req);
 
   console.log('postCreateUser called');
-  console.log(req.body);
+  // console.log(req.body);
 
   if (!errors.isEmpty()) {
     res.setHeader('error', errors.array());
@@ -182,7 +182,7 @@ async function getPosts(req, res, next){
   if (spins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
-  console.log(spins);
+  // console.log(spins);
   res.json(JSON.stringify(spins));
   return next();
 

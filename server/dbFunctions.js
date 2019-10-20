@@ -37,9 +37,8 @@ var userExists = async function (user) {
   var res = await pool.query(query, params);
   // response is a json 
   // need to get rows, which is a list
-  console.log(res);
-  var rows = res.rows;
   // console.log(res);
+  var rows = res.rows;
   // console.log(rows);
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring

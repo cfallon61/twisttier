@@ -258,7 +258,18 @@ async function createSpin(req, res, next){
     like_list: []
   };
 
+  var user = {
+    username: req.clientSession.uid
+  };
 
+  var added = await db.addSpin(user, spin);
+  if (!added) {
+    res.setHeader("error", "unable to add spin");
+  }
+  else {
+    res.setHeader("spinId", added);
+  }
+  return next();
 }
 
 
@@ -269,5 +280,6 @@ module.exports = {
   getTimeline,
   updateProfileInfo,
   getUserInfo,
-  getPosts
+  getPosts,
+  createSpin
 };

@@ -183,7 +183,12 @@ app.get('/*', (req, res) => {
 });
 
 
-
+app.post('/api/add_spin', loggedIn, users.createSpin, (req, res) => {
+  if (res.getHeader('error') != undefined) {
+    res.status(406)
+  }
+  res.sendFile(index);
+});
 
 
 // @brief:  endpoint for deleting account
@@ -198,7 +203,8 @@ app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
   }
 });
 
-
+// @brief: delete a client session
+// @author: Chris Fallon
 function deleteSession(req, res) {
   req.clientSession.uid = null;
   req.clientSession.destroy((err) => { if (err) throw err; });

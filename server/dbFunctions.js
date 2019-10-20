@@ -37,11 +37,6 @@ var userExists = async function (user) {
   var res = await pool.query(query, params);
   // response is a json 
   // need to get rows, which is a list
-<<<<<<< HEAD
-=======
-  // console.log(res);
-  var rows = res.rows;
->>>>>>> 433329af1151d66917c454b56fbf92838f5889b6
   // console.log(res);
   var rows = res.rows;
   // console.log(rows);

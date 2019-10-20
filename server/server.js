@@ -89,7 +89,9 @@ app.post('/create_user',
     }
     else {
       req.clientSession.uid = req.body.username;
+      res.setHeader("username", req.body.username);
     }
+    // TODO look into redirecting to / instead of index
     res.sendFile(index);
 
   });
@@ -117,7 +119,7 @@ app.get('/logout', loggedIn, (req, res) => {
 });
 
 // @brief: route handler for checking if a user is logged in
-//         will redirect to / if already logged in, otherwise 
+//         will redirect to / if already logged in, otherwise
 //         will continue to login page
 app.get('/login', notLoggedIn, (req, res) => {
   console.log('GET /login');
@@ -134,6 +136,7 @@ app.post('/login', notLoggedIn, users.authorize, (req, res, user) => {
   else {
     req.clientSession.uid = user.username;
     res.cookie('loggedIn', true, {maxAge: 60 * 60 * 24});
+    res.setHeader('username', user.username);
     res.sendFile(index);
   }
 });
@@ -147,7 +150,7 @@ app.post('/api/users/:username', users.getUserInfo, (req, res) => {
 
 
 // @brief: get a supplied user's timeline
-// @respond: json with posts made if user exists, 
+// @respond: json with posts made if user exists,
 //           404 not found error if user not exist
 app.post('/api/timeline/:username', users.getTimeline, (req, res) => {
   if (res.getHeader('error') != undefined){
@@ -156,7 +159,7 @@ app.post('/api/timeline/:username', users.getTimeline, (req, res) => {
 });
 
 // @brief: get a supplied user's posts
-// @respond: json with posts made if user exists, 
+// @respond: json with posts made if user exists,
 //           404 not found error if user not exist
 app.post('/api/posts/:username', users.getPosts, (req, res) => {
   console.log(res);
@@ -167,7 +170,7 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 
 // @brief: update a user's profile information
-// @respond: IDK man i'm tired 
+// @respond: IDK man i'm tired
 app.post('/api/update/:username', loggedIn, users.updateProfileInfo, (req, res) => {
   if (res.getHeader('error') != undefined){
     res.status(406)
@@ -187,7 +190,7 @@ app.get('/*', (req, res) => {
 
 
 // @brief:  endpoint for deleting account
-// @author: Chris Fallon 
+// @author: Chris Fallon
 app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
   if (res.getHeader('error') != undefined) {
     res.status(406);
@@ -211,11 +214,12 @@ function deleteSession(req, res) {
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
   if (req.clientSession.uid && req.cookies.loggedIn) {
-    console.log(req.clientSession.uid, 'is logged in')
+    res.setHeader("username", req.clientSession.uid);
+    console.log(req.clientSession.uid, 'is logged in');
     return next();
   }
   else {
-    res.redirect('/timeline'); // TODO route this however 
+    res.redirect('/timeline'); // TODO route this however
   }
 
 };

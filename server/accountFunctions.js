@@ -294,10 +294,25 @@ async function createSpin(req, res, next){
 // @brief: middleware to delete a post. sets 'error' header if 
 //         errors occur
 // @return: none
-async function removeSpin(req, res, next)
-{
+async function removeSpin(req, res, next) {
+  if (check_errors(req, res))
+  {
+    return next();
+  }
 
+  var spin_id = req.params.spinId;
 
+  var user = {
+    username: req.clientSession.uid
+  };
+
+  var deleted = await db.deleteSpin(user, spin_id);
+  if (!deleted) {
+    res.setHeader("error", "unable to delete spin");
+  }
+  else {
+    res.setHeader("spinId", delete);
+  }
   return next();
 }
 

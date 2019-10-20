@@ -126,7 +126,7 @@ app.get('/login', notLoggedIn, (req, res) => {
   res.sendFile(index);
 });
 
-
+// @brief: endpoint to actually handle the login request for a user
 app.post('/login', notLoggedIn, users.authorize, (req, res, user) => {
   // if the authorize function signals an error, send an unauthorized message
   if (res.getHeader('error')) {
@@ -142,6 +142,7 @@ app.post('/login', notLoggedIn, users.authorize, (req, res, user) => {
 });
 
 
+// @brief: enpoint to get a supplied user's profile information
 app.post('/api/users/:username', users.getUserInfo, (req, res) => {
   if (res.getHeader('error') != undefined) {
     res.status(406);
@@ -170,23 +171,41 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 
 // @brief: update a user's profile information
+<<<<<<< HEAD
 // @respond: IDK man i'm tired
 app.post('/api/update/:username', loggedIn, users.updateProfileInfo, (req, res) => {
+=======
+// @respond: IDK man i'm tired 
+app.post('/api/update/:username', loggedIn, 
+[check('bio').isLength({max 150}),
+ check('name').isLength({min: 1, max: 25}),
+ ],
+users.updateProfileInfo, (req, res) => {
+>>>>>>> 88f6a4e7050775a2b537872ee0ce57eec7755901
   if (res.getHeader('error') != undefined){
     res.status(406)
   }
   res.sendFile(index);
 });
 
-// wtf this actually fricken fixed it i am PISSED
-// TODO limit to non user pages, other pages are assumed to be user pages
-app.get('/*', (req, res) => {
-  console.log('GET', req.originalUrl);
+
+// @brief: endpoint for creating a spin. user must be logged in or this will not work.
+app.post('/api/add_spin', loggedIn, 
+[check('spinBody').isLength({min: 1, max:90})],
+ users.createSpin, (req, res) => {
+  // TODO add error states for invalid input
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
   res.sendFile(index);
 });
 
-
-
+app.post('/api/deleteSpin/:spinId', loggedIn, users.removeSpin, (req, res) => {
+  if(res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
 
 
 // @brief:  endpoint for deleting account
@@ -201,7 +220,15 @@ app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
   }
 });
 
+// wtf this actually fricken fixed it i am PISSED
+// TODO limit to non user pages, other pages are assumed to be user pages
+app.get('/*', (req, res) => {
+  console.log('GET', req.originalUrl);
+  res.sendFile(index);
+});
 
+// @brief: delete a client session
+// @author: Chris Fallon
 function deleteSession(req, res) {
   req.clientSession.uid = null;
   req.clientSession.destroy((err) => { if (err) throw err; });
@@ -219,7 +246,11 @@ function loggedIn(req, res, next) {
     return next();
   }
   else {
+<<<<<<< HEAD
     res.redirect('/timeline'); // TODO route this however
+=======
+    res.redirect('/'); // TODO route this however 
+>>>>>>> 88f6a4e7050775a2b537872ee0ce57eec7755901
   }
 
 };
@@ -231,7 +262,7 @@ function notLoggedIn(req, res, next) {
     return next();
   }
   else {
-    res.redirect('/'); // TODO set header loggedin false
+    res.redirect('/');
   }
 };
 

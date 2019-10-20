@@ -18,7 +18,7 @@ const TEST = (process.env.TEST === "true");
 var userExists = async function (user) {
   
   var params = [];
-  console.log(user);
+  // console.log(user);
   var query = `SELECT * FROM ${USER_TABLE} `;
   if(user.email === "")
   {
@@ -37,9 +37,8 @@ var userExists = async function (user) {
   var res = await pool.query(query, params);
   // response is a json 
   // need to get rows, which is a list
-  console.log(res);
-  var rows = res.rows;
   // console.log(res);
+  var rows = res.rows;
   // console.log(rows);
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
@@ -61,13 +60,13 @@ function userSpinTableName(username) {
 // @return: object containing creation info
 //         true if creation successful, false if not
  async function createUser(accountInfo) {
-  
+
   // check if the user exists already
   var existing = await userExists(accountInfo);
   if (existing != false){
     return existing; // return the rows
   }
-  console.log('create user called')
+  // console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -84,11 +83,12 @@ function userSpinTableName(username) {
     
     // begins transaction
     await client.query('BEGIN');
-
+    
     // create the user table
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
-
+    // console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
     var res = await client.query(query);
+    
 
     args = [
       accountInfo.email,
@@ -114,6 +114,7 @@ function userSpinTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
 
     res = await client.query(query, args);
+    // console.log("2nd res: ", res.rows);
     // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
@@ -127,7 +128,7 @@ function userSpinTableName(username) {
   finally {
     client.release();
   }
-  console.log(rows);
+  // console.log(rows);
   if (rows.length === 0 && TEST){
     return 'user exists';
   }
@@ -139,13 +140,15 @@ function userSpinTableName(username) {
 // function that deletes user info
 // this function is to be called after the server has properly authenticated
 // @param username: the user's username
-// @return true on success, error on failure
+// @return deleted username on success, error on failure
 async function deleteUser(username){
   const client = await pool.connect();
   var rows = [];
 
   try{
+
     var tablename = userSpinTableName(username);
+    
     await client.query('BEGIN');
 
     // delete spin table
@@ -155,20 +158,25 @@ async function deleteUser(username){
 
     query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING username`;
 
+    // query = `SELECT * FROM ${USER_TABLE} WHERE username=$1`;
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
-
+    
     rows = res.rows;
+    
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    // console.log(`Error caught by error handler: ${ e }`);
     // return e;
   } 
   finally {
     client.release();
   }
+  // console.log("Rows: ", rows);
+  // console.log(rows.length === 0 ? false : rows[0].username);
   return (rows.length === 0 ? false : rows[0].username);
+  
 };
 
 // function to update user info (used by edit account)
@@ -340,7 +348,7 @@ async function addSpin(user, spin) {
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
-      RETURNING username`
+      RETURNING id`
     ;
 
     var res = await client.query(query, args);
@@ -354,8 +362,9 @@ async function addSpin(user, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].id);
 };
+
 
 async function deleteSpin(user, spin_id) {
   const client = await pool.connect();

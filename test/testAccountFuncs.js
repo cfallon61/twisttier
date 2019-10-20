@@ -253,4 +253,78 @@ describe("middleware / routing function tests", () => {
     });
     
   });
+
+  describe("#create spin", async () => {
+
+    it("@quote == false: ", async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/api/add_spin',
+          body: {
+            spinBody: "yo screw you man",
+            tags: ['wtf', 'kill me'],
+            is_quote: false,
+            quote_origin: undefined
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+
+      // post to router
+      await router.createSpin(req, mockres, () => {});
+      const actualRes = mockres.getHeader('error');
+
+      console.log(mockres);
+      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but got' + String(actualRes));
+    });
+    it("@quote == true, origin undefined: ", async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/api/add_spin',
+          body: {
+            spinBody: "yo screw you man",
+            tags: ['wtf', 'kill me'],
+            is_quote: true,
+            quote_origin: undefined
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+
+      // post to router
+      await router.createSpin(req, mockres, () => { });
+      const actualRes = mockres.getHeader('error');
+      console.log(mockres);
+
+      assert.notDeepStrictEqual(actualRes, undefined, 'expected to be defined but response was undefined.');
+
+    });
+
+    it("@quote == true, origin undefined: ", async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/api/add_spin',
+          body: {
+            spinBody: "yo screw you man",
+            tags: ['wtf', 'kill me'],
+            is_quote: true,
+            quote_origin: "bringMeDeath"
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+
+      // post to router
+      await router.createSpin(req, mockres, () => { });
+      const actualRes = mockres.getHeader('error');
+      console.log(mockres);
+
+      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but was ' + String(actualRes));
+
+    });
+
+  });
 });

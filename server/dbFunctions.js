@@ -37,7 +37,7 @@ var userExists = async function (user) {
   var res = await pool.query(query, params);
   // response is a json 
   // need to get rows, which is a list
-  console.log(res);
+  // console.log(res);
   var rows = res.rows;
   // console.log(res);
   // console.log(rows);
@@ -114,6 +114,7 @@ function userSpinTableName(username) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
 
     res = await client.query(query, args);
+    
     // tell server we are done (end of transaction)
     await client.query('COMMIT');
 
@@ -143,9 +144,11 @@ function userSpinTableName(username) {
 async function deleteUser(username){
   const client = await pool.connect();
   var rows = [];
-
+  console.log("Outside try");
   try{
+
     var tablename = userSpinTableName(username);
+    
     await client.query('BEGIN');
 
     // delete spin table
@@ -155,10 +158,12 @@ async function deleteUser(username){
 
     query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING username`;
 
+    // query = `SELECT * FROM ${USER_TABLE} WHERE username=$1`;
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
-
+    
     rows = res.rows;
+    
   } 
   catch (e) {
     await client.query('ROLLBACK');
@@ -168,9 +173,10 @@ async function deleteUser(username){
   finally {
     client.release();
   }
-
+  console.log("Rows: ", rows);
   // console.log(rows.length === 0 ? false : rows[0].username);
   return (rows.length === 0 ? false : rows[0].username);
+  
 };
 
 // function to update user info (used by edit account)

@@ -55,7 +55,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe.skip("#db.createUser()", () => {
+  describe("#db.createUser()", () => {
 
     it ('@test not exist: should return true', async () => {
       var user = {
@@ -82,6 +82,17 @@ describe('database functions test', function() {
         name: "Harvey",
         password: "password",
         bio: 'my name is Harvey Hinkelberg, but they call me john',
+      }
+
+      var res = await db.createUser(user);
+    });
+    it('@recreate K, not an actual test', async () => {
+      var user = {
+        username: 'k',
+        email: 'newK@gmail.com',
+        name: "KurtK",
+        password: "Kpassword",
+        bio: 'K is my bio',
       }
 
       var res = await db.createUser(user);
@@ -163,28 +174,37 @@ describe('database functions test', function() {
   });
 
   
-  describe('#deleteUser',  () => {
+  describe.skip('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
-      user = {
-        username: "poop"
-      };
+      username = "k";
      
-      var res = await db.deleteUser(user);
+      var res = await db.deleteUser(username);
       
-      console.log("DELETE response: ", res);
+      // console.log("DELETE response: ", res);
       
+      // var user = {
+      //   username: 'k',
+      //   email: 'newK@gmail.com',
+      //   name: "KurtK",
+      //   password: "Kpassword",
+      //   bio: 'K is my bio',
+      // }
+
+      // var res1 = await db.createUser(user);
+      // console.log(res1);
+
       // assert
       assert.notDeepStrictEqual(res, false);
 
     });
 
     it('user does not exist: should return false', async () => {
-      user = {
-        username: "notExist"
-      };
+      
+      var  username = "notExist";
+      
      
-      var res = await db.deleteUser(user);
+      var res = await db.deleteUser(username);
       
       console.log("DELETE response: ", res);
       

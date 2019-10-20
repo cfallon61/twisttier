@@ -55,7 +55,7 @@ body: {
   * __If password is invalid:__ server will set header 'error' with message 'Incorrect Password'
   * __If, for whatever reason, the login time could not be updated:__ server will set header 'error' with message 'Login time could not be updated'
 
-* __Successful login:__ a cookie `loggedIn` will be set true and `uid` cookie will be set with the hash of the user's username
+* __Successful login:__ a cookie `loggedIn` will be set true and `uid` cookie will be set with the hash of the user's username, and a header `username: <username>` will be set.
 
 ## Getting a user's profile
 

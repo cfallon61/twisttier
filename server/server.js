@@ -171,17 +171,16 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 
 // @brief: update a user's profile information
-<<<<<<< HEAD
+
 // @respond: IDK man i'm tired
 app.post('/api/update/:username', loggedIn, users.updateProfileInfo, (req, res) => {
-=======
-// @respond: IDK man i'm tired 
-app.post('/api/update/:username', loggedIn, 
+
+// @respond: IDK man i'm tired
+app.post('/api/update/:username', loggedIn,
 [check('bio').isLength({max 150}),
  check('name').isLength({min: 1, max: 25}),
  ],
 users.updateProfileInfo, (req, res) => {
->>>>>>> 88f6a4e7050775a2b537872ee0ce57eec7755901
   if (res.getHeader('error') != undefined){
     res.status(406)
   }
@@ -190,7 +189,7 @@ users.updateProfileInfo, (req, res) => {
 
 
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
-app.post('/api/add_spin', loggedIn, 
+app.post('/api/add_spin', loggedIn,
 [check('spinBody').isLength({min: 1, max:90})],
  users.createSpin, (req, res) => {
   // TODO add error states for invalid input
@@ -249,7 +248,7 @@ function loggedIn(req, res, next) {
 <<<<<<< HEAD
     res.redirect('/timeline'); // TODO route this however
 =======
-    res.redirect('/'); // TODO route this however 
+    res.redirect('/'); // TODO route this however
 >>>>>>> 88f6a4e7050775a2b537872ee0ce57eec7755901
   }
 

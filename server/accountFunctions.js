@@ -1,5 +1,7 @@
-
-const { check, validationResult } = require('express-validator');
+const {
+  check,
+  validationResult
+} = require('express-validator');
 const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
@@ -14,8 +16,7 @@ async function postCreateUser(req, res, next) {
   console.log('postCreateUser called');
   // console.log(req.body);
 
-  if (check_errors(req, res))
-  {
+  if (check_errors(req, res)) {
     return next();
   }
 
@@ -32,8 +33,7 @@ async function postCreateUser(req, res, next) {
   // userCreated is the empty rows or false, return error
   if (!userCreated) {
     res.setHeader('errors', userCreated);
-  }
-  else {
+  } else {
     res.setHeader('username', userCreated.username);
   }
 
@@ -45,37 +45,34 @@ async function postCreateUser(req, res, next) {
 //          sends response 401 unauthorized with a set header specifying what went wrong
 async function authorize(req, res, next) {
   const user = {
-    username : req.body.username,
-    password : req.body.password,
-    email : req.body.email
+    username: req.body.username,
+    password: req.body.password,
+    email: req.body.email
   };
 
   // console.log(user);
-  
+
   var userData = await db.userExists(user);
   // console.log(userData);
 
-  if (userData === false)
-  {
+  if (userData === false) {
     console.log('invalid username');
     res.setHeader('error', 'Username invalid');
     return next();
   }
   var match = await bcrypt.compare(user.password, userData.passhash);
- 
+
   // password doesn't match
-  if (!match){
+  if (!match) {
     console.log('invalid password');
     res.setHeader('error', 'Incorrect Password');
-  }
-  else {
-    if(typeof user.username === 'undefined' || user.username === "")
-    {
+  } else {
+    if (typeof user.username === 'undefined' || user.username === "") {
       //1st index is the username
       user.username = userData[1];
     }
     updateLoginTimeBool = db.updateLoginTime(user.username);
-    
+
     // check whether login time was successfully updated
     if (!updateLoginTimeBool) {
       console.log('Login time could not be updated');
@@ -91,27 +88,25 @@ async function authorize(req, res, next) {
 async function deleteAccount(req, res, next) {
   // extract info from the request
   const user = {
-    username : req.body.username,
-    password : req.body.password,
-    email : req.body.email
+    username: req.body.username,
+    password: req.body.password,
+    email: req.body.email
   };
 
   var exist = await db.userExists(user);
-  
+
   // check if the user exists
   // if it exists, call the delete user function of db
   if (exist !== false) {
-    
+
     var deleteSuccess = await db.deleteUser(req.body.username);
 
-    if (deleteSuccess){
+    if (deleteSuccess) {
       return next();
-    } 
-    else {
+    } else {
       res.setHeader('error', 'deletion failed');
     }
-  } 
-  else {
+  } else {
     res.setHeader('error', 'deletion failed');
   }
   return next();
@@ -119,7 +114,7 @@ async function deleteAccount(req, res, next) {
 }
 
 // API for frontend development
-async function getUserInfo(req,res, next) {
+async function getUserInfo(req, res, next) {
   console.log('get user info')
   var user = {
     // send the username as a url parameter ex: /api/users/bringMeDeath
@@ -127,14 +122,13 @@ async function getUserInfo(req,res, next) {
   }
 
   var data = await db.userExists(user);
-  if (!data){
+  if (!data) {
     res.setHeader('error', 'user not found');
-  }
-  else {
+  } else {
     // protect certain information such as password
     var responseObject = {
       username: data.username,
-      bio :  data.bio,
+      bio: data.bio,
       create_date: data.create_date,
       last_login: data.last_login,
       name: data.name,
@@ -147,13 +141,13 @@ async function getUserInfo(req,res, next) {
     // TODO change this to not be a .json response
     // need to get clever with how to send response back
     res.json(JSON.stringify(responseObject));
-    
+
   }
   // console.log(res);
   return next();
 }
 
-async function addInterest(req, res, next){
+async function addInterest(req, res, next) {
 
 }
 
@@ -163,9 +157,9 @@ async function removeInterest(req, res, next) {
 
 
 // @brief: copy pasta from getTimeline because I am lazy
-//         same thing, but does a hack which converts the 
-//         user list to a following list. 
-async function getPosts(req, res, next){
+//         same thing, but does a hack which converts the
+//         user list to a following list.
+async function getPosts(req, res, next) {
   var user = {
     username: req.params.username,
   };
@@ -176,7 +170,12 @@ async function getPosts(req, res, next){
     res.setHeader('error', 'user not found');
     return next();
   }
-  var request = { users: JSON.stringify([{ username: user.username, tags: [] }]) }
+  var request = {
+    users: JSON.stringify([{
+      username: user.username,
+      tags: []
+    }])
+  }
   var spins = await db.getSpins(request);
 
   if (spins.length === 0) {
@@ -190,44 +189,43 @@ async function getPosts(req, res, next){
 }
 
 // @brief: generic get timeline function
-//         will also be used for when typing in a user's username in 
+//         will also be used for when typing in a user's username in
 //         the address bar. this wont work i don't think
-async function getTimeline(req, res, next){
+async function getTimeline(req, res, next) {
   var user = {
-    username : req.params.username,
+    username: req.params.username,
   };
   // get user's data
   var data = await db.userExists(user);
 
-  if (data === false){
+  if (data === false) {
     res.setHeader('error', 'user not found');
     return next();
   }
 
   var following = data.following;
   // console.log(following);
-  
+
   var followedSpins = await db.getSpins(following);
 
-  if (followedSpins.length === 0){
+  if (followedSpins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
 
   res.json(JSON.stringify(followedSpins));
   return next();
-  
+
   // TODO error check here and make sure that it returns good data
-  
+
 }
 
 // updates user profile information from request
 async function updateProfileInfo(req, res, next) {
 
-  if (check_errors(req, res))
-  {
+  if (check_errors(req, res)) {
     return next();
   }
-  
+
   var user = {
     password: req.body.password,
     bio: req.body.bio,
@@ -240,7 +238,7 @@ async function updateProfileInfo(req, res, next) {
   // if all checking fine, update the user
   var username = await db.updateUser(user);
 
-  if (username === false){
+  if (username === false) {
     // if use use header, we need to return next
     res.setHeader('error', 'user not found');
   } else {
@@ -251,12 +249,11 @@ async function updateProfileInfo(req, res, next) {
 }
 
 
-// @brief: middleware to create a post. sets 'error' header if 
+// @brief: middleware to create a post. sets 'error' header if
 //         errors occur
 // @return: none
-async function createSpin(req, res, next){
-  if (check_errors(req, res))
-  {
+async function createSpin(req, res, next) {
+  if (check_errors(req, res)) {
     return next();
   }
 
@@ -284,19 +281,17 @@ async function createSpin(req, res, next){
   var added = await db.addSpin(user, spin);
   if (!added) {
     res.setHeader("error", "unable to add spin");
-  }
-  else {
+  } else {
     res.setHeader("spinId", added);
   }
   return next();
 }
 
-// @brief: middleware to delete a post. sets 'error' header if 
+// @brief: middleware to delete a post. sets 'error' header if
 //         errors occur
 // @return: none
 async function removeSpin(req, res, next) {
-  if (check_errors(req, res))
-  {
+  if (check_errors(req, res)) {
     return next();
   }
 
@@ -309,16 +304,15 @@ async function removeSpin(req, res, next) {
   var deleted = await db.deleteSpin(user, spin_id);
   if (!deleted) {
     res.setHeader("error", "unable to delete spin");
-  }
-  else {
-    res.setHeader("spinId", delete);
+  } else {
+    res.setHeader("spinId", deleted);
   }
   return next();
 }
 
 // @brief generic function for checking if a request has invalid input.
 // @return: true if there are errors present, false if none
-function check_errors(req, res){
+function check_errors(req, res) {
   const errors = validationResult(req);
 
   // verify that the spin fits within the legnth bounds

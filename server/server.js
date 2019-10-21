@@ -5,10 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-const {
-  check,
-  validationResult
-} = require('express-validator');
+const { check, validationResult } = require('express-validator');
 
 const dotenv = require('dotenv');
 const users = require('./accountFunctions.js');
@@ -20,6 +17,7 @@ const root = path.join(__dirname, "../build");
 const images = path.join(__dirname, '../profileImages');
 
 const port = process.env.PORT || 8080;
+
 const app = express();
 
 app.use(session(init.sessionSetup));
@@ -70,7 +68,7 @@ const upload = multer({
 
 }).single('profileImage');
 
-var server = app.listen((port, err) => {
+var server = app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
 });
@@ -80,25 +78,12 @@ var server = app.listen((port, err) => {
 // handle user creation
 app.post('/create_user',
   [check('email').isEmail(),
-    check('password').isLength({
-      min: 8
-    }),
-    check('bio').isLength({
-      max: 150
-    }),
-    check('name').isLength({
-      max: 25,
-      min: 1
-    }),
-    check('username').isLength({
-      max: 15,
-      min: 1
-    })
+    check('password').isLength({ min: 8}),
+    check('bio').isLength({ max: 150 }),
+    check('name').isLength({ max: 25, min: 1 }),
+    check('username').isLength({ max: 15, min: 1 })
   ],
-  notLoggedIn,
-  upload,
-  users.postCreateUser, (req, res) => {
-
+  notLoggedIn, upload, users.postCreateUser, (req, res) => {
 
     if (res.getHeader('error') != undefined) {
       res.status(406);
@@ -189,104 +174,97 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 // @brief: update a user's profile information
 
 // @respond: IDK man i'm tired
-app.post('/api/update/:username', loggedIn, users.updateProfileInfo, (req, res) => {
 
-      // @respond: IDK man i'm tired
-      app.post('/api/update/:username', loggedIn,
-        [check('bio').isLength({
-            max: 150
-          }),
-          check('name').isLength({
-            min: 1,
-            max: 25
-          }),
-        ],
-        users.updateProfileInfo, (req, res) => {
-          if (res.getHeader('error') != undefined) {
-            res.status(406)
-          }
-          res.sendFile(index);
-        });
+app.post('/api/update/:username', loggedIn,
+        [check('bio').isLength({ max: 150 }),
+         check('name').isLength({ min: 1, max: 25 })], 
+         users.updateProfileInfo, (req, res) => {
+    
+  if (res.getHeader('error') != undefined) {
+      res.status(406)
+  }
+  res.sendFile(index);
+});
 
 
-      // @brief: endpoint for creating a spin. user must be logged in or this will not work.
-      app.post('/api/add_spin', loggedIn,
-        [check('spinBody').isLength({
-          min: 1,
-          max: 90
-        })],
-        users.createSpin, (req, res) => {
-          // TODO add error states for invalid input
-          if (res.getHeader('error') != undefined) {
-            res.status(418)
-          }
-          res.sendFile(index);
-        });
+// @brief: endpoint for creating a spin. user must be logged in or this will not work.
+app.post('/api/add_spin', loggedIn,
+        [check('spinBody').isLength({ min: 1, max: 90 })], 
+         users.createSpin, (req, res) => {
+    // TODO add error states for invalid input
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
 
-      app.post('/api/deleteSpin/:spinId', loggedIn, users.removeSpin, (req, res) => {
-        if (res.getHeader('error') != undefined) {
-          res.status(418)
-        }
-        res.sendFile(index);
-      });
+app.post('/api/deleteSpin/:spinId', loggedIn, users.removeSpin, (req, res) => {
+
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
 
 
-      // @brief:  endpoint for deleting account
-      // @author: Chris Fallon
-      app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
-        if (res.getHeader('error') != undefined) {
-          res.status(406);
-          res.sendFile(index);
-        } else {
-          deleteSession(req, res);
-        }
-      });
+// @brief:  endpoint for deleting account
+// @author: Chris Fallon
+app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
 
-      // wtf this actually fricken fixed it i am PISSED
-      // TODO limit to non user pages, other pages are assumed to be user pages
-      app.get('/*', (req, res) => {
-        console.log('GET', req.originalUrl);
-        res.sendFile(index);
-      });
+  if (res.getHeader('error') != undefined) {
+    res.status(406);
+    res.sendFile(index);
+  } else {
+    deleteSession(req, res);
+  }
+});
 
-      // @brief: delete a client session
-      // @author: Chris Fallon
-      function deleteSession(req, res) {
-        req.clientSession.uid = null;
-        req.clientSession.destroy((err) => {
-          if (err) throw err;
-        });
-        res.clearCookie('clientSession');
-        res.clearCookie('tracker');
-        res.redirect('/');
-        return 0;
-      }
+// wtf this actually fricken fixed it i am PISSED
+// TODO limit to non user pages, other pages are assumed to be user pages
+app.get('/*', (req, res) => {
 
-      function loggedIn(req, res, next) {
-        // if logged in continue, else redirect to wherever
-        if (req.clientSession.uid && req.cookies.loggedIn) {
-          res.setHeader("username", req.clientSession.uid);
-          console.log(req.clientSession.uid, 'is logged in');
-          return next();
-        } else {
-          res.redirect('/'); // TODO route this however
-        }
+  console.log('GET', req.originalUrl);
+  res.sendFile(index);
+});
 
-      };
+// @brief: delete a client session
+// @author: Chris Fallon
+function deleteSession(req, res) {
 
-      function notLoggedIn(req, res, next) {
-        console.log(req.cookies);
-        if (!req.clientSession.uid || !req.cookies.loggedIn) {
-          console.log('user is not logged in')
-          return next();
-        } else {
-          res.redirect('/');
-        }
-      };
+  req.clientSession.uid = null;
+  req.clientSession.destroy((err) => {
+    if (err) throw err;
+  });
+  res.clearCookie('clientSession');
+  res.clearCookie('tracker');
+  res.redirect('/');
+  return 0;
+}
 
-      app.use((err, req, res, next) => {
-        // TODO implement a log file for errors
-        console.log(err.stack);
-        res.status(500).send('The server encountered an error');
-      });
+function loggedIn(req, res, next) {
+  // if logged in continue, else redirect to wherever
+  if (req.clientSession.uid && req.cookies.loggedIn) {
+    res.setHeader("username", req.clientSession.uid);
+    console.log(req.clientSession.uid, 'is logged in');
+    return next();
+  } else {
+    res.redirect('/'); // TODO route this however
+  }
+
+};
+
+function notLoggedIn(req, res, next) {
+  console.log(req.cookies);
+  if (!req.clientSession.uid || !req.cookies.loggedIn) {
+    console.log('user is not logged in')
+    return next();
+  } else {
+    res.redirect('/');
+  }
+};
+
+app.use((err, req, res, next) => {
+  // TODO implement a log file for errors
+  console.log(err.stack);
+  res.status(500).send('The server encountered an error');
 });

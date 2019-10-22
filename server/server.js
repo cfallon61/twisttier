@@ -25,6 +25,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
 
+
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
 

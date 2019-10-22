@@ -36,6 +36,70 @@ describe("middleware / routing function tests", () => {
     });
   });
 
+  describe("#delete account", async () => {
+
+    before(async () => {
+      console.log('creating test user for deletion of account testing.')
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/create_user',
+          body: {
+            username: 'endMyPain',
+            email: 'welcometohell1@gmail.com',
+            name: "Kurt",
+            password: "password",
+            bio: 'why am i the only one actually working?',
+          }
+        });
+    
+      const mockres = httpMocks.createResponse();
+      // post to router
+      await router.postCreateUser(req, mockres, () => {});
+      if (mockres.getHeader('error')){
+        assert.fail("IDK WTF happened here man, here is the error from the creation: " + mockres.getHeader('error'));
+      }
+    });
+
+    it('@delete account bad pass', async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/delete',
+          body: {
+            username: 'endMyPain',
+            email: 'welcometohell1@gmail.com',
+            password: "ogarjfvvfphfpqu",
+          }
+        });
+    
+      const mockres = httpMocks.createResponse();
+      await router.deleteAccount(req, mockres, () => {});
+      var error = mockres.getHeader('error');
+
+      assert.notDeepStrictEqual(error, undefined, 'expected error header to be defined but was ' + error);
+    });
+
+    it('@delete account good pass', async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/delete',
+          body: {
+            username: 'endMyPain',
+            email: 'welcometohell1@gmail.com',
+            password: "password",
+          }
+        });
+    
+      const mockres = httpMocks.createResponse();
+      await router.deleteAccount(req, mockres, () => {});
+      var error = mockres.getHeader('error');
+
+      assert.deepStrictEqual(error, undefined, 'expected error header to be undefined but was ' + error);
+    });
+  });
+
   describe('#authorize', () => {
  
     it('@test authorize good pass', async () => {
@@ -375,4 +439,9 @@ async function create_test_spin()
   await router.createSpin(req, mockres, () => {});
   const actualRes = mockres.getHeader('spinId');
   return actualRes;
+}
+async function create_test_user()
+{
+  
+
 }

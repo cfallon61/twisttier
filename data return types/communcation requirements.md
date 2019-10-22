@@ -101,9 +101,12 @@ body: {
 }
 ```
   __NOTE: All 3 fields are required.__
+2. Client will prompt user for their password, and store this in the body parameters.
+3. Server will validate password prior to attempting deletion
 * If user is not logged in, Server will redirect to home page
+* If the provided password is incorrect, server will set `error` header with message `deletion failed: bad password` and 406 will be returned.
 * if there was a problem with deletion, header 'error' will be set with message 'deletion failed' and 406 will be returned
-2. Server will delete client cookie and local session and redirect to `/`
+3. Server will delete client cookie and local session and redirect to `/`
 
 
 # Follow Interface

@@ -91,11 +91,13 @@ async function deleteAccount(req, res, next) {
     email: req.body.email
   };
 
-  var exist = await db.userExists(user);
+  var userData = await db.userExists(user);
+
+  var goodPass = await bcrypt.compare(user.password, userData.passhash);
 
   // check if the user exists
   // if it exists, call the delete user function of db
-  if (exist !== false) {
+  if (userData !== false && goodPass) {
 
     var deleteSuccess = await db.deleteUser(req.body.username);
 
@@ -105,7 +107,7 @@ async function deleteAccount(req, res, next) {
       res.setHeader('error', 'deletion failed');
     }
   } else {
-    res.setHeader('error', 'deletion failed');
+    res.setHeader('error', 'deletion failed: bad password');
   }
   return next();
 

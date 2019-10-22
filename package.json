@@ -20,7 +20,7 @@
   "author": "chris fallon",
   "license": "UNLICENSED",
   "dependencies": {
-    "bcrypt": "git+https://github.com/kelektiv/node.bcrypt.js.git#master",
+    "bcrypt": "latest",
     "bootstrap": "^4.3.1",
     "chai": "^4.2.0",
     "client-sessions": "latest",
@@ -29,7 +29,7 @@
     "dotenv": "^8.1.0",
     "eslint": "^6.5.1",
     "express": "latest",
-    "express-validator": "^6.2.0",
+    "express-validator": "latest",
     "jquery": "^3.4.1",
     "mocha": "^6.2.1",
     "mocha-junit-reporter": "latest",

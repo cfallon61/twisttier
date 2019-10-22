@@ -61,7 +61,7 @@ class Login extends Component {
       resultState.email = "";
     }
     else{
-      resultState.error = "The field you enter is not a valid entry.";
+      resultState.error = "The field you entered is not a valid entry.";
     }
 
     return resultState;
@@ -86,7 +86,7 @@ class Login extends Component {
     }).then( (res) => {
       //Got response from server.
       if (res.status === 401) {
-        NotificationManager.error("There is no user with this email or username. Please sign up.");
+        NotificationManager.error("Invalid username / email");
         return;
       }
       //Redirecting to home page. 

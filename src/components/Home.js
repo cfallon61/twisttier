@@ -19,8 +19,9 @@ class Home extends Component{
         //Decide which page to show.
         console.log(document.cookie);
         if(document.cookie !== "")
-        {
-            this.setState({loggedIn : true, username:"test"});
+        {   
+            var username = document.cookie.split('=')[1];
+            this.setState({loggedIn : true, username:username});
         }
         
     }

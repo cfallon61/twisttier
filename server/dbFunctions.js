@@ -467,7 +467,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 // funtion decrements like number of the spin by 1

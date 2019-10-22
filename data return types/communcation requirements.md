@@ -112,14 +112,27 @@ body: {
 # Follow Interface
 ## **TODO:** Figure out how the frick to do updates for new posts when not following that topic.
 
-## Following A User
+## Following A User [: Topic]
+1. Client will `POST /api/follow/<params>` where params are the following URL Parameters: 
+```
+params: {
+  toFollow: <username of the user to follow>,
+  tags: [list of tags to follow, empty defualts to all posts],
+  follower: <username of user who is following>
+}
+```
+2. __TODO__
 
-## Following A User:Topic
+## Unfollowing A User [: Topic]
 
-## Unfollowing A user
-
-## Unfollowing A User:Topic
-
+1. Client will `POST /api/unfollow/<params>` where params are the following URL Parameters: 
+```
+params: {
+  toFollow: <username of the user to unfollow>,
+  tags: [list of tags to unfollow, empty defualts to all posts and entire user],
+  follower: <username of user who is unfollowing>
+}
+```
 
 # Spins Interface
 
@@ -139,13 +152,16 @@ body: {
 
 ## Liking / Unliking a spin
 
-1. Client will `POST /api/spins/esteem` with the following parameters as URL parameters of the request: 
+1. Client will `POST /api/spins/esteem/esteem` with the following parameters as an `esteem` object as a URL parameter request: 
 ```
-params: {
-  postAuthor: <author's username>,
-  action: <'like' or 'unlike'>,
-  liker: <username of the person liking the post>
-  spinId: <ID of the spin to be liked / unliked>
+params: 
+{
+  esteem: {
+    postAuthor: <author's username>,
+    action: <'like' or 'unlike'>,
+    liker: <username of the person liking the post>
+    spinId: <ID of the spin to be liked / unliked>
+  }
 }
 ```
 

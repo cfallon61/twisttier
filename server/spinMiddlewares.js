@@ -64,10 +64,11 @@ async function removeSpin(req, res, next) {
 
 
 async function esteemSpin(req, res, next) {
-  var liker = req.params.username;
-  var author = req.params.spinAuthor;
-  var spinId = req.params.spinId;
-  var action = req.params.action;
+  const esteem = req.params.esteem
+  var liker = esteem.username;
+  var author = esteem.spinAuthor;
+  var spinId = esteem.spinId;
+  var action = esteem.action;
 
   var result;
 

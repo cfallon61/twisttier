@@ -87,12 +87,12 @@ app.post('/create_user',
     // console.log(validationResult(req));
     
     if (res.getHeader('error') != undefined) {
-      res.status(406);
+      res.status(406).send();
     } else {
       createSession(req, res);
+      res.sendFile(index);
     }
     // TODO look into redirecting to / instead of index
-    res.sendFile(index);
 
   });
 
@@ -130,12 +130,11 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   console.log(req.body.username || req.body.email, 'logging in');
   if (res.getHeader('error')) {
     // console.log(res);
-    res.status(401)
+    res.status(401).sendFile(index);
   } else {
     createSession(req, res);
+    res.sendFile(index);
   }
-  res.sendFile(index);
-
 });
 
 // @brief: endpoint for querying the logged in status of a user
@@ -242,7 +241,7 @@ function createSession(req, res){
   req.clientSession.uid = res.getHeader('username');
   // console.log('client session =',req.clientSession);
   res.setHeader("loggedIn", true);
-  res.cookie('loggedIn', true, {
+  res.cookie('username', req.clientSession.uid, {
     maxAge: 60 * 60 * 24
   });
 }
@@ -251,16 +250,15 @@ function createSession(req, res){
 // @author: Chris Fallon
 function deleteSession(req, res) {
 
-  
   if (req.clientSession.uid) {
     req.clientSession.uid = null;
     req.clientSession.destroy((err) => { if (err) throw err; });
     res.clearCookie('clientSession');
   }
-  if (req.cookies.loggedIn)
+  if (req.cookies.username)
   {
-    req.cookies.loggedIn = null;
-    res.clearCookie('loggedIn')
+    req.cookies.username = null;
+    res.clearCookie('username')
   }
   console.log(req.clientSession, req.cookies);
   return 0;

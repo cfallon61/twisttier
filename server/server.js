@@ -110,7 +110,7 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
 
 // TODO send responses to front based on login / logout
 app.get('/logout', loggedIn, (req, res) => {
-  console.log(req.clientSession.uid, 'logging out');
+  console.log(req.clientSession.uid, 'is logging out');
   // console.log(req.cookies);
   deleteSession(req, res);
   res.redirect('/'); // redirect to home page
@@ -127,7 +127,7 @@ app.get('/login', notLoggedIn, (req, res) => {
 // @brief: endpoint to actually handle the login request for a user
 app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   // if the authorize function signals an error, send an unauthorized message
-  console.log('logging in');
+  console.log(req.body.username || req.body.email, 'logging in');
   if (res.getHeader('error')) {
     // console.log(res);
     res.status(401)
@@ -254,26 +254,15 @@ function deleteSession(req, res) {
   
   if (req.clientSession.uid) {
     req.clientSession.uid = null;
-    req.clientSession.destroy((err) => {
-      if (err) console.log(err);
-    });
+    req.clientSession.destroy((err) => { if (err) throw err; });
     res.clearCookie('clientSession');
   }
-  if (req.tracker){
-    req.tracker = null;
-    req.tracker.destroy((err) => {
-      if (err) console.log(err);
-    })
-    res.clearCookie('tracker');
-  } 
-  if (req.loggedIn)
+  if (req.cookies.loggedIn)
   {
-    req.loggedIn = null;
-    req.loggedIn.destroy((err) => {
-      if (err) console.log(err);
-    })
+    req.cookies.loggedIn = null;
     res.clearCookie('loggedIn')
   }
+  console.log(req.clientSession, req.cookies);
   return 0;
 }
 
@@ -289,7 +278,7 @@ function loggedIn(req, res, next) {
 };
 
 function notLoggedIn(req, res, next) {
-  // console.log(req.cookies);
+  // console.log(req.clientSession);
   if (!req.clientSession.uid || !req.cookies.loggedIn) {
     console.log('user is not logged in')
     return next();

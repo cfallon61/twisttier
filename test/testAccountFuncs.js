@@ -24,9 +24,9 @@ describe("middleware / routing function tests", () => {
       const mockres = httpMocks.createResponse();
       // post to router
       await router.postCreateUser(req, mockres, () => {});
-      const actualRes = mockres._getData();
+      const actualRes = mockres.getHeader('error');
 
-      if (actualRes === 'user exists'){
+      if (!actualRes){
         assert.notDeepStrictEqual(actualRes, 'user exists');
       }
       else{
@@ -72,8 +72,8 @@ describe("middleware / routing function tests", () => {
 
       await router.authorize(req, mockres, () => {});
 
-      const actual = mockres._getHeaders();
-      const expected = { error: 'Incorrect Password' };
+      const actual = mockres.getHeader('error');
+      const expected = 'Incorrect Password' ;
 
       assert.deepStrictEqual(actual, expected);
 
@@ -94,8 +94,8 @@ describe("middleware / routing function tests", () => {
 
       await router.authorize(req, mockres, () => {});
 
-      const actual = mockres._getHeaders();
-      const expected = {error : 'Username invalid'};
+      const actual = mockres.getHeader('error');
+      const expected = 'Username invalid';
         // console.log("actual: ", actual);
         // console.log("expected: ", expected);
       assert.deepStrictEqual(actual, expected);
@@ -130,19 +130,20 @@ describe("middleware / routing function tests", () => {
   });
 
   describe("#updateProfileInfo", async () => { 
-    it("id exists, returns user updated", async () => {
+    it("user exists, returns user updated", async () => {
         const req = httpMocks.createRequest(
         {
           method: "POST",
           url: '/updateProfileInfo',
           body: {
-            id: 1,
+            username: 'test',
             password: 'passwordsr4losers',
             bio: 'i hate my life', 
             name: 'test', 
             interests: [],
             accessibility_features: {},
             profile_pic: []
+            
           }
         });
 
@@ -150,17 +151,17 @@ describe("middleware / routing function tests", () => {
       
       // post to router
       await router.updateProfileInfo(req, mockres, () => {});
-      const actualRes = mockres.getHeader('message');
+      const actualRes = mockres.getHeader('error');
         // console.log(actualRes);
-      assert.equal(actualRes, "user updated");
+      assert.deepStrictEqual(actualRes, undefined);
     });
-    it("id does not exist, should return user not found", async () => {
+    it("username does not exist, should return user not found", async () => {
       const req = httpMocks.createRequest(
       {
         method: "POST",
         url: '/updateProfileInfo',
         body: {
-          id: -1,
+          username: 'this_sucks',
           password: 'i do not exist',
           bio: 'doesnotexist', 
           name: 'existingispain', 
@@ -177,17 +178,17 @@ describe("middleware / routing function tests", () => {
       // console.log(mockres);
       const actualRes = mockres.getHeader("error");
       // console.log("actual:", actualRes);
-      assert.equal(actualRes, "user not found");
+      assert.notDeepStrictEqual(actualRes, undefined);
     });
     // updateprofileInfo should return next() if fail not false, 
     // need a test for that
-    it("id exists with password not given, should return user found", async () => {
+    it("username exists with password not given, should return user found", async () => {
       const req = httpMocks.createRequest(
       {
         method: "POST",
         url: '/updateProfileInfo',
         body: {
-          id: 6,
+          username: 'doeJohn',
           bio: 'yellow', 
           name: 'Harvey', 
           interests: [],
@@ -201,9 +202,9 @@ describe("middleware / routing function tests", () => {
       // post to router
       await router.updateProfileInfo(req, mockres, () => {});
       // console.log(mockres);
-      const actualRes = mockres.getHeader("message");
+      const actualRes = mockres.getHeader("username");
       // console.log("actual:", actualRes);
-      assert.equal(actualRes, "user updated");
+      assert.notDeepStrictEqual(actualRes, undefined);
     });
   });
 
@@ -247,7 +248,6 @@ describe("middleware / routing function tests", () => {
       await router.getUserInfo(req, mockres, () => {});
       const actualRes = mockres.getHeader('error');
       if (actualRes != undefined){
-        console.log(mockres);
         assert.notDeepStrictEqual(actualRes, undefined);
       }
     });
@@ -260,7 +260,8 @@ describe("middleware / routing function tests", () => {
       const req = httpMocks.createRequest(
         {
           method: "POST",
-          url: '/api/add_spin',
+          url: '/api/add_spin/f',
+          params: { username: 'f' },
           body: {
             spinBody: "yo screw you man",
             tags: ['wtf', 'kill me'],
@@ -275,14 +276,14 @@ describe("middleware / routing function tests", () => {
       await router.createSpin(req, mockres, () => {});
       const actualRes = mockres.getHeader('error');
 
-      console.log(mockres);
       assert.deepStrictEqual(actualRes, undefined, 'expected undefined but got' + String(actualRes));
     });
     it("@quote == true, origin undefined: ", async () => {
       const req = httpMocks.createRequest(
         {
           method: "POST",
-          url: '/api/add_spin',
+          url: '/api/add_spin/f',
+          params: { username: 'f' },
           body: {
             spinBody: "yo screw you man",
             tags: ['wtf', 'kill me'],
@@ -296,22 +297,22 @@ describe("middleware / routing function tests", () => {
       // post to router
       await router.createSpin(req, mockres, () => { });
       const actualRes = mockres.getHeader('error');
-      console.log(mockres);
 
       assert.notDeepStrictEqual(actualRes, undefined, 'expected to be defined but response was undefined.');
 
     });
 
-    it("@quote == true, origin undefined: ", async () => {
+    it("@quote == true, origin defined: ", async () => {
       const req = httpMocks.createRequest(
         {
           method: "POST",
-          url: '/api/add_spin',
+          url: '/api/add_spin/f',
+          params: { username: 'f' },
           body: {
             spinBody: "yo screw you man",
             tags: ['wtf', 'kill me'],
             is_quote: true,
-            quote_origin: "bringMeDeath"
+            quote_origin: { username: 'bringMeDeath', id: 1}
           }
         });
 
@@ -320,7 +321,6 @@ describe("middleware / routing function tests", () => {
       // post to router
       await router.createSpin(req, mockres, () => { });
       const actualRes = mockres.getHeader('error');
-      console.log(mockres);
 
       assert.deepStrictEqual(actualRes, undefined, 'expected undefined but was ' + String(actualRes));
 

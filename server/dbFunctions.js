@@ -20,18 +20,20 @@ var userExists = async function (user) {
   var params = [];
   // console.log(user);
   var query = `SELECT * FROM ${USER_TABLE} `;
-  if(user.email === "")
+
+  if(user.username)
   {
     query += `WHERE USERNAME=$1`;
     params.push(user.username);
   }
-  else if(user.username === "")
+  else if(user.email)
   {
     query += `WHERE EMAIL=$1`;
     params.push(user.email);
   }
-  else{
+  else {
     //Unexpected error here.
+    console.log("what the fuck")
     return false;
   }
   var res = await pool.query(query, params);
@@ -193,7 +195,7 @@ async function updateUser(user) {
     await client.query('BEGIN');
 
     var args = [
-      user.id,
+      user.username,
       hash, 
       user.bio, 
       user.name, 
@@ -205,7 +207,7 @@ async function updateUser(user) {
     var query = `UPDATE ${USER_TABLE} 
       SET passhash = $2, bio = $3, name = $4, interests = $5, 
       accessibility_features = $6, profile_pic = $7
-      WHERE id = $1 
+      WHERE username = $1 
       RETURNING username`
     ;
 
@@ -214,7 +216,7 @@ async function updateUser(user) {
       query = `UPDATE ${USER_TABLE} 
         SET bio = $2, name = $3, interests = $4, 
         accessibility_features = $5, profile_pic = $6
-        WHERE id = $1 
+        WHERE username = $1 
         RETURNING username`
       ;
     }
@@ -337,12 +339,12 @@ async function getSpins(users) {
 // @param user = user who created the spin
 // @param spin = spin to be added into the user's spin table
 // @return spin id if success, false if failure
-async function addSpin(user, spin) {
+async function addSpin(username, spin) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user.username);
+    var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
     var args = [
@@ -352,7 +354,7 @@ async function addSpin(user, spin) {
       spin.likes,
       spin.quotes,
       spin.is_quote,
-      spin.quote_origin,
+      JSON.stringify(spin.quote_origin),
       spin.like_list
     ];
 
@@ -377,12 +379,12 @@ async function addSpin(user, spin) {
 };
 
 
-async function deleteSpin(user, spin_id) {
+async function deleteSpin(username, spin_id) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user.username);
+    var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
     var query = 

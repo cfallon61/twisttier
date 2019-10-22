@@ -225,6 +225,7 @@ async function updateProfileInfo(req, res, next) {
   }
 
   var user = {
+    username: req.body.username,
     password: req.body.password,
     bio: req.body.bio,
     name: req.body.name,
@@ -267,16 +268,14 @@ async function createSpin(req, res, next) {
   };
 
   // if it is a quote but no original author is specified, error
-  if (spin.is_quote && quote_origin === undefined) {
+  if (spin.is_quote && spin.quote_origin === undefined) {
     res.setHeader("error", "no quote origin specified");
     return next();
   }
 
-  var user = {
-    username: req.clientSession.uid
-  };
 
-  var added = await db.addSpin(user, spin);
+  var added = await db.addSpin(req.params.username, spin);
+  console.log(added);
   if (!added) {
     res.setHeader("error", "unable to add spin");
   } else {

@@ -196,7 +196,7 @@ app.post('/api/update/:username', loggedIn,
 
 
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
-app.post('/api/add_spin', loggedIn,
+app.post('/api/add_spin/:username', loggedIn,
         [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
         ], users.createSpin, (req, res) => {
     // TODO add error states for invalid input

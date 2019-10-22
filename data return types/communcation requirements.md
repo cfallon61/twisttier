@@ -29,7 +29,7 @@ body: {
 * **Successful creation:** A header 'username' will be set with the username returned from the creation and the following cookies will be set:```
 cookies: { 
   uid : <some arbitary hash value>
-  loggedIn: true
+  username: <username>
 }```
 
 * **Creation Failed due to user existing:** a header 'error' will be set and 406 will be returned ex
@@ -137,13 +137,15 @@ body: {
 ## Adding a Spin
 
 __Note__ This functionality requires integration testing with client
-1. Client will `POST /api/add_spin` with the following parameters in the body:
+1. Client will `POST /api/add_spin/<username>` with `username` as a URL parameter with the following parameters in the body:
   ```
   body: {
     spinBody: [some arbitary text here. <= 90 characters in length],
     tags: [list of tags i.e. ['tag1', 'tag2']],
     is_quote: [boolean. True if quoted, false if not],
-    quote_origin: [username: post_id (front end will have a list of the post IDs available to it so this is possible)]
+    quote_origin: {
+      username: <username of original author>,
+      spinId: <id of original quote> //(front end will have a list of the post IDs available to it so this is possible)]
   }; 
   ```
 

@@ -5,7 +5,7 @@
 * This is an endpoint strictly for querying whether a user is logged in. 
 Client will `POST /api/login_status`
 Server will return the following:
-    * __User is logged in:__ A cookie `loggedIn=true` will be set, as well as a response header `loggedIn: true`
+    * __User is logged in:__ A cookie `username=<username>` will be set, as well as a response header `loggedIn: true`
     * __User is not logged in:__ Server will send response header `loggedIn: false`
 
 ## Creating a User

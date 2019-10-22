@@ -206,7 +206,7 @@ app.post('/api/add_spin/:username', loggedIn,
   res.sendFile(index);
 });
 
-app.post('/api/deleteSpin/:spinId', loggedIn, users.removeSpin, (req, res) => {
+app.post('/api/deleteSpin/:username', loggedIn, users.removeSpin, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(418)

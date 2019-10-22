@@ -291,14 +291,10 @@ async function removeSpin(req, res, next) {
   if (check_errors(req, res)) {
     // return next();
   }
+  var username = req.params.username
+  var spin_id = req.body.spinId;
 
-  var spin_id = req.params.spinId;
-
-  var user = {
-    username: req.clientSession.uid
-  };
-
-  var deleted = await db.deleteSpin(user, spin_id);
+  var deleted = await db.deleteSpin(username, spin_id);
   if (!deleted) {
     res.setHeader("error", "unable to delete spin");
   } else {

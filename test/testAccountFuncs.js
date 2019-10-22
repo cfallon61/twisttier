@@ -254,6 +254,31 @@ describe("middleware / routing function tests", () => {
     
   });
 
+  describe('#delete spin', async () => {
+    it ("@spin exists", async () => {
+      console.log('delete existing spin');
+      var testSpinId = await create_test_spin();
+      console.log("spinId:", testSpinId);
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/api/deleteSpin/f',
+          params: { username: 'f' },
+          body: {
+            spinId: testSpinId
+          }
+        });
+
+      const mockres = httpMocks.createResponse();
+      await router.removeSpin(req, mockres, () => {});
+
+      const actualRes = mockres.getHeader('error');
+
+      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but got ' + String(actualRes));
+      // post to router
+    });
+  });
+
   describe("#create spin", async () => {
 
     it("@quote == false: ", async () => {
@@ -328,3 +353,26 @@ describe("middleware / routing function tests", () => {
 
   });
 });
+
+async function create_test_spin()
+{
+  const req = httpMocks.createRequest(
+    {
+      method: "POST",
+      url: '/api/add_spin/f',
+      params: { username: 'f' },
+      body: {
+        spinBody: "yo screw you man",
+        tags: ['wtf', 'kill me'],
+        is_quote: false,
+        quote_origin: undefined
+      }
+    });
+
+  const mockres = httpMocks.createResponse();
+
+  // post to router
+  await router.createSpin(req, mockres, () => {});
+  const actualRes = mockres.getHeader('spinId');
+  return actualRes;
+}

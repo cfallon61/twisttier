@@ -159,7 +159,12 @@ __Note__ This functionality requires integration testing with client
 ##Deleting a Spin
 __NOTE:__ This functionality has not been implemented yet.
 __NOTE:__ Only 1 post may be deleted at a time. No plans to implement bulk removal.
-1. Client will `POST /api/deleteSpin/` with the `spinId` being a URL parameter.
+1. Client will `POST /api/deleteSpin/<username>` with the `username` being a URL parameter and the `spinId` given in the body:
+```
+body: {
+  spinId: <id>
+} 
+```
 2. Server will validate the user session. 
 3. If the user session is valid, the username will be gathered from the `clientSession.uid` cookie in the request object. 
 4. Server will attempt to remove the post from the user's post table

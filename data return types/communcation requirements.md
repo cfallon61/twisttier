@@ -195,7 +195,7 @@ __Note__ This functionality requires integration testing with client
     * __Success:__ If the post was successfully added, the server will set response header `spinId: [id]` and will send the index file.
 
 ##Deleting a Spin
-__NOTE:__ This functionality has not been implemented yet.
+<!-- __NOTE:__ This functionality has not been implemented yet. -->
 __NOTE:__ Only 1 post may be deleted at a time. No plans to implement bulk removal.
 1. Client will `POST /api/deleteSpin/<username>` with the `username` being a URL parameter and the `spinId` given in the body:
 ```

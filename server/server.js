@@ -165,8 +165,9 @@ app.post('/api/users/:username', users.getUserInfo, (req, res) => {
 //           404 not found error if user not exist
 app.post('/api/timeline/:username', users.getTimeline, (req, res) => {
   if (res.getHeader('error') != undefined) {
-    res.status(404)
+    res.status(404).send('user page not found');
   }
+  
 });
 
 // @brief: get a supplied user's posts

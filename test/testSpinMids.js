@@ -117,7 +117,7 @@ describe('test spin middleware functions', async () => {
               liker: 'doeJohn',
               postAuthor: 'f',
               action: 'like',
-              spinId: 353
+              spinId: 356
             }
            }
         });

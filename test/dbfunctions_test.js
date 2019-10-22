@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
 
-describe('database functions test', function() {
+describe.skip('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 

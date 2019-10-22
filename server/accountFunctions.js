@@ -212,9 +212,9 @@ async function getTimeline(req, res, next) {
   if (followedSpins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
-
+  // console.log(followedSpins);
   res.json(JSON.stringify(followedSpins));
-  return next();
+  // return next();
 
   // TODO error check here and make sure that it returns good data
 

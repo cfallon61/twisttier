@@ -35,6 +35,7 @@ var userExists = async function (user) {
     return false;
   }
   var res = await pool.query(query, params);
+
   // response is a json 
   // need to get rows, which is a list
   // console.log(res);
@@ -111,7 +112,7 @@ function userSpinTableName(username) {
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
       name, followers, following, interests, accessibility_features) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING username`;
 
     res = await client.query(query, args);
     // console.log("2nd res: ", res.rows);
@@ -129,11 +130,8 @@ function userSpinTableName(username) {
     client.release();
   }
   // console.log(rows);
-  if (rows.length === 0 && TEST){
-    return 'user exists';
-  }
 
-  return (rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? 'unable to create user' : rows[0].username);
 };
 
 
@@ -242,14 +240,27 @@ async function updateUser(user) {
 
 // Function to update the last login time
 // return true on success, false on error
-async function updateLoginTime(username){
+async function updateLoginTime(user){
   var client = await pool.connect();
   var rows;
+  var query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE`;
+  var arg = '';
+  if (!user.username)
+  {
+    query +=` email = $1 RETURNING username`;
+    arg = user.email;
+  }
+  else {
+    query += ` USERNAME = $1 RETURNING username`;
+    arg = user.username;
+  }
+  console.log(query)
   try{
+    // console.log(user);
     await client.query('BEGIN');
-    const tablename = userSpinTableName(username);
-    const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
-    var res = await client.query(query, [username]);
+    // const tablename = userSpinTableName(username);
+    var res = await client.query(query, [arg]);
+    // var res = await client.query(query);
     rows = res.rows;
     await client.query('COMMIT');
   }
@@ -260,7 +271,7 @@ async function updateLoginTime(username){
   finally {
     client.release();
   }
-
+  // console.log(res.rows);
   return (rows.length === 0 ? false : true);
 };
 

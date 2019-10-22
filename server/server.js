@@ -77,19 +77,19 @@ var server = app.listen(port, (err) => {
 // TODO ADD SESSION CACHING
 // handle user creation
 app.post('/create_user',
-  [check('email').isEmail(),
-    check('password').isLength({ min: 8}),
-    check('bio').isLength({ max: 150 }),
-    check('name').isLength({ max: 25, min: 1 }),
-    check('username').isLength({ max: 15, min: 1 })
+  [check('email').isEmail().withMessage('invalid email'),
+   check('password').isLength({ min: 8}).withMessage('password too short'),
+   check('bio').isLength({ max: 150 }).withMessage('bio too long'),
+   check('name').isLength({ max: 25, min: 1 }).withMessage('invalid name'),
+   check('username').isLength({ max: 15, min: 1 }).withMessage('invalid username')
   ],
   notLoggedIn, upload, users.postCreateUser, (req, res) => {
-
+    // console.log(validationResult(req));
+    
     if (res.getHeader('error') != undefined) {
       res.status(406);
     } else {
-      req.clientSession.uid = req.body.username;
-      res.setHeader("username", req.body.username);
+      createSession(req, res);
     }
     // TODO look into redirecting to / instead of index
     res.sendFile(index);
@@ -97,9 +97,6 @@ app.post('/create_user',
   });
 
 
-// TODO add route for update user info and use express validator
-
-// TODO ADD COOKIE / SESSION VALIDATION
 // handle profile image uploading
 // @param req: the html headers which will include
 //              a json with the user information
@@ -116,6 +113,7 @@ app.get('/logout', loggedIn, (req, res) => {
   console.log(req.clientSession.uid, 'logging out');
   // console.log(req.cookies);
   deleteSession(req, res);
+  res.redirect('/'); // redirect to home page
 });
 
 // @brief: route handler for checking if a user is logged in
@@ -127,18 +125,28 @@ app.get('/login', notLoggedIn, (req, res) => {
 });
 
 // @brief: endpoint to actually handle the login request for a user
-app.post('/login', notLoggedIn, users.authorize, (req, res, user) => {
+app.post('/login', notLoggedIn, users.authorize, (req, res) => {
   // if the authorize function signals an error, send an unauthorized message
+  console.log('logging in');
   if (res.getHeader('error')) {
     // console.log(res);
-    res.status(401).send('Unauthorized');
+    res.status(401)
   } else {
-    req.clientSession.uid = user.username;
-    res.cookie('loggedIn', true, {
-      maxAge: 60 * 60 * 24
-    });
-    res.setHeader('username', user.username);
-    res.sendFile(index);
+    createSession(req, res);
+  }
+  res.sendFile(index);
+
+});
+
+// @brief: endpoint for querying the logged in status of a user
+// @response: header loggedIn: true and cookie loggedIn=true if user is logged in, otherwise
+//            these valuse will be false
+app.post('/api/login_status', (req, res) => {
+  if (req.clientSession.uid && req.cookies.loggedIn){
+    createSession(req, res);
+  }
+  else {
+    deleteSession(req, res);
   }
 });
 
@@ -171,14 +179,15 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 });
 
 
+
 // @brief: update a user's profile information
 
 // @respond: IDK man i'm tired
 
 app.post('/api/update/:username', loggedIn,
-        [check('bio').isLength({ max: 150 }),
-         check('name').isLength({ min: 1, max: 25 })], 
-         users.updateProfileInfo, (req, res) => {
+        [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
+         check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), 
+        ], users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
       res.status(406)
@@ -189,8 +198,8 @@ app.post('/api/update/:username', loggedIn,
 
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
 app.post('/api/add_spin', loggedIn,
-        [check('spinBody').isLength({ min: 1, max: 90 })], 
-         users.createSpin, (req, res) => {
+        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
+        ], users.createSpin, (req, res) => {
     // TODO add error states for invalid input
   if (res.getHeader('error') != undefined) {
     res.status(418)
@@ -216,6 +225,7 @@ app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
     res.sendFile(index);
   } else {
     deleteSession(req, res);
+    res.redirect('/'); // redirect to home page
   }
 });
 
@@ -227,34 +237,59 @@ app.get('/*', (req, res) => {
   res.sendFile(index);
 });
 
+// @brief: Create a user session and set relevant headers
+function createSession(req, res){
+  req.clientSession.uid = res.getHeader('username');
+  // console.log('client session =',req.clientSession);
+  res.setHeader("loggedIn", true);
+  res.cookie('loggedIn', true, {
+    maxAge: 60 * 60 * 24
+  });
+}
+
 // @brief: delete a client session
 // @author: Chris Fallon
 function deleteSession(req, res) {
 
-  req.clientSession.uid = null;
-  req.clientSession.destroy((err) => {
-    if (err) throw err;
-  });
-  res.clearCookie('clientSession');
-  res.clearCookie('tracker');
-  res.redirect('/');
+  
+  if (req.clientSession.uid) {
+    req.clientSession.uid = null;
+    req.clientSession.destroy((err) => {
+      if (err) console.log(err);
+    });
+    res.clearCookie('clientSession');
+  }
+  if (req.tracker){
+    req.tracker = null;
+    req.tracker.destroy((err) => {
+      if (err) console.log(err);
+    })
+    res.clearCookie('tracker');
+  } 
+  if (req.loggedIn)
+  {
+    req.loggedIn = null;
+    req.loggedIn.destroy((err) => {
+      if (err) console.log(err);
+    })
+    res.clearCookie('loggedIn')
+  }
   return 0;
 }
 
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
   if (req.clientSession.uid && req.cookies.loggedIn) {
-    res.setHeader("username", req.clientSession.uid);
+    res.setHeader("loggedIn", true);
     console.log(req.clientSession.uid, 'is logged in');
     return next();
   } else {
     res.redirect('/'); // TODO route this however
   }
-
 };
 
 function notLoggedIn(req, res, next) {
-  console.log(req.cookies);
+  // console.log(req.cookies);
   if (!req.clientSession.uid || !req.cookies.loggedIn) {
     console.log('user is not logged in')
     return next();
@@ -264,7 +299,9 @@ function notLoggedIn(req, res, next) {
 };
 
 app.use((err, req, res, next) => {
-  // TODO implement a log file for errors
-  console.log(err.stack);
+  // TODO implement a log file for errorsthro
+  console.log('The server encountered an error', err.stack)
   res.status(500).send('The server encountered an error');
+  throw err;
+
 });

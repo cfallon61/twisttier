@@ -13,11 +13,9 @@ const bcrypt = require('bcrypt');
 // @return: none
 async function postCreateUser(req, res, next) {
 
-  console.log('postCreateUser called');
-  // console.log(req.body);
-
+  // TODO figure out why express-validator isnt working
   if (check_errors(req, res)) {
-    return next();
+    // return next();
   }
 
   var accountInfo = {
@@ -27,14 +25,14 @@ async function postCreateUser(req, res, next) {
     username: req.body.username,
     bio: req.body.bio
   };
-
+  
   var userCreated = await db.createUser(accountInfo);
-
+  // console.log(userCreated);
   // userCreated is the empty rows or false, return error
   if (!userCreated) {
     res.setHeader('errors', userCreated);
   } else {
-    res.setHeader('username', userCreated.username);
+    res.setHeader('username', userCreated);
   }
 
   return next();
@@ -53,7 +51,6 @@ async function authorize(req, res, next) {
   // console.log(user);
 
   var userData = await db.userExists(user);
-  // console.log(userData);
 
   if (userData === false) {
     console.log('invalid username');
@@ -61,7 +58,7 @@ async function authorize(req, res, next) {
     return next();
   }
   var match = await bcrypt.compare(user.password, userData.passhash);
-
+  // console.log(match);
   // password doesn't match
   if (!match) {
     console.log('invalid password');
@@ -71,7 +68,7 @@ async function authorize(req, res, next) {
       //1st index is the username
       user.username = userData[1];
     }
-    updateLoginTimeBool = db.updateLoginTime(user.username);
+    updateLoginTimeBool = await db.updateLoginTime(user);
 
     // check whether login time was successfully updated
     if (!updateLoginTimeBool) {
@@ -79,7 +76,8 @@ async function authorize(req, res, next) {
       res.setHeader('error', 'Login time could not be updated');
     }
   }
-  return next(req, res, user);
+  res.setHeader('username', userData.username);
+  return next();
 
 }
 
@@ -223,7 +221,7 @@ async function getTimeline(req, res, next) {
 async function updateProfileInfo(req, res, next) {
 
   if (check_errors(req, res)) {
-    return next();
+    // return next();
   }
 
   var user = {
@@ -254,7 +252,7 @@ async function updateProfileInfo(req, res, next) {
 // @return: none
 async function createSpin(req, res, next) {
   if (check_errors(req, res)) {
-    return next();
+    // return next();
   }
 
   var spin = {
@@ -292,7 +290,7 @@ async function createSpin(req, res, next) {
 // @return: none
 async function removeSpin(req, res, next) {
   if (check_errors(req, res)) {
-    return next();
+    // return next();
   }
 
   var spin_id = req.params.spinId;
@@ -315,9 +313,10 @@ async function removeSpin(req, res, next) {
 function check_errors(req, res) {
   const errors = validationResult(req);
 
-  // verify that the spin fits within the legnth bounds
+  // verify that the spin fits within the length bounds
   if (!errors.isEmpty()) {
-    res.setHeader('error', errors.array());
+    // console.log(errors.array());
+    res.setHeader('error', JSON.stringify(errors.array()));
     return true;
   }
 

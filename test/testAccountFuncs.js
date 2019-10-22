@@ -2,6 +2,7 @@ const assert = require('assert');
 const httpMocks = require('node-mocks-http');
 const router = require('../server/accountFunctions');
 const db = require('../server/dbFunctions');
+const spins = require('../server/spinMiddlewares.js');
 
 
 
@@ -318,128 +319,7 @@ describe("middleware / routing function tests", () => {
     
   });
 
-  describe('#delete spin', async () => {
-    it ("@spin exists", async () => {
-      console.log('delete existing spin');
-      var testSpinId = await create_test_spin();
-      console.log("spinId:", testSpinId);
-      const req = httpMocks.createRequest(
-        {
-          method: "POST",
-          url: '/api/deleteSpin/f',
-          params: { username: 'f' },
-          body: {
-            spinId: testSpinId
-          }
-        });
-
-      const mockres = httpMocks.createResponse();
-      await router.removeSpin(req, mockres, () => {});
-
-      const actualRes = mockres.getHeader('error');
-
-      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but got ' + String(actualRes));
-      // post to router
-    });
-  });
-
-  describe("#create spin", async () => {
-
-    it("@quote == false: ", async () => {
-      const req = httpMocks.createRequest(
-        {
-          method: "POST",
-          url: '/api/add_spin/f',
-          params: { username: 'f' },
-          body: {
-            spinBody: "yo screw you man",
-            tags: ['wtf', 'kill me'],
-            is_quote: false,
-            quote_origin: undefined
-          }
-        });
-
-      const mockres = httpMocks.createResponse();
-
-      // post to router
-      await router.createSpin(req, mockres, () => {});
-      const actualRes = mockres.getHeader('error');
-
-      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but got' + String(actualRes));
-    });
-    it("@quote == true, origin undefined: ", async () => {
-      const req = httpMocks.createRequest(
-        {
-          method: "POST",
-          url: '/api/add_spin/f',
-          params: { username: 'f' },
-          body: {
-            spinBody: "yo screw you man",
-            tags: ['wtf', 'kill me'],
-            is_quote: true,
-            quote_origin: undefined
-          }
-        });
-
-      const mockres = httpMocks.createResponse();
-
-      // post to router
-      await router.createSpin(req, mockres, () => { });
-      const actualRes = mockres.getHeader('error');
-
-      assert.notDeepStrictEqual(actualRes, undefined, 'expected to be defined but response was undefined.');
-
-    });
-
-    it("@quote == true, origin defined: ", async () => {
-      const req = httpMocks.createRequest(
-        {
-          method: "POST",
-          url: '/api/add_spin/f',
-          params: { username: 'f' },
-          body: {
-            spinBody: "yo screw you man",
-            tags: ['wtf', 'kill me'],
-            is_quote: true,
-            quote_origin: { username: 'bringMeDeath', id: 1}
-          }
-        });
-
-      const mockres = httpMocks.createResponse();
-
-      // post to router
-      await router.createSpin(req, mockres, () => { });
-      const actualRes = mockres.getHeader('error');
-
-      assert.deepStrictEqual(actualRes, undefined, 'expected undefined but was ' + String(actualRes));
-
-    });
-
-  });
 });
-
-async function create_test_spin()
-{
-  const req = httpMocks.createRequest(
-    {
-      method: "POST",
-      url: '/api/add_spin/f',
-      params: { username: 'f' },
-      body: {
-        spinBody: "yo screw you man",
-        tags: ['wtf', 'kill me'],
-        is_quote: false,
-        quote_origin: undefined
-      }
-    });
-
-  const mockres = httpMocks.createResponse();
-
-  // post to router
-  await router.createSpin(req, mockres, () => {});
-  const actualRes = mockres.getHeader('spinId');
-  return actualRes;
-}
 async function create_test_user()
 {
   

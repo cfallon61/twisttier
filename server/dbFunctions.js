@@ -425,7 +425,7 @@ async function unfollowTopicUserPair(pair) {
 // @param user_liker: username of user which is liking the spin
 // @param user_poster: username of user which is recieveing the like on his spin
 // @param spin: spin which is being liked
-// @return true on success and false on failure
+// @return the spin which was liked on success and false on failure
 async function likeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
   var rows = [];
@@ -436,11 +436,11 @@ async function likeSpin(user_liker, user_poster, spin) {
     await client.query('BEGIN');
    
     var args = [spin.id];
-    var query = `SELECT like_list FROM ${tablename} 
-    WHERE id = $1`;
+    var query = `SELECT like_list FROM ${tablename} WHERE id = $1`;
 
     var res = await client.query(query, args);
 
+    // check that the user has not already liked the spin
     if (res[0].indexOf(user_like.username) > -1) {
       console.log("user_liker has already liked the spin")
       return false;
@@ -449,11 +449,7 @@ async function likeSpin(user_liker, user_poster, spin) {
 
       res[0].push(user_liker.username);
       args = [res[0], spin.id];
-      query = `UPDATE ${tablename} 
-      SET 
-      likelist = $1, 
-      likes = likes + 1
-      WHERE id = $2`;
+      query = `UPDATE ${tablename} SET likelist = $1, likes = likes + 1 WHERE id = $2`;
 
       res = await client.query(query, args);
       
@@ -468,7 +464,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows);
 };
 
 // funtion decrements like number of the spin by 1
@@ -477,7 +473,7 @@ async function likeSpin(user_liker, user_poster, spin) {
 // @param user_liker: username of user which is unliking the spin
 // @param user_poster: username of user which is poster of spin
 // @param spin: spin which is being unliked
-// @return true on success and false on failure
+// @return the spin which was unliked on success and false on failure
 async function unlikeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
   var rows = [];
@@ -519,7 +515,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows);
 };
 
 async function reSpin(user, res) {

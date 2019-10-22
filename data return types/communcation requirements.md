@@ -137,6 +137,25 @@ body: {
 
 2. Server will return JSON of all spins in chronological order
 
+## Liking / Unliking a spin
+
+1. Client will `POST /api/spins/esteem` with the following parameters as URL parameters of the request: 
+```
+params: {
+  postAuthor: <author's username>,
+  action: <'like' or 'unlike'>,
+  liker: <username of the person liking the post>
+  spinId: <ID of the spin to be liked / unliked>
+}
+```
+
+2. Server will validate that `liker` is logged in and all that stuff
+3. Server will proceed to validate like status on the post:
+* If the user already likes the post and tries to like again, server will set header `error` with message `unable to like post`.
+* If the user tries to unlike a post and does not currently like it, server will set header `error` with message `unable to unlike post`
+* If liking / unliking is successful, server will return the spin's updated information
+3. Under error conditions, error headers will be set and server will respond with status `400: bad request`
+
 ## Adding a Spin
 
 __Note__ This functionality requires integration testing with client

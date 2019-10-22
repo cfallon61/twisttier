@@ -9,6 +9,7 @@ const { check, validationResult } = require('express-validator');
 
 const dotenv = require('dotenv');
 const users = require('./accountFunctions.js');
+const spins = require('./spinMiddlewares.js');
 const index = path.join(__dirname, '../build/index.html');
 
 
@@ -181,9 +182,7 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 
 // @brief: update a user's profile information
-
 // @respond: IDK man i'm tired
-
 app.post('/api/update/:username', loggedIn,
         [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
          check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), 
@@ -199,7 +198,7 @@ app.post('/api/update/:username', loggedIn,
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
 app.post('/api/add_spin/:username', loggedIn,
         [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
-        ], users.createSpin, (req, res) => {
+        ], spins.createSpin, (req, res) => {
     // TODO add error states for invalid input
   if (res.getHeader('error') != undefined) {
     res.status(418)
@@ -207,7 +206,7 @@ app.post('/api/add_spin/:username', loggedIn,
   res.sendFile(index);
 });
 
-app.post('/api/deleteSpin/:username', loggedIn, users.removeSpin, (req, res) => {
+app.post('/api/deleteSpin/:username', loggedIn, spins.removeSpin, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(418)
@@ -215,6 +214,13 @@ app.post('/api/deleteSpin/:username', loggedIn, users.removeSpin, (req, res) => 
   res.sendFile(index);
 });
 
+
+// @brief: endpoint for liking and unliking a spin.
+app.post('/api/spins/esteem/:esteem', loggedIn, spins.esteemSpin, (req, res) => {
+  if (res.getHeader('error')) {
+    res.status(400).send('bad request');
+  }
+});
 
 // @brief:  endpoint for deleting account
 // @author: Chris Fallon

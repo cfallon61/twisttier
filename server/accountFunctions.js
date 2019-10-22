@@ -5,6 +5,7 @@ const {
 const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
+const extFuncs = require('./helpers.js');
 
 
 
@@ -14,7 +15,7 @@ const bcrypt = require('bcrypt');
 async function postCreateUser(req, res, next) {
 
   // TODO figure out why express-validator isnt working
-  if (check_errors(req, res)) {
+  if (extFuncs.check_errors(req, res)) {
     // return next();
   }
 
@@ -222,7 +223,7 @@ async function getTimeline(req, res, next) {
 // updates user profile information from request
 async function updateProfileInfo(req, res, next) {
 
-  if (check_errors(req, res)) {
+  if (extFuncs.check_errors(req, res)) {
     // return next();
   }
 
@@ -250,76 +251,6 @@ async function updateProfileInfo(req, res, next) {
 }
 
 
-// @brief: middleware to create a post. sets 'error' header if
-//         errors occur
-// @return: none
-async function createSpin(req, res, next) {
-  if (check_errors(req, res)) {
-    // return next();
-  }
-
-  var spin = {
-    content: req.body.spinBody,
-    tags: req.body.tags,
-    edited: false,
-    likes: 0,
-    quotes: 0,
-    is_quote: req.body.is_quote,
-    quote_origin: req.body.quote_origin, // TODO define how this works I still don't understand the whole quote origin thing
-    like_list: []
-  };
-
-  // if it is a quote but no original author is specified, error
-  if (spin.is_quote && spin.quote_origin === undefined) {
-    res.setHeader("error", "no quote origin specified");
-    return next();
-  }
-
-
-  var added = await db.addSpin(req.params.username, spin);
-  console.log(added);
-  if (!added) {
-    res.setHeader("error", "unable to add spin");
-  } else {
-    res.setHeader("spinId", added);
-  }
-  return next();
-}
-
-// @brief: middleware to delete a post. sets 'error' header if
-//         errors occur
-// @return: none
-async function removeSpin(req, res, next) {
-  if (check_errors(req, res)) {
-    // return next();
-  }
-  var username = req.params.username
-  var spin_id = req.body.spinId;
-
-  var deleted = await db.deleteSpin(username, spin_id);
-  if (!deleted) {
-    res.setHeader("error", "unable to delete spin");
-  } else {
-    res.setHeader("spinId", deleted);
-  }
-  return next();
-}
-
-// @brief generic function for checking if a request has invalid input.
-// @return: true if there are errors present, false if none
-function check_errors(req, res) {
-  const errors = validationResult(req);
-
-  // verify that the spin fits within the length bounds
-  if (!errors.isEmpty()) {
-    // console.log(errors.array());
-    res.setHeader('error', JSON.stringify(errors.array()));
-    return true;
-  }
-
-  return false;
-}
-
 
 module.exports = {
   postCreateUser,
@@ -329,6 +260,5 @@ module.exports = {
   updateProfileInfo,
   getUserInfo,
   getPosts,
-  createSpin,
-  removeSpin
+  
 };

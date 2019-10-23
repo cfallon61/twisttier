@@ -113,10 +113,12 @@ describe('test spin middleware functions', async () => {
           method: "POST",
           url: '/api/esteemSpin/params',
           params: { 
-            liker: 'doeJohn',
-            postAuthor: 'f',
-            action: 'like',
-            spinId: 353
+            esteem: {
+              liker: 'doeJohn',
+              postAuthor: 'f',
+              action: 'like',
+              spinId: 356
+            }
            }
         });
       
@@ -130,7 +132,7 @@ describe('test spin middleware functions', async () => {
 
     it('@test like spin in like list', async () => {
       console.log('@test like spin in like list');
-     // TODO
+     
     });
   });
 

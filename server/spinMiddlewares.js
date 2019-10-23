@@ -64,10 +64,13 @@ async function removeSpin(req, res, next) {
 
 
 async function esteemSpin(req, res, next) {
-  var liker = req.params.username;
-  var author = req.params.spinAuthor;
-  var spinId = req.params.spinId;
-  var action = req.params.action;
+  const esteem = req.params.esteem
+  var liker = esteem.liker;
+  var author = esteem.postAuthor;
+  var spinId = esteem.spinId;
+  var action = esteem.action;
+  // console.log(esteem);
+  // console.log(liker, author, spinId, action);
 
   var result;
 
@@ -77,7 +80,8 @@ async function esteemSpin(req, res, next) {
   else if (action === 'unlike') {
     result = await db.unlikeSpin(liker, author, spinId);
   }
-  
+  console.log(result);
+
   // if the action was not able to be completed, set an error header and return next
   // else send the post and die
   if (!result) {
@@ -85,7 +89,7 @@ async function esteemSpin(req, res, next) {
     return next();
   }
   else {
-    res.JSON(JSON.stringify(result));
+    res.json(JSON.stringify(result));
   }
 }
 

@@ -27,28 +27,36 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
 
 
+function getExtension(filename) {
+  const index = filename.lastIndexOf(".");
+  return filename.substring(index);
+}
+
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
 
+  destination: "../profileImages",
+
   // handle filename creation
   filename: function(req, file, cb) {
-    // create a temporary filename
-    var ext = path.extname(file.originalname);
-    // strip off extension
-    var name = file.originalname.split('.')[0];
 
-    var tempName = name + '_' + Date.now().toString();
+    try {
 
-    // super hacky way of doing the file name handling
-    while (fs.existsSync(path.join(this.dest, tempName))) {
-      tempName = name + '_' + Date.now().toString();
+      var tempName = Date.now().toString() + "_" + file.originalname;
+      var filepath = path.join("../profileImages", tempName);
+      console.log(filepath);
+      // super hacky way of doing the file name handling
+      while (fs.existsSync(filepath)) {
+        filepath = path.join("../profileImages", tempName);
+        tempName = Date.now().toString() + "_" + file.originalname;
+      }
+      console.log(tempName);
+      cb(null, tempName);
     }
-
-    cb(null, tempName);
-  },
-
-  destination: function(req, file, cb) {
-    cb(null, '../profileImages');
+    catch (e) {
+      console.log('Multer.storage encountered an error:', e);
+      return cb(null, undefined);
+    }
   }
 });
 
@@ -56,12 +64,25 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
 
-  fileFilter: function(req, file, cb) {
-    var ext = path.extname(file.filename).toLocaleLowerCase()
-    if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
-      return cb(null, false);
+  fileFilter: function(req, file, next) {
+    console.log('file=', file);
+    // console.log(file.originalname);
+    try {
+      var ext = getExtension(file.originalname);
+      console.log(ext);
+      // var ext = path.extname(file.originalname).toLocaleLowerCase()
+      if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
+        console.log("image fucking killed everything fuck these images man ...");
+
+        return next(null, false);
+      }
+      console.log("image uploaded supposedly ...");
+      return next(null, true);
     }
-    cb(null, true);
+    catch (e) {
+      console.log('Multer.upload encountered an error:', e);
+      return next(null, false);
+    }
   },
 
   limits: {
@@ -106,7 +127,13 @@ app.post('/create_user',
 //             will return 406, Not acceptable to the client
 app.post('/uploadProfileImage', upload, (req, res, next) => {
   //placeholder @TODO implement database mapping
-  res.status(200).send("good job you uploaded a picture");
+  console.log(req.file);
+  if (!req.file) {
+    res.status(418).send('idk what the fuck is wrong man');
+  }
+  else {
+    res.status(200).send("good job you uploaded a picture");
+  }
 });
 
 

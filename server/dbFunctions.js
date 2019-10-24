@@ -416,7 +416,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     ];
 
     // gets the users following list
-    var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
+    var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
 
     var res = await client.query(query, args);
     

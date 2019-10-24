@@ -234,7 +234,13 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
   }
 });
 
-
+// @brief: endpoint for the following api
+// @return: leave me alone
+app.post('/api/updateFollowing/:params', helpers.loggedIn, users.updateFollowing, (req, res) => {
+  if (res.getHeader('error')) {
+    res.status(418).sendFile(index);
+  }
+});
 
 // @brief: update a user's profile information
 // @respond: IDK man i'm tired

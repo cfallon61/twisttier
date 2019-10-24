@@ -326,11 +326,19 @@ async function updateProfileInfo(req, res, next) {
 }
 
 async function updateFollowing(req, res, next) {
-  const ation = req.params.action;
+  const action = req.params.action;
   const toFollow = req.params.toFollow;
   const tags = req.params.tags;
   const follower = req.params.follower;
   var followUpdate;
+  var user = { username: toFollow };
+  
+  // make sure tofollow exists probably not necessary.
+  const userData = await db.userExists(user);
+  if (!userData) {
+    res.setHeader('error', toFollow + ' does not exist');
+    return next();
+  }
 
   if (action === "follow") {
     followUpdate = await db.followTopicUserPair(follower, toFollow, tags);
@@ -340,10 +348,16 @@ async function updateFollowing(req, res, next) {
   }
   else {
     res.setHeader('error', "invalid action");
+    return next(); 
+  }
+
+  if (!followUpdate) {
+    res.setHeader('error', "unable to " + action + " " + toFollow);
     return next();
   }
-  
-  
+  else {
+    res.json(JSON.stringify(followUpdate));
+  }
 }
 
 
@@ -356,5 +370,5 @@ module.exports = {
   updateProfileInfo,
   getUserInfo,
   getPosts,
-  
+  updateFollowing,
 };

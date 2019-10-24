@@ -150,10 +150,12 @@ params: {
 2. Server will verify that user is logged in, that both accounts exist, and the following circumstances: 
 * __Following Errors:__
     * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
-    * __`follower` already follows `toFollow`:__ header `error: cannot follow <toFollow>, you already follow <toFollow>`
+    * __Generic follow error:__ header `error: cannot follow <toFollow>`
 * __Unfollowing Errors:__
     * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
-    * __`follower` does not follow `toFollow`:__ header `error: cannot unfollow <toFollow>, you do not follow <toFollow>`
+    * __Generic unfollow error:__ header `error: cannot unfollow <toFollow>`
+* __Generic Errors:__
+    * __Invalid action:__ if `action` is neither `follow` or `unfollow`, header `error: invalid action` will be set. 
 3. Server will return the following information upon successful following / unfollowing:
 * ```
   params: {

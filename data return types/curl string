@@ -3,7 +3,7 @@ curl -X POST http://localhost:8080/uploadProfileImage \
 -F "profileImage=@/home/vert/Downloads/portfolio/IMG_20180804_121544677_copy.jpg"
 
 
-// creating a user with a profile picture
+// creating a user with a profile picture not sure why this string works but the others don't
 curl -i -X POST http://localhost:8080/uploadProfileImage \
 -H "content-type: multipart/form-data" \
 -F "email=k@k.com" \
@@ -25,8 +25,15 @@ curl -i -X POST http://localhost:8080/login \
 
 // changing profile information doesnt work rip
 
-curl -i -X POST 'http://localhost:8080/api/update?username=q' \
--F "name=q" \
+curl -i -X POST http://localhost:8080/api/update/\?username\=doeJohn \
+-H "content-type: multipart/form-data" \
+-F "name=doeJohn" \
 -F "bio='i wish for death'" \
--F "profileImage=~/Downloads/IMG_7636.JPG" \
--c sessionInfo
+-F "profileImage=@/home/vert/Downloads/IMG_7636.JPG"
+
+// delete account test doesnt work :( only works when i have the upload middleware included? what?
+curl -i -X POST 'http://localhost:8080/api/delete' \
+-H "content-type: multipart/form-data" \
+-F "username=killMeSir" \
+-F "email=kill@me.com" \
+-F "password=killmeplease" 

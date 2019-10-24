@@ -382,9 +382,7 @@ async function deleteSpin(username, spin_id) {
     await client.query('BEGIN');
 
     var query = 
-      `DELETE FROM ${tablename} 
-      WHERE id=$1 
-      RETURNING id`
+      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`
     ;
 
     var res = await client.query(query, [spin_id]);
@@ -421,50 +419,44 @@ async function followTopicUserPair(username, tofollow, tags) {
     // gets the users following list
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
 
-    var res = await client.query(query, [args]);
-    console.log(res);
+    var res = await client.query(query, args);
     
     // checks if tofollow exists
-    // console.log(res.rows);
-    var add = res[0].following;
-    
-    var b = -1;
-    for (var i = 0; i < add.users.length(); i++) {
-      if (add.users[i].username === tofollow) {
-        b = i;
+    var following = res[0].following.users;
+
+    var tofollowIndex = -1;
+
+    for (var i = 0; i < following.length(); i++) {
+      if (following[i].username === tofollow) {
+        tofollowIndex = i;
       }
     }
     // if not exists add new user
-    if (b === -1) {
-      var follow = {};
-      var key1 = 'username';
-      var key2 = 'tags';
-      follow[key1] = username;
-      follow[key2] = tags;
-      add.users.push(follow);
+    if (tofollowIndex === -1) {
+      var follow = {
+        username: tofollow,
+        tags: tags
+      };
+      following.push(follow);
     }
     // if exists add non-duplicate tags into tag list
     else {
       for (var i = 0; i < tags.length(); i++) {
-        if (!add.users[b].tags.inculdes(tags[i])) {
-          add.users[b].tags.push(tags[i]);
+        if (!following[tofollowIndex].tags.includes(tags[i])) {
+          following[tofollowIndex].tags.push(tags[i]);
         }
       }
     }
 
     args = [
       username,
-      add
+      JSON.stringify( { users: following } )
     ];
 
     // update new following
-    var query = `UPDATE ${USER_TABLE} 
-      SET following = $2
-      WHERE username = $1 
-      RETURNING username`
-    ;
+    var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
-    var res = await client.query(query, [args]);
+    var res = await client.query(query, args);
 
     await client.query('COMMIT');
     rows = res.rows;

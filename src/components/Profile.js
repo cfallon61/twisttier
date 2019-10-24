@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import "./profile.css";
+import {NotificationManager} from 'react-notifications';
 
 
 
@@ -9,23 +10,19 @@ class Profile extends Component{
         super(props);
         this.username = this.props.username;
         this.state = {
-            profilePic : "",//base64 string format
+            profilePic : "",
             username : this.props.username,
             bio : "",
-            tags : []
+            interests : [],
         };
     }
 
     componentDidMount()
     {
-        //GET User info from server.
-        this.getUserInformation();
-    }
-
-    getUserInformation()
-    {
-        console.log(`/api/users/${this.username}`);
-        fetch(`/api/users/${this.username}`, {
+        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        const self = this;
+        console.log(`/api/users/${self.username}`);
+        fetch(`/api/users/${self.username}`, {
             method : 'POST',
             headers: {
                 'Content-Type' : 'application/json'
@@ -33,22 +30,27 @@ class Profile extends Component{
         })
         .then(function(res){
             console.log(res);
-            if(res.status !== "406")
+            if(res.status === 200)
             {
-                this.setState(res.json());
-                return res.json();
+                res.json().then(function(jsonData){
+                    const dataDict = JSON.parse(jsonData);
+                    console.log(jsonData);
+                    self.setState({bio : dataDict.bio, interests : dataDict.interests});
+                }).catch(function(error){
+                    self.setState({error:{exist:true, message:error, status:404}});
+                });
             }
             else{
                 if(res.headers.error)
                 {
-                    alert(res.headers.error);
-                    return JSON.stringify({error : res.headers.error});
+                    NotificationManager.error(res.headers.error);
+                    self.setState({error : res.headers.error});
                 }
             }
         })
         .catch(function(err){
             console.log(err);
-            return JSON.stringify({error : err});
+            self.setState({error : err});
         })
         ;
     }
@@ -56,12 +58,16 @@ class Profile extends Component{
     render()
     {
         let tagViews = []
-        let currentTags = this.state.tags;
-        for(var i = 0; i < currentTags.length; i++)
+        console.log(this.state.interests);
+        if(this.state.interests != undefined && this.state.interests.length > 0)
         {
-            tagViews.push(<h6 className="tag-entry">{currentTags[i]}</h6>)
+            let currentTags = this.state.interests;
+            for(var i = 0; i < currentTags.length; i++)
+            {
+                tagViews.push(<h6 className="tag-entry">{currentTags[i]}</h6>);
+            }
         }
-
+        
         return (
             <div className="profile-container">
                 <div className="profile-info">

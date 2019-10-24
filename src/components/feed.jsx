@@ -19,9 +19,9 @@ class Feed extends Component
         );
     }
 
-    addSpin(Spin)
+    addSpin(spin)
     {
-        let updatedList = this.state.spins.push(Spin);
+        let updatedList = this.state.spins.push(spin);
         this.setState({spins: updatedList});
     } 
 }

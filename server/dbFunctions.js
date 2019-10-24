@@ -405,6 +405,11 @@ async function showNotification(user, res) {
 
 };
 
+// adds the userToFollow,tags pair into the following list of user
+// @param username: username of the user will follow
+// @param tofollow: username of user to add in following
+// @param tags: tag list to add with tofollow in following list
+// @return username of user on success or false on failure
 async function followTopicUserPair(username, tofollow, tags) {
   const client = await pool.connect();
   var rows = [];
@@ -416,17 +421,19 @@ async function followTopicUserPair(username, tofollow, tags) {
     var args = [
       username
     ];
-
+    console.log(args[0]);
     // gets the users following list
-    var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
+    var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
 
-    var res = await client.query(query, [args]);
+    var res = await client.query(query, args);
     
     // checks if tofollow exists
-    var add = res[0].following;
+    var add = res.rows[0].following;
+    console.log(add);
+    console.log(JSON.stringify(add));
     var b = -1;
-    for (var i = 0; i < add.users.length(); i++) {
-      if (add.users[i].username === tofollow) {
+    for (var i = 0; i < add['users'].length; i++) {
+      if (add['users'][i].username === tofollow) {
         b = i;
       }
     }
@@ -437,17 +444,18 @@ async function followTopicUserPair(username, tofollow, tags) {
       var key2 = 'tags';
       follow[key1] = username;
       follow[key2] = tags;
-      add.users.push(follow);
+      console.log(Array.isArray(add['users']));
+      console.log(add['users']);
+      add['users'].push(follow);
     }
     // if exists add non-duplicate tags into tag list
     else {
-      for (var i = 0; i < tags.length(); i++) {
-        if (!add.users[b].tags.inculdes(tags[i])) {
-          add.users[b].tags.push(tags[i]);
+      for (var i = 0; i < tags.length; i++) {
+        if (!add['users'][b].tags.inculdes(tags[i])) {
+          add['users'][b].tags.push(tags[i]);
         }
       }
     }
-
     args = [
       username,
       add
@@ -468,14 +476,14 @@ async function followTopicUserPair(username, tofollow, tags) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    // console.log(`Error caught by error handler: ${ e }`);
+    console.log(`Error caught by error handler: ${ e }`);
     // return e;
   } 
   finally {
     client.release();
   }
   
-  return (rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 async function unfollowTopicUserPair(pair) {

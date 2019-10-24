@@ -19,6 +19,7 @@ async function postCreateUser(req, res, next) {
   var profile_pic_path = null;
   // if there is a file then add it to the thing
   console.log(req.file);
+  console.log(req.file);
   if (req.file.path) {
     profile_pic_path = req.file.path;
   }
@@ -42,8 +43,7 @@ async function postCreateUser(req, res, next) {
     // delete the image that got uploaded so we don't just rack up tons of files
     // and get DDoSed
     res.setHeader('error', 'user exists');
-    req.imgsrc = accountInfo.profile_pic;
-    extFuncs.delete_profile_img(req, res);
+    extFuncs.delete_profile_img(accountInfo.profile_pic);
     return next(); // return the rows
   }
 
@@ -86,7 +86,14 @@ async function authorize(req, res, next) {
     res.setHeader('error', 'Username invalid');
     return next();
   }
-  var match = await bcrypt.compare(user.password, userData.passhash);
+  try {
+    var match = await bcrypt.compare(user.password, userData.passhash);
+  }
+  catch (e) {
+    console.log('exception occurred in authorize: ', e);
+    res.setHeader('error', "unable to authorize");
+    return next();
+  }
   // console.log(match);
   // password doesn't match
   if (!match) {
@@ -127,11 +134,17 @@ async function deleteAccount(req, res, next) {
     password: req.body.password,
     email: req.body.email
   };
-
+  // console.log("user =", user);
   var userData = await db.userExists(user);
-
-  var goodPass = await bcrypt.compare(user.password, userData.passhash);
-
+  // console.log(userData);
+  try {
+    var goodPass = await bcrypt.compare(user.password, userData.passhash);
+  }
+  catch (e) {
+    console.log('exception occurred while deleting account:', e);
+    res.setHeader('error', 'deletion failed');
+    return next();
+  }
   // check if the user exists
   // if it exists, call the delete user function of db
   if (userData !== false && goodPass) {
@@ -139,7 +152,7 @@ async function deleteAccount(req, res, next) {
     var deleteSuccess = await db.deleteUser(req.body.username);
 
     if (deleteSuccess) {
-      req.imgsrc = userData.profile_pic;
+      extFuncs.delete_profile_img(userData.profile_pic);
       return next();
     } 
     else {
@@ -271,9 +284,8 @@ async function updateProfileInfo(req, res, next) {
   if (req.file.path) {
     imgsrc = req.file.path;
   }
-
   var user = {
-    username: req.body.username,
+    username: req.params.username,
     password: req.body.password,
     bio: req.body.bio,
     name: req.body.name,
@@ -281,9 +293,17 @@ async function updateProfileInfo(req, res, next) {
     accessibility_features: req.body.accessibility_features,
     profile_pic: imgsrc
   };
+  console.log(req.params, "\n", req.body, "\n", user);
 
   // get user's profile data so i can be lazy
   var userData = await db.userExists(user);
+
+  if (!userData) {
+    res.setHeader('error', "unable to update");
+    console.log('unable to update user idk what happened');
+    extFuncs.delete_profile_img(req.file.path);
+    return next();
+  }
 
   // if no new profile picture is provided, set the new one to be the current one
   if (!user.profile_pic) {

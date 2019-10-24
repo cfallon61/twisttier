@@ -186,8 +186,8 @@ describe('database functions test', function() {
     
     it('follows user: should return username', async () => {
       
-      username = 'k';
-      tofollow = 'test';
+      username = 'f';
+      tofollow = 'seriously';
       tags = [];
       
       var res = await db.followTopicUserPair(username, tofollow, tags);

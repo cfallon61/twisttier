@@ -414,25 +414,31 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     await client.query('BEGIN');
 
-    var args = [
-      username
-    ];
+    var args = ["test"];
 
     // gets the users following list
+    // var query = `SELECT username FROM ${USER_TABLE} WHERE USERNAME=$1`;
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
-
-    var res = await client.query(query, args);
+    // console.log(args);
+    var res = await client.query(query,args);
+    
+    rows = res.rows;
+    
+    console.log(rows[0].following);
     
     // checks if tofollow exists
-    var following = res[0].following.users;
+    var following = rows[0].following;
 
     var tofollowIndex = -1;
 
-    for (var i = 0; i < following.length(); i++) {
-      if (following[i].username === tofollow) {
-        tofollowIndex = i;
+    if (following != null) {
+      for (var i = 0; i < following.length(); i++) {
+        if (following[i].username === tofollow) {
+          tofollowIndex = i;
+        }
       }
     }
+    
     // if not exists add new user
     if (tofollowIndex === -1) {
       var follow = {

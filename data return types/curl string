@@ -1,0 +1,14 @@
+curl -X POST http://localhost:8080/uploadProfileImage \
+-H "content-type: multipart/form-data" \
+-F "profileImage=@/home/vert/Downloads/portfolio/IMG_20180804_121544677_copy.jpg"
+
+
+// creating a user with a profile picture
+curl -X POST http://localhost:8080/uploadProfileImage \
+-H "content-type: multipart/form-data" \
+-F "email=k@k.com" \
+-F "password=12345678" \
+-F "name=iHateMax'sCologne" \
+-F "bio=it makes him smell like a douche bro" \
+-F "username=seriously" \
+-F "profileImage=@/home/vert/Downloads/portfolio/IMG_20180804_121544677_copy.jpg"

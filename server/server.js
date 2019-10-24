@@ -11,6 +11,7 @@ const dotenv = require('dotenv');
 const users = require('./accountFunctions.js');
 const spins = require('./spinMiddlewares.js');
 const index = path.join(__dirname, '../build/index.html');
+const helpers = require('./helpers.js');
 
 
 const init = require('./config.json');
@@ -25,6 +26,8 @@ app.use(session(init.sessionSetup));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
+console.log(path.join(__dirname, '../profileImages'))
+app.use(express.static(images))
 
 
 function getExtension(filename) {
@@ -35,23 +38,24 @@ function getExtension(filename) {
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
 
-  destination: "./profileImages",
+  destination: images,
 
   // handle filename creation
   filename: function(req, file, cb) {
 
     try {
-
+      
       var tempName = Date.now().toString() + "_" + file.originalname;
-      var filepath = path.join("./profileImages", tempName);
+      var filepath = path.join(images, tempName);
       // console.log(filepath);
       // super hacky way of doing the file name handling
       while (fs.existsSync(filepath)) {
-        filepath = path.join("./profileImages", tempName);
+        filepath = path.join(images, tempName);
         tempName = Date.now().toString() + "_" + file.originalname;
       }
-      console.log(tempName);
-      req.setHeader('imgsrc', tempName);
+      file.imgsrc = filepath;
+      console.log('filename =', tempName, 'file =', file);
+
       cb(null, tempName);
     }
     catch (e) {
@@ -67,7 +71,7 @@ const upload = multer({
 
   fileFilter: function(req, file, next) {
     console.log('filtering files');
-    // console.log('file=', file);
+    console.log('file=', file);
     // console.log(file.originalname);
     try {
       var ext = getExtension(file.originalname);
@@ -76,7 +80,7 @@ const upload = multer({
       if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
         return next(null, false);
       }
-      console.log("image uploaded supposedly to " + this.filename);
+      console.log("image uploaded supposedly to " + file.path);
       return next(null, true);
     }
     catch (e) {
@@ -107,24 +111,20 @@ var server = app.listen(port, (err) => {
 // ],
 app.post('/create_user',
   
-  notLoggedIn, upload, users.postCreateUser, (req, res) => {
+  helpers.notLoggedIn, upload, users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
     
     if (res.getHeader('error') != undefined) {
       console.log('error detected in profile creation', res.getHeader('error'));
       
-      res.status(406).send();
+      res.status(406).send(res.getHeader('error'));
     } 
     else {
-      createSession(req, res);
-
-      var userdata = res.getHeader('userdata');
-      res.removeHeader('userdata');
+      helpers.createSession(req, res);
       // console.log('userdata =', userdata);
       // res.sendFile(index);
-      res.json(JSON.stringify(userdata));
+      res.json(JSON.stringify(res.userdata));
     }
-    // TODO look into redirecting to / instead of index
 
   });
 
@@ -138,7 +138,7 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
   //placeholder @TODO implement database mapping
   console.log(req.file);
   if (!req.file) {
-    res.status(418).send('idk what the fuck is wrong man');
+    res.status(418).send('idk wtf is wrong');
   }
   else {
     res.status(200).send("good job you uploaded a picture");
@@ -147,31 +147,35 @@ app.post('/uploadProfileImage', upload, (req, res, next) => {
 
 
 // TODO send responses to front based on login / logout
-app.get('/logout', loggedIn, (req, res) => {
+app.get('/logout', helpers.loggedIn, (req, res) => {
   console.log(req.clientSession.uid, 'is logging out');
   // console.log(req.cookies);
-  deleteSession(req, res);
+ helpers.deleteSession(req, res);
   res.redirect('/'); // redirect to home page
 });
 
 // @brief: route handler for checking if a user is logged in
 //         will redirect to / if already logged in, otherwise
 //         will continue to login page
-app.get('/login', notLoggedIn, (req, res) => {
+app.get('/login', helpers.notLoggedIn, (req, res) => {
   console.log('GET /login');
   res.sendFile(index);
 });
 
+// TODO add express-validator for empty fields here
 // @brief: endpoint to actually handle the login request for a user
-app.post('/login', notLoggedIn, users.authorize, (req, res) => {
+app.post('/login', helpers.notLoggedIn, users.authorize, (req, res) => {
   // if the authorize function signals an error, send an unauthorized message
   console.log(req.body.username || req.body.email, 'logging in');
   if (res.getHeader('error')) {
     // console.log(res);
-    res.status(401).sendFile(index);
-  } else {
-    createSession(req, res);
+    res.status(401)
     res.sendFile(index);
+  } 
+  else {
+    helpers.createSession(req, res);
+    res.json(JSON.stringify(res.userdata));
+    // res.sendFile(index);
   }
 });
 
@@ -180,11 +184,12 @@ app.post('/login', notLoggedIn, users.authorize, (req, res) => {
 //            these valuse will be false
 app.post('/api/login_status', (req, res) => {
   if (req.clientSession.uid && req.cookies.loggedIn){
-    createSession(req, res);
+    helpers.createSession(req, res);
   }
   else {
-    deleteSession(req, res);
+    helpers.deleteSession(req, res);
   }
+  res.sendFile(index);
 });
 
 
@@ -192,6 +197,7 @@ app.post('/api/login_status', (req, res) => {
 app.post('/api/users/:username', users.getUserInfo, (req, res) => {
   if (res.getHeader('error') != undefined) {
     res.status(406);
+    res.sendFile(index);
   }
 });
 
@@ -213,6 +219,7 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
   console.log(res);
   if (res.getHeader('error') != undefined) {
     res.status(404)
+    res.sendFile(index);
   }
 });
 
@@ -220,7 +227,7 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 // @brief: update a user's profile information
 // @respond: IDK man i'm tired
-app.post('/api/update/:username', loggedIn,
+app.post('/api/update/:username', helpers.loggedIn,
         [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
          check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), 
         ], users.updateProfileInfo, (req, res) => {
@@ -229,16 +236,15 @@ app.post('/api/update/:username', loggedIn,
       res.status(406)
   }
   // i'm just hacking this together at this point i want to sleep
-  var userdata = res.getHeader('userdata');
+  var userdata = req.userdata;
   if (userdata) {
-    res.removeHeader('userdata');
     res.json(JSON.stringify(userdata));
   }
 });
 
 
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
-app.post('/api/add_spin/:username', loggedIn,
+app.post('/api/add_spin/:username', helpers.loggedIn,
         [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
         ], spins.createSpin, (req, res) => {
     // TODO add error states for invalid input
@@ -248,7 +254,7 @@ app.post('/api/add_spin/:username', loggedIn,
   res.sendFile(index);
 });
 
-app.post('/api/deleteSpin/:username', loggedIn, spins.removeSpin, (req, res) => {
+app.post('/api/deleteSpin/:username', helpers.loggedIn, spins.removeSpin, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(418)
@@ -258,7 +264,7 @@ app.post('/api/deleteSpin/:username', loggedIn, spins.removeSpin, (req, res) => 
 
 
 // @brief: endpoint for liking and unliking a spin.
-app.post('/api/spins/esteem/:esteem', loggedIn, spins.esteemSpin, (req, res) => {
+app.post('/api/spins/esteem/:esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => {
   if (res.getHeader('error')) {
     res.status(400).send('bad request');
   }
@@ -266,74 +272,44 @@ app.post('/api/spins/esteem/:esteem', loggedIn, spins.esteemSpin, (req, res) => 
 
 // @brief:  endpoint for deleting account
 // @author: Chris Fallon
-app.post('/api/delete', loggedIn, users.deleteAccount, (req, res) => {
+app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(406);
     res.sendFile(index);
-  } else {
-    deleteSession(req, res);
+  } 
+  else {
+    helpers.delete_profile_img(req, res);
+    helpers.deleteSession(req, res);
     res.redirect('/'); // redirect to home page
+  }
+});
+
+// @brief: route for getting profile images stored on the server.
+// @return: profile image located at the specified path, or 404 otherwise.
+app.get('/profileImages/*', (req, res) => {
+  console.log(req.originalUrl);
+  var img = req.originalUrl.substring(req.originalUrl.lastIndexOf("/"));
+  const imgpath = path.join(images, img);
+
+  if (fs.existsSync(imgpath)) {
+    res.sendFile(imgpath);
+  }
+  else {
+    res.status(404);
+    res.sendFile(index);
   }
 });
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
+// NOTE MUST REMAIN AT THE BOTTOM OF THE FILE OTHERWISE OTHER ROUTES WILL NOT WORK
 app.get('/*', (req, res) => {
 
   console.log('GET', req.originalUrl);
   res.sendFile(index);
 });
 
-// @brief: Create a user session and set relevant headers
-function createSession(req, res){
-  req.clientSession.uid = res.getHeader('username');
-  // console.log('client session =',req.clientSession);
-  res.setHeader("loggedIn", true);
-  res.cookie('username', req.clientSession.uid, {
-    maxAge: 60 * 60 * 24
-  });
-}
-
-// @brief: delete a client session
-// @author: Chris Fallon
-function deleteSession(req, res) {
-
-  if (req.clientSession.uid) {
-    req.clientSession.uid = null;
-    req.clientSession.destroy((err) => { if (err) throw err; });
-    res.clearCookie('clientSession');
-  }
-  if (req.cookies.username)
-  {
-    req.cookies.username = null;
-    res.clearCookie('username')
-  }
-  console.log(req.clientSession, req.cookies);
-  return 0;
-}
-
-function loggedIn(req, res, next) {
-  // if logged in continue, else redirect to wherever
-  if (req.clientSession.uid && req.cookies.username) {
-    res.setHeader("loggedIn", true);
-    console.log(req.clientSession.uid, 'is logged in');
-    return next();
-  } else {
-    res.redirect('/'); // TODO route this however
-  }
-};
-
-function notLoggedIn(req, res, next) {
-  console.log(req.cookies);
-  console.log(req.clientSession);
-  if (!req.clientSession.uid || !req.cookies.username) {
-    console.log('user is not logged in')
-    return next();
-  } else {
-    res.redirect('/');
-  }
-};
 
 app.use((err, req, res, next) => {
   // TODO implement a log file for errorsthro

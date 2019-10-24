@@ -64,13 +64,6 @@ function userSpinTableName(username) {
 // @return: object containing creation info if creation successful, 'unable to create user' if not
  async function createUser(accountInfo) {
 
-  // check if the user exists already
-  var existing = await userExists(accountInfo);
-  if (existing != false){
-    console.log(accountInfo.username + ' user already exists')
-    return existing; // return the rows
-  }
-  // console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -186,13 +179,7 @@ async function deleteUser(username){
 // function to update user info (used by edit account)
 // returns username, last_login, and profile_pic link of user on success and false on failure
 async function updateUser(user) {
-  // get user's profile data so i can be lazy
-  var userData = await userExists(user);
-
-  if (!user.profile_pic) {
-    user.profile_pic = userData.profile_pic;
-  }
-
+  
   // extract the info to be inserted
   if (user.password != undefined) {
     var hash = await bcrypt.hash(user.password, 10);

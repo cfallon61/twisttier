@@ -11,6 +11,7 @@ const pool = new Pool(credentials.database);
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true");
+const reservedTag = require('./config.json').reservedTag;
 
 
 // query the database to see if the user exists
@@ -289,7 +290,8 @@ async function getSpins(users) {
     // select * from <username_spins>  
     query += baseQuery + userSpinTableName(item.username);
 
-    if (item.tags.length > 0) {
+    // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
+    if (item.tags.length > 0 && item.tags[0] != reservedTag) {
       tagList.push(item.tags);
       // supposed to search in the range of a list supplied
       // hopefully postgres decides to parse this correctly
@@ -382,9 +384,7 @@ async function deleteSpin(username, spin_id) {
     await client.query('BEGIN');
 
     var query = 
-      `DELETE FROM ${tablename} 
-      WHERE id=$1 
-      RETURNING id`
+      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`
     ;
 
     var res = await client.query(query, [spin_id]);
@@ -458,17 +458,13 @@ async function followTopicUserPair(username, tofollow, tags) {
     }
     args = [
       username,
-      add
+      JSON.stringify( { users: following } )
     ];
 
     // update new following
-    var query = `UPDATE ${USER_TABLE} 
-      SET following = $2
-      WHERE username = $1 
-      RETURNING username`
-    ;
+    var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
-    var res = await client.query(query, [args]);
+    var res = await client.query(query, args);
 
     await client.query('COMMIT');
     rows = res.rows;
@@ -486,7 +482,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   return (rows.length === 0 ? false : rows[0]);
 };
 
-async function unfollowTopicUserPair(pair) {
+async function unfollowTopicUserPair(follower, tags, toUnfollow) {
 
 };
 
@@ -538,7 +534,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 // funtion decrements like number of the spin by 1

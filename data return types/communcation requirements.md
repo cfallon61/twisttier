@@ -133,32 +133,54 @@ body: {
 * if there was a problem with deletion, header 'error' will be set with message 'deletion failed' and 406 will be returned
 3. Server will delete client cookie and local session and redirect to `/`
 
+---
 
 # Follow Interface
-## **TODO:** Figure out how the frick to do updates for new posts when not following that topic.
 
-## Following A User [: Topic]
-1. Client will `POST /api/follow/<params>` where params are the following URL Parameters: 
+
+
+## New Tags Posted
+###TODO
+This is less of a communication specification and more of a procedural specification for how this functionality will work. 
+The rough outline for this process is as follows:
+
+1. A user will create a new post with a tag which they are previously unassociated with (a new column must be added to the database to support this).
+2. The `addSpin` functionality will check the tags of this post and see if they already exist.
+3. If the post does not exist in the user's tag list, then the post will get a reserved `__new` tag which will expire in 24 hours. All posts tagged with `__new` will automatically show up in the users feed, and the new tag will then be added to the poster's tag list. 
+3. __(Alternative approach):__ If the post is not in the tags_associated list, the post ID will be placed into a `__new` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
+
+
+## Following/Unfollowing A User [: Topic]
+1. Client will `POST /api/updateFollowing/<params>` where params are the following URL Parameters: 
 ```
 params: {
-  toFollow: <username of the user to follow>,
-  tags: [list of tags to follow, empty defualts to all posts],
-  follower: <username of user who is following>
+  toFollow: <username of the user to follow or unfollow>,
+  tags: [list of tags to follow, empty defualts to all posts / entire user for unfollowing case],
+  follower: <username of user who is following>,
+  action: <"follow" or "unfollow">
 }
 ```
-2. __TODO__
+2. Server will verify that user is logged in, that both accounts exist, and the following circumstances: 
+* __Following Errors:__
+    * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
+    * __Generic follow error:__ header `error: cannot follow <toFollow>`
+* __Unfollowing Errors:__
+    * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
+    * __Generic unfollow error:__ header `error: cannot unfollow <toFollow>`
+* __Generic Errors:__
+    * __Invalid action:__ if `action` is neither `follow` or `unfollow`, header `error: invalid action` will be set. 
+3. Server will return the following information upon successful following / unfollowing:
+* ```
+  params: {
+    action: <action performed (either 'follow' or 'unfollow')>,
+    follower: <username of the person following or unfollowing>,
+    toFollow: <username of the person being followed or unfollowed>,
+    tags: <tags which were followed or unfollowed> 
+  }
+  ```
+4. Server will reply with `418: I'm a teapot` if errors are detected.
 
-## Unfollowing A User [: Topic]
-
-1. Client will `POST /api/unfollow/<params>` where params are the following URL Parameters: 
-```
-params: {
-  toFollow: <username of the user to unfollow>,
-  tags: [list of tags to unfollow, empty defualts to all posts and entire user],
-  follower: <username of user who is unfollowing>
-}
-```
-
+---
 # Spins Interface
 
 ## Getting a single user's spins
@@ -199,7 +221,9 @@ params:
 
 ## Adding a Spin
 
+
 __Note__ This functionality requires integration testing with client
+__Note__ Please refer to [this section](#new-tags-posted) for information on how the updates work for when a user makes a post about a previously unfollowed tag
 1. Client will `POST /api/add_spin/<username>` with `username` as a URL parameter with the following parameters in the body:
   ```
   body: {
@@ -233,5 +257,4 @@ body: {
 4. Server will attempt to remove the post from the user's post table
     * __Errors:__ If an error occurs, server will set response header `error: unable to delete spin` and return `418: I'm a teapot`
     * __Success:__ if the post is added successfully, server will set response header `spinId: [id]` and return the index.
-
 

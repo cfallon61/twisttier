@@ -4,7 +4,7 @@ curl -X POST http://localhost:8080/uploadProfileImage \
 
 
 // creating a user with a profile picture
-curl -X POST http://localhost:8080/uploadProfileImage \
+curl -i -X POST http://localhost:8080/uploadProfileImage \
 -H "content-type: multipart/form-data" \
 -F "email=k@k.com" \
 -F "password=12345678" \
@@ -12,3 +12,21 @@ curl -X POST http://localhost:8080/uploadProfileImage \
 -F "bio=it makes him smell like a douche bro" \
 -F "username=seriously" \
 -F "profileImage=@/home/vert/Downloads/portfolio/IMG_20180804_121544677_copy.jpg"
+
+
+// logging in also doesnt work 
+
+curl -i -X POST http://localhost:8080/login \
+-H "content-type=multipart/form-data"
+-F "email=q@q.com" \
+-F "password=qqqqqqqq" \
+-b sessionInfo
+
+
+// changing profile information doesnt work rip
+
+curl -i -X POST 'http://localhost:8080/api/update?username=q' \
+-F "name=q" \
+-F "bio='i wish for death'" \
+-F "profileImage=~/Downloads/IMG_7636.JPG" \
+-c sessionInfo

@@ -70,6 +70,7 @@ async function authorize(req, res, next) {
     password: req.body.password,
     email: req.body.email
   };
+  console.log("body =", req.body);
 
   if (!user.password && !user.username || !user.password && !user.email) {
     res.setHeader('error', 'invalid user');

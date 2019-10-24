@@ -121,8 +121,8 @@ app.post('/create_user',
     } 
     else {
       helpers.createSession(req, res);
-      // console.log('userdata =', userdata);
       // res.sendFile(index);
+      console.log(res.userData);
       res.json(JSON.stringify(res.userdata));
     }
 

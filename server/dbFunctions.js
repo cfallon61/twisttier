@@ -405,6 +405,7 @@ async function showNotification(user, res) {
 
 };
 
+
 async function followTopicUserPair(username, tofollow, tags) {
   const client = await pool.connect();
   var rows = [];

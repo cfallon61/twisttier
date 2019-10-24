@@ -74,7 +74,7 @@ class Timeline extends Component
             }
         }
         else{
-            feed.addSpin(<h6>This user currently has no spins...</h6>);
+            feed.addSpin(<h6>Follow user-tags to see spins here!</h6>);
         }
         /**
          * The view organized by these parts:

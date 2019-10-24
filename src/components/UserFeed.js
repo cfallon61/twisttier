@@ -20,37 +20,54 @@ class UserFeed extends Component
     {
         super(props);
         this.username = this.props.match.params.username;
-        let spins = this.getUserSpins(this.props.match.params.username);
         this.state = {
-            spins : spins,
+            spins : [],
             error : {
                 exist : false, 
-                errorMessage : "",
+                message : "",
                 status : ""
             }
         }
         console.log(this.username);
     }
 
-    getUserSpins(username)
+    updateUserSpins(username)
     {
+        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        const self = this;
+        console.log("Fetching...");
         fetch(`/api/posts/${username}`, {
             method: "POST",
-            headers: {
-                "Content-Type" : "application/json"
-            }
+            credentials: 'same-origin'
         }).then(function(res){
-            if(res.status === "200")
+            console.log(res);
+            if(res.status === 200)
             {
-                return res.json();
+                //res.json also is a promise thus we attach a success callback
+                res.json().then(function(jsonData){
+                    const dataDict = JSON.parse(jsonData);
+                    console.log(jsonData);
+                    self.setState({spins : dataDict});
+                }).catch(function(error){
+                    self.setState({error:{exist:true, message:error, status:404}});
+                });
+                
             }
             else{
-                this.setState({error: {exist: true, message: res.headers.error, status:res.status}});
+                self.setState({error: {exist: true, message: res.headers.error, status:res.status}});
+                console.log(res.headers.error);
             }
         }).catch(function(err){
-            this.setState({error: {exist: true, message: err, status:"404"}});
+            console.log(err);
+            this.setState({error: {exist: true, message: err, status:404}});
         });
 
+    }
+
+    componentDidMount()
+    {
+        console.log(this.username);
+        this.updateUserSpins(this.username);
     }
 
     render()
@@ -66,7 +83,7 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp}/>);
+                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.data}/>);
             }
         }
         else{

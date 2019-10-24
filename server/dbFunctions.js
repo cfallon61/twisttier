@@ -15,6 +15,7 @@ const TEST = (process.env.TEST === "true");
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
+// @return: object of all user's data
 var userExists = async function (user) {
   
   var params = [];
@@ -60,16 +61,9 @@ function userSpinTableName(username) {
 
 // database function that does all the heavy lifting
 // @param accountInfo: object with all the user details from the create account form
-// @return: object containing creation info
-//         true if creation successful, false if not
+// @return: object containing creation info if creation successful, 'unable to create user' if not
  async function createUser(accountInfo) {
 
-  // check if the user exists already
-  var existing = await userExists(accountInfo);
-  if (existing != false){
-    return existing; // return the rows
-  }
-  // console.log('create user called')
   // creates postgres client
   const client = await pool.connect();
   var rows = [];
@@ -91,7 +85,8 @@ function userSpinTableName(username) {
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
     // console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
     var res = await client.query(query);
-    
+
+    // console.log(accountInfo);
 
     args = [
       accountInfo.email,
@@ -109,12 +104,14 @@ function userSpinTableName(username) {
        }, // following
       [], // interests
       {}, // accessibility features
+      accountInfo.profile_pic,
     ];
 
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
-      name, followers, following, interests, accessibility_features) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING username`;
+      name, followers, following, interests, accessibility_features, profile_pic) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON, $12::TEXT) 
+      RETURNING username, profile_pic, last_login`;
 
     res = await client.query(query, args);
     // console.log("2nd res: ", res.rows);
@@ -133,7 +130,7 @@ function userSpinTableName(username) {
   }
   // console.log(rows);
 
-  return (rows.length === 0 ? 'unable to create user' : rows[0].username);
+  return (rows.length === 0 ? 'unable to create user' : rows[0]);
 };
 
 
@@ -180,8 +177,9 @@ async function deleteUser(username){
 };
 
 // function to update user info (used by edit account)
-// returns id of user on success and false on failure
+// returns username, last_login, and profile_pic link of user on success and false on failure
 async function updateUser(user) {
+  
   // extract the info to be inserted
   if (user.password != undefined) {
     var hash = await bcrypt.hash(user.password, 10);
@@ -204,20 +202,16 @@ async function updateUser(user) {
       user.profile_pic
     ];
 
-    var query = `UPDATE ${USER_TABLE} 
-      SET passhash = $2, bio = $3, name = $4, interests = $5, 
-      accessibility_features = $6, profile_pic = $7
-      WHERE username = $1 
-      RETURNING username`
+    var query = `UPDATE ${USER_TABLE} SET passhash = $2, bio = $3, name = $4, interests = $5, 
+      accessibility_features = $6, profile_pic = $7 WHERE username = $1 
+      RETURNING username, profile_pic, last_login`
     ;
 
     if (user.password === undefined) {
       args.splice(1,1);
       query = `UPDATE ${USER_TABLE} 
-        SET bio = $2, name = $3, interests = $4, 
-        accessibility_features = $5, profile_pic = $6
-        WHERE username = $1 
-        RETURNING username`
+        SET bio = $2, name = $3, interests = $4, accessibility_features = $5, profile_pic = $6
+        WHERE username = $1 RETURNING username, profile_pic, last_login`
       ;
     }
 
@@ -237,7 +231,7 @@ async function updateUser(user) {
   }
   
   // returns id of user if success otherwise false
-  return (rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? false : rows[0]);
 }
 
 // Function to update the last login time
@@ -388,9 +382,7 @@ async function deleteSpin(username, spin_id) {
     await client.query('BEGIN');
 
     var query = 
-      `DELETE FROM ${tablename} 
-      WHERE id=$1 
-      RETURNING id`
+      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`
     ;
 
     var res = await client.query(query, [spin_id]);
@@ -411,8 +403,74 @@ async function showNotification(user, res) {
 
 };
 
-async function followTopicUserPair(pair) {
+async function followTopicUserPair(username, tofollow, tags) {
+  const client = await pool.connect();
+  var rows = [];
 
+  try{
+    
+    await client.query('BEGIN');
+
+    var args = [
+      username
+    ];
+
+    // gets the users following list
+    var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
+
+    var res = await client.query(query, args);
+    
+    // checks if tofollow exists
+    var following = res[0].following.users;
+
+    var tofollowIndex = -1;
+
+    for (var i = 0; i < following.length(); i++) {
+      if (following[i].username === tofollow) {
+        tofollowIndex = i;
+      }
+    }
+    // if not exists add new user
+    if (tofollowIndex === -1) {
+      var follow = {
+        username: tofollow,
+        tags: tags
+      };
+      following.push(follow);
+    }
+    // if exists add non-duplicate tags into tag list
+    else {
+      for (var i = 0; i < tags.length(); i++) {
+        if (!following[tofollowIndex].tags.includes(tags[i])) {
+          following[tofollowIndex].tags.push(tags[i]);
+        }
+      }
+    }
+
+    args = [
+      username,
+      JSON.stringify( { users: following } )
+    ];
+
+    // update new following
+    var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
+
+    var res = await client.query(query, args);
+
+    await client.query('COMMIT');
+    rows = res.rows;
+
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+  
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 async function unfollowTopicUserPair(pair) {
@@ -525,13 +583,6 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   return (rows.length === 0 ? false : rows[0]);
 };
 
-async function reSpin(user, res) {
-
-};
-
-async function getQuoteOrigin(user, res) {
-
-};
 
 
 // error handler
@@ -547,8 +598,6 @@ module.exports = {
   unfollowTopicUserPair,
   likeSpin,
   unlikeSpin,
-  reSpin,
-  getQuoteOrigin,
   createUser,
   userExists,
   deleteUser,

@@ -494,30 +494,33 @@ async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster.username);
+    var tablename = userSpinTableName(user_poster);
     
     await client.query('BEGIN');
    
-    var args = [spin.id];
+    var args = [spin];
     var query = `SELECT like_list FROM ${tablename} WHERE id = $1`;
 
     var res = await client.query(query, args);
+    var like_list = res.rows[0].like_list;
+    // console.log(like_list);
 
     // check that the user has not already liked the spin
-    if (res[0].indexOf(user_like.username) > -1) {
-      console.log("user_liker has already liked the spin")
+    if (like_list.indexOf(user_liker) > -1) {
+      console.log(user_liker + " has already liked the spin")
+      await client.query('ROLLBACK');
       return false;
     } 
     else {
 
-      res[0].push(user_liker.username);
-      args = [res[0], spin.id];
-      query = `UPDATE ${tablename} SET likelist = $1, likes = likes + 1 WHERE id = $2`;
+      like_list.push(user_liker);
+      args = [like_list, spin];
+      query = `UPDATE ${tablename} SET like_list = $1, likes = likes + 1 WHERE id = $2 RETURNING *`;
 
       res = await client.query(query, args);
       
       rows = res.rows;
-
+      // console.log(rows);
       await client.query('COMMIT');
     }
   } catch(e) {
@@ -542,33 +545,37 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster.username);
+    var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');
     
-    var args = [spin.id];
+    var args = [spin];
     var query = `SELECT like_list FROM ${tablename} 
     WHERE id = $1`;
 
     var res = await client.query(query, args);
-    var index = res[0].indexOf(user_like.username);
+    // get the like list from the response object
+    var like_list = res.rows[0].like_list;
+
+    var index = like_list.indexOf(user_liker);
+    // if the user is found in the like list then we remove the name
+    // and write to the database
     if (index > -1) {
 
-      res[0].splice(index, 1);
+      like_list.splice(index, 1);
       
-      args = [res[0], spin.id];
-      query = `UPDATE ${tablename} 
-      SET 
-      likelist = $1, 
-      likes = likes - 1
-      WHERE id = $2`;
+      args = [like_list, spin];
+      query = `UPDATE ${tablename} SET likelist = $1, likes = likes - 1 
+      WHERE id = $2 RETURNING *`;
 
       res = await client.query(query);
 
       rows = res.rows;
 
       await client.query('COMMIT');
-    } else {
-      console.log("user_liker has not liked the spin")
+    } 
+    else {
+      console.log(user_liker + " has not liked the spin")
+      await client.query("ROLLBACK");
       return false;
     }
   } catch(e) {
@@ -578,7 +585,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 

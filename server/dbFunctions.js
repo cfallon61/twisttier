@@ -473,7 +473,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   return (rows.length === 0 ? false : rows[0].username);
 };
 
-async function unfollowTopicUserPair(pair) {
+async function unfollowTopicUserPair(follower, tags, toUnfollow) {
 
 };
 

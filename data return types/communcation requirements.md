@@ -137,27 +137,34 @@ body: {
 # Follow Interface
 ## **TODO:** Figure out how the frick to do updates for new posts when not following that topic.
 
-## Following A User [: Topic]
-1. Client will `POST /api/follow/<params>` where params are the following URL Parameters: 
+## Following/Unfollowing A User [: Topic]
+1. Client will `POST /api/updateFollowing/<params>` where params are the following URL Parameters: 
 ```
 params: {
-  toFollow: <username of the user to follow>,
-  tags: [list of tags to follow, empty defualts to all posts],
-  follower: <username of user who is following>
+  toFollow: <username of the user to follow or unfollow>,
+  tags: [list of tags to follow, empty defualts to all posts / entire user for unfollowing case],
+  follower: <username of user who is following>,
+  action: <"follow" or "unfollow">
 }
 ```
-2. __TODO__
+2. Server will verify that user is logged in, that both accounts exist, and the following circumstances: 
+* __Following Errors:__
+    * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
+    * __`follower` already follows `toFollow`:__ header `error: cannot follow <toFollow>, you already follow <toFollow>`
+* __Unfollowing Errors:__
+    * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
+    * __`follower` does not follow `toFollow`:__ header `error: cannot unfollow <toFollow>, you do not follow <toFollow>`
+3. Server will return the following information upon successful following / unfollowing:
+* ```
+  params: {
+    action: <action performed (either 'follow' or 'unfollow')>,
+    follower: <username of the person following or unfollowing>,
+    toFollow: <username of the person being followed or unfollowed>,
+    tags: <tags which were followed or unfollowed> 
+  }
+  ```
+4. Server will reply with `418: I'm a teapot` if errors are detected.
 
-## Unfollowing A User [: Topic]
-
-1. Client will `POST /api/unfollow/<params>` where params are the following URL Parameters: 
-```
-params: {
-  toFollow: <username of the user to unfollow>,
-  tags: [list of tags to unfollow, empty defualts to all posts and entire user],
-  follower: <username of user who is unfollowing>
-}
-```
 
 # Spins Interface
 

@@ -201,14 +201,6 @@ async function getUserInfo(req, res, next) {
   return next();
 }
 
-async function addInterest(req, res, next) {
-
-}
-
-async function removeInterest(req, res, next) {
-
-}
-
 
 // @brief: copy pasta from getTimeline because I am lazy
 //         same thing, but does a hack which converts the
@@ -331,6 +323,27 @@ async function updateProfileInfo(req, res, next) {
   }
   return next();
 
+}
+
+async function updateFollowing(req, res, next) {
+  const ation = req.params.action;
+  const toFollow = req.params.toFollow;
+  const tags = req.params.tags;
+  const follower = req.params.follower;
+  var followUpdate;
+
+  if (action === "follow") {
+    followUpdate = await db.followTopicUserPair(follower, toFollow, tags);
+  }
+  else if (action === "unfollow") {
+    followUpdate = await db.unfollowTopicUserPair(follower, toFollow, tags);
+  }
+  else {
+    res.setHeader('error', "invalid action");
+    return next();
+  }
+  
+  
 }
 
 

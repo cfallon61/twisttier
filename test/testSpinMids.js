@@ -4,7 +4,7 @@ const httpMocks = require('node-mocks-http');
 
 
 
-describe('test spin middleware functions', async () => {
+describe.skip('test spin middleware functions', async () => {
     
   describe('#delete spin', async () => {
     it ("@spin exists", async () => {

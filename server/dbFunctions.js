@@ -405,6 +405,7 @@ async function showNotification(user, res) {
 
 };
 
+
 async function followTopicUserPair(username, tofollow, tags) {
   const client = await pool.connect();
   var rows = [];
@@ -418,12 +419,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     ];
 
     // gets the users following list
-    var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
+    var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
 
     var res = await client.query(query, [args]);
+    console.log(res);
     
     // checks if tofollow exists
+    // console.log(res.rows);
     var add = res[0].following;
+    
     var b = -1;
     for (var i = 0; i < add.users.length(); i++) {
       if (add.users[i].username === tofollow) {
@@ -468,7 +472,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    // console.log(`Error caught by error handler: ${ e }`);
+    console.log(`Error caught by error handler: ${ e }`);
     // return e;
   } 
   finally {

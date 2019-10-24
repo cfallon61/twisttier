@@ -35,7 +35,7 @@ function getExtension(filename) {
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
 
-  destination: "../profileImages",
+  destination: "./profileImages",
 
   // handle filename creation
   filename: function(req, file, cb) {
@@ -43,14 +43,15 @@ const storage = multer.diskStorage({
     try {
 
       var tempName = Date.now().toString() + "_" + file.originalname;
-      var filepath = path.join("../profileImages", tempName);
-      console.log(filepath);
+      var filepath = path.join("./profileImages", tempName);
+      // console.log(filepath);
       // super hacky way of doing the file name handling
       while (fs.existsSync(filepath)) {
-        filepath = path.join("../profileImages", tempName);
+        filepath = path.join("./profileImages", tempName);
         tempName = Date.now().toString() + "_" + file.originalname;
       }
       console.log(tempName);
+      req.setHeader('imgsrc', tempName);
       cb(null, tempName);
     }
     catch (e) {
@@ -65,18 +66,17 @@ const upload = multer({
   storage: storage,
 
   fileFilter: function(req, file, next) {
-    console.log('file=', file);
+    console.log('filtering files');
+    // console.log('file=', file);
     // console.log(file.originalname);
     try {
       var ext = getExtension(file.originalname);
-      console.log(ext);
+      // console.log(ext);
       // var ext = path.extname(file.originalname).toLocaleLowerCase()
       if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
-        console.log("image fucking killed everything fuck these images man ...");
-
         return next(null, false);
       }
-      console.log("image uploaded supposedly ...");
+      console.log("image uploaded supposedly to " + this.filename);
       return next(null, true);
     }
     catch (e) {
@@ -99,21 +99,30 @@ var server = app.listen(port, (err) => {
 
 // TODO ADD SESSION CACHING
 // handle user creation
+// [check('email').isEmail().withMessage('invalid email'),
+//   check('password').isLength({ min: 8 }).withMessage('password too short'),
+//   check('bio').isLength({ max: 150 }).withMessage('bio too long'),
+//   check('name').isLength({ max: 25, min: 1 }).withMessage('invalid name'),
+//   check('username').isLength({ max: 15, min: 1 }).withMessage('invalid username')
+// ],
 app.post('/create_user',
-  [check('email').isEmail().withMessage('invalid email'),
-   check('password').isLength({ min: 8}).withMessage('password too short'),
-   check('bio').isLength({ max: 150 }).withMessage('bio too long'),
-   check('name').isLength({ max: 25, min: 1 }).withMessage('invalid name'),
-   check('username').isLength({ max: 15, min: 1 }).withMessage('invalid username')
-  ],
+  
   notLoggedIn, upload, users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
     
     if (res.getHeader('error') != undefined) {
+      console.log('error detected in profile creation', res.getHeader('error'));
+      
       res.status(406).send();
-    } else {
+    } 
+    else {
       createSession(req, res);
-      res.sendFile(index);
+
+      var userdata = res.getHeader('userdata');
+      res.removeHeader('userdata');
+      // console.log('userdata =', userdata);
+      // res.sendFile(index);
+      res.json(JSON.stringify(userdata));
     }
     // TODO look into redirecting to / instead of index
 
@@ -301,7 +310,7 @@ function deleteSession(req, res) {
 
 function loggedIn(req, res, next) {
   // if logged in continue, else redirect to wherever
-  if (req.clientSession.uid && req.cookies.loggedIn) {
+  if (req.clientSession.uid && req.cookies.username) {
     res.setHeader("loggedIn", true);
     console.log(req.clientSession.uid, 'is logged in');
     return next();
@@ -311,8 +320,9 @@ function loggedIn(req, res, next) {
 };
 
 function notLoggedIn(req, res, next) {
-  // console.log(req.clientSession);
-  if (!req.clientSession.uid || !req.cookies.loggedIn) {
+  console.log(req.cookies);
+  console.log(req.clientSession);
+  if (!req.clientSession.uid || !req.cookies.username) {
     console.log('user is not logged in')
     return next();
   } else {

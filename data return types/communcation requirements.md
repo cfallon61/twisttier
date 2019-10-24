@@ -21,16 +21,25 @@ body: {
   username: <username (not to exceed 15 characters)>
 }
 ```
-
-**Note:** Images will be uploaded somehow. As of yet this is undetermined
+* Additionally, a profile image will be sent via `multipart/form-data`. The fieldname must be `profileImage=<img src>` where `<img src>` is the file from the upload field. 
 
 ### Server response
 
-* **Successful creation:** A header 'username' will be set with the username returned from the creation and the following cookies will be set:```
+* **Successful creation:** A json `userdata` will be sent with the user's nonsensitive profile information returned from the creation, a header `username` will be set (because i am lazy and don't want to rewrite half of the implementation of server side stuff.), and the following cookies will be set:
+```
+userdata: {
+  username: <username>,
+  last_login: <last_login>,
+  profile_pic_path: <filepath on server>
+}
+```
+```
 cookies: { 
   uid : <some arbitary hash value>
   username: <username>
-}```
+}
+```
+
 
 * **Creation Failed due to user existing:** a header 'error' will be set and 406 will be returned ex
   error: 'user exists'
@@ -69,6 +78,7 @@ body: {
 1. Client will `POST /api/user/` with the username as a URL parameter ex `username=steve`
     * If an error occurs, an 'error' header will be set and 406 will be returned
 3. Server will reply with JSON of user's information
+ __NOTE:__ Profile image will be returned via a serverside filepath. Client will be responsible for `GET`ting this file accordingly.
 
 
 ## Updating a profile
@@ -84,6 +94,7 @@ body: {
   //TODO PROFILE PIC
 }
 ```
+- Additionally, a profile picture can be uploaded via `multipart/form-data`, and the fieldname must be `profileImage=<img src>`. Please see "Creating a User"
 
 2. Server will check that user is logged in
 3. Assuming user is logged in, server will respond in the following ways:

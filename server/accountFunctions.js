@@ -6,6 +6,7 @@ const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const extFuncs = require('./helpers.js');
+const path = require('path');
 
 
 
@@ -18,26 +19,36 @@ async function postCreateUser(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
     // return next();
   }
+  var profile_pic_path;
+  // if there is a file then add it to the thing
+  if (req.file) {
+    profile_pic_path = path.join('./profileImages', req.file.filename);
+  }
+  console.log('profile picture located at', profile_pic_path);
 
   var accountInfo = {
     email: req.body.email,
     password: req.body.password,
     name: req.body.name,
     username: req.body.username,
-    bio: req.body.bio
+    bio: req.body.bio,    
+    profile_pic: profile_pic_path,
   };
   
-  var userCreated = await db.createUser(accountInfo);
-  // console.log(userCreated);
-  // userCreated is the empty rows or false, return error
-  if (!userCreated) {
-    res.setHeader('errors', userCreated);
-  } else {
-    res.setHeader('username', userCreated);
-  }
 
+  var userCreated = await db.createUser(accountInfo);
+  console.log(userCreated);
+  // userCreated is the empty rows or false, return error
+  if (Object.keys(userCreated) === 0) {
+    // console.log(userCreated);
+    res.setHeader('error', userCreated);
+  } 
+  else {
+    res.setHeader('userdata', JSON.stringify(userCreated));
+    res.setHeader('username', userCreated.username);
+  }
   return next();
-}
+} 
 
 // @desc: function used for logging in (idk why its not called login but whatever)
 // @return: none
@@ -226,7 +237,13 @@ async function updateProfileInfo(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
     // return next();
   }
+  var picPath;
 
+  // if there is a profile picture path 
+  if (req.file) {
+    picPath = path.join('./profileImages', req.file.filename);
+  }
+  
   var user = {
     username: req.body.username,
     password: req.body.password,
@@ -234,7 +251,7 @@ async function updateProfileInfo(req, res, next) {
     name: req.body.name,
     interests: req.body.interests,
     accessibility_features: req.body.accessibility_features,
-    profile_pic: req.body.profile_pic
+    profile_pic: picPath
   };
 
   // if all checking fine, update the user

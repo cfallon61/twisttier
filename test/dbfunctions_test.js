@@ -190,13 +190,31 @@ describe('database functions test', function() {
       tofollow = 'seriously';
       tags = [];
       
-      var res = await db.followTopicUserPair(username, tofollow, tags);
-      
-      // assert
-      assert.deepStrictEqual(res, false);
+      var res = await db.followTopicUserPair(username, tofollow, tags);  
+  });
 
-      // var res = await db.deleteUser(user);
-    });
+  it('@test add user topic pair: should return username', async () => {
+    user = {
+      username: 'testingUser',
+      password: 'passwordsr4losers',
+      bio: 'i hate my life', 
+      name: 'testing will delete if bad', 
+      interests: [],
+      accessibility_features: {},
+      profile_pic: []
+    };
+
+    var res = await db.createUser(user);
+    console.log(res);
+
+    tofollow = {
+      username: 'tofollow',
+      tags: ['cats', 'dogs']
+    };
+
+    var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
+    // assert
+    assert.deepStrictEqual(res, user.username);
   });
 
 });

@@ -405,7 +405,11 @@ async function showNotification(user, res) {
 
 };
 
-
+// adds the userToFollow,tags pair into the following list of user
+// @param username: username of the user will follow
+// @param tofollow: username of user to add in following
+// @param tags: tag list to add with tofollow in following list
+// @return username of user on success or false on failure
 async function followTopicUserPair(username, tofollow, tags) {
   const client = await pool.connect();
   var rows = [];
@@ -440,22 +444,24 @@ async function followTopicUserPair(username, tofollow, tags) {
     }
     
     // if not exists add new user
-    if (tofollowIndex === -1) {
-      var follow = {
-        username: tofollow,
-        tags: tags
-      };
-      following.push(follow);
+    if (b === -1) {
+      var follow = {};
+      var key1 = 'username';
+      var key2 = 'tags';
+      follow[key1] = username;
+      follow[key2] = tags;
+      console.log(Array.isArray(add['users']));
+      console.log(add['users']);
+      add['users'].push(follow);
     }
     // if exists add non-duplicate tags into tag list
     else {
-      for (var i = 0; i < tags.length(); i++) {
-        if (!following[tofollowIndex].tags.includes(tags[i])) {
-          following[tofollowIndex].tags.push(tags[i]);
+      for (var i = 0; i < tags.length; i++) {
+        if (!add['users'][b].tags.inculdes(tags[i])) {
+          add['users'][b].tags.push(tags[i]);
         }
       }
     }
-
     args = [
       username,
       JSON.stringify( { users: following } )
@@ -479,7 +485,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     client.release();
   }
   
-  return (rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
 async function unfollowTopicUserPair(follower, tags, toUnfollow) {

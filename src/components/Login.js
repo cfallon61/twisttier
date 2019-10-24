@@ -85,12 +85,17 @@ class Login extends Component {
       body: JSON.stringify(writtenCredentials)
     }).then( (res) => {
       //Got response from server.
-      if (res.status === 401) {
+      if(res.status === 200)
+      {
+        //Redirecting to home page.
+        NotificationManager.success("Login successful!"); 
+        window.location.href = "/";
+      }
+      else{
         NotificationManager.error("Invalid username / email");
         return;
       }
-      //Redirecting to home page. 
-      window.location.href = "/";
+
     }).catch(function (error) {
       NotificationManager.error(error);
     });

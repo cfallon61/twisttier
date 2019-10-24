@@ -12,6 +12,7 @@ const users = require('./accountFunctions.js');
 const spins = require('./spinMiddlewares.js');
 const index = path.join(__dirname, '../build/index.html');
 const helpers = require('./helpers.js');
+const helmet = require('helmet');
 
 
 const init = require('./config.json');
@@ -24,21 +25,22 @@ const app = express();
 
 app.use(session(init.sessionSetup));
 app.use(cookieParser());
+app.use(helmet());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
-console.log(path.join(__dirname, '../profileImages'))
-app.use(express.static(images))
+
 
 
 function getExtension(filename) {
   const index = filename.lastIndexOf(".");
-  return filename.substring(index);
+  var ext =  filename.substring(index);
+  return ext.toLowerCase();
 }
 
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
 
-  destination: images,
+  destination: './profileImages',
 
   // handle filename creation
   filename: function(req, file, cb) {
@@ -53,8 +55,7 @@ const storage = multer.diskStorage({
         filepath = path.join(images, tempName);
         tempName = Date.now().toString() + "_" + file.originalname;
       }
-      file.imgsrc = filepath;
-      console.log('filename =', tempName, 'file =', file);
+      // console.log('filename =', tempName, 'file =', file);
 
       cb(null, tempName);
     }
@@ -71,15 +72,17 @@ const upload = multer({
 
   fileFilter: function(req, file, next) {
     console.log('filtering files');
-    console.log('file=', file);
+    // console.log('file=', file);
     // console.log(file.originalname);
     try {
       var ext = getExtension(file.originalname);
       // console.log(ext);
       // var ext = path.extname(file.originalname).toLocaleLowerCase()
       if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
+        console.log('failed to upload image');
         return next(null, false);
       }
+      
       console.log("image uploaded supposedly to " + file.path);
       return next(null, true);
     }
@@ -113,7 +116,7 @@ app.post('/create_user',
   
   helpers.notLoggedIn, upload, users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
-    
+      console.log(req.body);
     if (res.getHeader('error') != undefined) {
       console.log('error detected in profile creation', res.getHeader('error'));
       
@@ -121,8 +124,8 @@ app.post('/create_user',
     } 
     else {
       helpers.createSession(req, res);
-      // console.log('userdata =', userdata);
       // res.sendFile(index);
+      console.log(res.userData);
       res.json(JSON.stringify(res.userdata));
     }
 
@@ -159,6 +162,14 @@ app.get('/logout', helpers.loggedIn, (req, res) => {
 //         will continue to login page
 app.get('/login', helpers.notLoggedIn, (req, res) => {
   console.log('GET /login');
+  res.sendFile(index);
+});
+
+// @brief: route handler for checking if a user is logged in
+//         will redirect to / if already logged in, otherwise
+//         will continue to login page
+app.get('/signup', helpers.notLoggedIn, (req, res) => {
+  console.log('GET /signup');
   res.sendFile(index);
 });
 
@@ -227,13 +238,15 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 // @brief: update a user's profile information
 // @respond: IDK man i'm tired
-app.post('/api/update/:username', helpers.loggedIn,
-        [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
-         check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), 
-        ], users.updateProfileInfo, (req, res) => {
+// helpers.loggedIn,
+// [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
+  // check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), ],
+app.post('/api/update/:username', upload,
+        
+         users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
-      res.status(406)
+      res.status(406).sendFile(index);
   }
   // i'm just hacking this together at this point i want to sleep
   var userdata = req.userdata;
@@ -279,7 +292,6 @@ app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
     res.sendFile(index);
   } 
   else {
-    helpers.delete_profile_img(req, res);
     helpers.deleteSession(req, res);
     res.redirect('/'); // redirect to home page
   }
@@ -300,6 +312,7 @@ app.get('/profileImages/*', (req, res) => {
     res.sendFile(index);
   }
 });
+
 
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages

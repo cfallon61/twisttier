@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
 
-describe.skip('database functions test', function() {
+describe('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
@@ -31,7 +31,7 @@ describe.skip('database functions test', function() {
       assert.equal(res.id, spin_id.id);
     });
   });
-  describe("#db.userExists()", async () => {
+  describe.skip("#db.userExists()", async () => {
     it("@test email does exist", async () => {
       console.log("@test email does exist")
       user = {
@@ -80,7 +80,7 @@ describe.skip('database functions test', function() {
   });
 
  
-  describe("#db.createUser()", () => {
+  describe.skip("#db.createUser()", () => {
 
     it.skip ('@test not exist: should return true', async () => {
       console.log('@test not exist: should return true');
@@ -133,7 +133,7 @@ describe.skip('database functions test', function() {
     
   });
 
-  describe('#updateUserInfo',  () => {
+  describe.skip('#updateUserInfo',  () => {
     it('@test change user info with password: should return user id', async () => {
       user = {
         // id: 1,
@@ -179,6 +179,23 @@ describe.skip('database functions test', function() {
       assert.notDeepStrictEqual(res, false);
 
       var res = await db.deleteUser(user);
+    });
+  });
+
+  describe('#followTopicUserPair',  () => {
+    
+    it('follows user: should return username', async () => {
+      
+      username = 'k';
+      tofollow = 'test';
+      tags = [];
+      
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      // assert
+      assert.deepStrictEqual(res, false);
+
+      // var res = await db.deleteUser(user);
     });
   });
 

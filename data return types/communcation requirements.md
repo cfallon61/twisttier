@@ -71,7 +71,6 @@ body: {
   * __If password is invalid:__ server will set header 'error' with message 'Incorrect Password'
   * __If, for whatever reason, the login time could not be updated:__ server will set header 'error' with message 'Login time could not be updated'
 
-<<<<<<< HEAD
 * __Successful login:__ a cookie `loggedIn` will be set true and `uid` cookie will be set with the hash of the user's username, and a JSON with the following parameters will be returned:
 ```
 userdata : {
@@ -80,9 +79,8 @@ userdata : {
     last_login: <last_login>,
   };
 ```
-=======
+
 * __Successful login:__ a cookie `loggedIn` will be set true and `uid` cookie will be set with the hash of the user's username, and a header `username: <username>` will be set.
->>>>>>> d7e893610e70993798f358a799abdde5a725ab7d
 
 ## Getting a user's profile
 

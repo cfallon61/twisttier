@@ -417,17 +417,20 @@ async function followTopicUserPair(username, tofollow, tags) {
       username
     ];
 
+    // gets the users following list
     var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
 
     var res = await client.query(query, [args]);
     
-    var add = res[0];
+    // checks if tofollow exists
+    var add = res[0].following;
     var b = -1;
     for (var i = 0; i < add.users.length(); i++) {
       if (add.users[i].username === tofollow) {
         b = i;
       }
     }
+    // if not exists add new user
     if (b === -1) {
       var follow = {};
       var key1 = 'username';
@@ -436,9 +439,12 @@ async function followTopicUserPair(username, tofollow, tags) {
       follow[key2] = tags;
       add.users.push(follow);
     }
+    // if exists add non-duplicate tags into tag list
     else {
-      for (var i = 0; i <tags.length(); i++) {
-        add.users[b].tags.push(tags[i])
+      for (var i = 0; i < tags.length(); i++) {
+        if (!add.users[b].tags.inculdes(tags[i])) {
+          add.users[b].tags.push(tags[i]);
+        }
       }
     }
 
@@ -447,6 +453,7 @@ async function followTopicUserPair(username, tofollow, tags) {
       add
     ];
 
+    // update new following
     var query = `UPDATE ${USER_TABLE} 
       SET following = $2
       WHERE username = $1 
@@ -467,8 +474,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   finally {
     client.release();
   }
-  // console.log("Rows: ", rows);
-  // console.log(rows.length === 0 ? false : rows[0].username);
+  
   return (rows.length === 0 ? false : rows[0].username);
 };
 

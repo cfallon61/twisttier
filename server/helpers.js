@@ -21,8 +21,7 @@ function check_errors(req, res) {
 
 // @brief Function for finding and deleting an old profile image
 // @return: true on success, false on fail
-function delete_profile_img(req, res) {
-  const imgpath = req.imgsrc;
+function delete_profile_img(imgpath) {
   var ret = false;
   if (fs.existsSync(imgpath)) {
     fs.unlink(imgpath, (err) => { 
@@ -75,6 +74,7 @@ function loggedIn(req, res, next) {
 function notLoggedIn(req, res, next) {
   console.log(req.cookies);
   console.log(req.clientSession);
+  // console.log(req.session);
   if (!req.clientSession.uid || !req.cookies.username) {
     console.log('user is not logged in')
     return next();

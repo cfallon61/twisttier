@@ -9,12 +9,47 @@ import Login from './components/Login.js';
 import Signup from './components/Signup.js';
 import UserSettings from './components/UserSettings.js';
 import UserFeed from './components/UserFeed.js';
-import PrivateRoute from 'react-private-route';
 import Error from './components/Error.js';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import Timeline from './components/Timeline.js';
 
 class App extends Component {
+
+  constructor(props)
+  {
+    super(props);
+    this.state = {
+      //We need this field because component is rendered before resolution of the API call. Thus the solution is setting up this state after request is finished.
+      //More info: https://stackoverflow.com/questions/51407402/react-router-dom-private-route-always-redirects-to-login
+      isDeterminingAuth: true,
+
+      //If the user is logged in
+      isLoggedIn : false,
+
+      //If isLoggedIn is true, this will contain the username.
+      username : ""
+    };
+  }
+
+  updateAuthInfo()
+  {
+    console.log(document.cookie);
+    if(document.cookie !== "")
+    {   
+        var username = document.cookie.split('=')[1];
+        this.setState({isLoggedIn : true, username:username});
+    }
+    else
+    {
+      this.setState({isLoggedIn : false, username : ""});
+    }
+  }
+
+  componentDidMount()
+  {
+    this.updateAuthInfo();
+  }
 
   render() {
     return (
@@ -25,11 +60,11 @@ class App extends Component {
             <Navbardemo className="Navbardemo" />
             <NotificationContainer/>
             <Switch>
-              <PrivateRoute path="/" component={Home} exact isAuthenticated={true} redirect="/login" />
-              <Route path="/login" component={Login} />
-              <Route path="/signup" component={Signup} />
-              <Route path="/userSettings" component={UserSettings} />
-              <Route path="/profile/:username" component={UserFeed}/>
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/signup" component={Signup} />
+              <Route exact path="/userSettings" component={UserSettings} />
+              <Route exact path="/profile/:username" component={UserFeed}/>
+              <Route exact path="/" component={() => this.state.isLoggedIn ?  <Timeline username={this.state.username}/> : <Home />} /> 
               <Route component={(props) => <Error message="Page cannot be found." statusCode="404"></Error>}/>
             </Switch>
           </div>

@@ -15,6 +15,7 @@ const TEST = (process.env.TEST === "true");
 
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
+// @return: object of all user's data
 var userExists = async function (user) {
   
   var params = [];
@@ -60,8 +61,7 @@ function userSpinTableName(username) {
 
 // database function that does all the heavy lifting
 // @param accountInfo: object with all the user details from the create account form
-// @return: object containing creation info
-//         true if creation successful, false if not
+// @return: object containing creation info if creation successful, 'unable to create user' if not
  async function createUser(accountInfo) {
 
   // check if the user exists already
@@ -192,7 +192,7 @@ async function updateUser(user) {
   if (!user.profile_pic) {
     user.profile_pic = userData.profile_pic;
   }
-  
+
   // extract the info to be inserted
   if (user.password != undefined) {
     var hash = await bcrypt.hash(user.password, 10);
@@ -244,7 +244,7 @@ async function updateUser(user) {
   }
   
   // returns id of user if success otherwise false
-  return (rows.length === 0 ? false : rows[0];
+  return (rows.length === 0 ? false : rows[0]);
 }
 
 // Function to update the last login time

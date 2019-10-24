@@ -228,7 +228,12 @@ app.post('/api/update/:username', loggedIn,
   if (res.getHeader('error') != undefined) {
       res.status(406)
   }
-  res.sendFile(index);
+  // i'm just hacking this together at this point i want to sleep
+  var userdata = res.getHeader('userdata');
+  if (userdata) {
+    res.removeHeader('userdata');
+    res.json(JSON.stringify(userdata));
+  }
 });
 
 

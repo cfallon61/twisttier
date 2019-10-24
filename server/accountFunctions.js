@@ -243,7 +243,7 @@ async function updateProfileInfo(req, res, next) {
   if (req.file) {
     picPath = path.join('./profileImages', req.file.filename);
   }
-  
+
   var user = {
     username: req.body.username,
     password: req.body.password,
@@ -255,13 +255,15 @@ async function updateProfileInfo(req, res, next) {
   };
 
   // if all checking fine, update the user
-  var username = await db.updateUser(user);
+  var userData = await db.updateUser(user);
 
-  if (username === false) {
+  if (userData === false) {
     // if use use header, we need to return next
     res.setHeader('error', 'user not found');
-  } else {
-    res.setHeader('username', username);
+  } 
+  else {
+    res.setHeader('username', userData.username);
+    res.setHeader('userdata', userdata);
   }
   return next();
 

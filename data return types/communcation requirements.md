@@ -99,7 +99,14 @@ body: {
 2. Server will check that user is logged in
 3. Assuming user is logged in, server will respond in the following ways:
   * __Errors:__ If an error occurs, header 'error' will be set with some arbitrary error message
-  * __Success:__ If the updating is successful, header 'username' will be set with the username of the person updated
+  * __Success:__ If the updating is successful, header 'username' will be set with the username of the person updated, and a JSON of the following user information will be returned: 
+  ```
+    userdata: {
+      username: <username>,
+      last_login: <last_login>,
+      profile_pic: <serverside profile picture filepath>
+    }
+  ```
 
 ## Deleting an account
 

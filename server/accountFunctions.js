@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const extFuncs = require('./helpers.js');
 const path = require('path');
 const express = require('express');
+const reservedTag = require('./config.json').reservedTag;
 
 
 
@@ -333,6 +334,15 @@ async function updateFollowing(req, res, next) {
   var followUpdate;
   var user = { username: toFollow };
   
+  // don't allow for following or unfollowing of yourself.
+  if (toFollow === follower) {
+    res.setHeader('error', 'nice try bucko you can\'t do that though.');
+    return next();
+  }
+  // auto follow all __new posts
+  // 
+  tags.push(reservedTag);
+
   // make sure tofollow exists probably not necessary.
   const userData = await db.userExists(user);
   if (!userData) {

@@ -133,9 +133,22 @@ body: {
 * if there was a problem with deletion, header 'error' will be set with message 'deletion failed' and 406 will be returned
 3. Server will delete client cookie and local session and redirect to `/`
 
+---
 
 # Follow Interface
-## **TODO:** Figure out how the frick to do updates for new posts when not following that topic.
+
+
+
+## New Tags Posted
+###TODO
+This is less of a communication specification and more of a procedural specification for how this functionality will work. 
+The rough outline for this process is as follows:
+
+1. A user will create a new post with a tag which they are previously unassociated with (a new column must be added to the database to support this).
+2. The `addSpin` functionality will check the tags of this post and see if they already exist.
+3. If the post does not exist in the user's tag list, then the post will get a reserved `__new` tag which will expire in 24 hours. All posts tagged with `__new` will automatically show up in the users feed, and the new tag will then be added to the poster's tag list. 
+3. __(Alternative approach):__ If the post is not in the tags_associated list, the post ID will be placed into a `__new` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
+
 
 ## Following/Unfollowing A User [: Topic]
 1. Client will `POST /api/updateFollowing/<params>` where params are the following URL Parameters: 
@@ -167,7 +180,7 @@ params: {
   ```
 4. Server will reply with `418: I'm a teapot` if errors are detected.
 
-
+---
 # Spins Interface
 
 ## Getting a single user's spins
@@ -208,7 +221,9 @@ params:
 
 ## Adding a Spin
 
+
 __Note__ This functionality requires integration testing with client
+__Note__ Please refer to [this section](#new-tags-posted) for information on how the updates work for when a user makes a post about a previously unfollowed tag
 1. Client will `POST /api/add_spin/<username>` with `username` as a URL parameter with the following parameters in the body:
   ```
   body: {
@@ -242,5 +257,4 @@ body: {
 4. Server will attempt to remove the post from the user's post table
     * __Errors:__ If an error occurs, server will set response header `error: unable to delete spin` and return `418: I'm a teapot`
     * __Success:__ if the post is added successfully, server will set response header `spinId: [id]` and return the index.
-
 

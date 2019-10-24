@@ -15,5 +15,6 @@
     "cookie": {
       "maxAge": 86400000
     }
-  }
+  },
+  "reservedTag": "__new"
 }

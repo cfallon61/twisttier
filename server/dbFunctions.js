@@ -11,6 +11,7 @@ const pool = new Pool(credentials.database);
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true");
+const reservedTag = require('./config.json').reservedTag;
 
 
 // query the database to see if the user exists
@@ -289,7 +290,8 @@ async function getSpins(users) {
     // select * from <username_spins>  
     query += baseQuery + userSpinTableName(item.username);
 
-    if (item.tags.length > 0) {
+    // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
+    if (item.tags.length > 0 && item.tags[0] != reservedTag) {
       tagList.push(item.tags);
       // supposed to search in the range of a list supplied
       // hopefully postgres decides to parse this correctly

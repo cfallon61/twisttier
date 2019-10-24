@@ -6,13 +6,18 @@ import './spin.css'
  */
 class Spin extends Component
 {
-    state = {
-        tags: {},
-        edited: false, 
-        quoted: false,
-        quoteOrigin: "",
-        likes : 0
-    };
+    constructor(props)
+    {
+        super(props);
+        this.state = {
+            tags: {},
+            edited: false, 
+            quoted: false,
+            quoteOrigin: "",
+            likes : 0
+        };
+    }
+    
 
     render()
     {

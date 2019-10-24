@@ -1,6 +1,13 @@
 
 # Profile Interface
 
+## Querying User Login Status
+* This is an endpoint strictly for querying whether a user is logged in. 
+Client will `POST /api/login_status`
+Server will return the following:
+    * __User is logged in:__ A cookie `username=<username>` will be set, as well as a response header `loggedIn: true`
+    * __User is not logged in:__ Server will send response header `loggedIn: false`
+
 ## Creating a User
 
 * Front end will send the following information via POST in the following format:
@@ -22,7 +29,7 @@ body: {
 * **Successful creation:** A header 'username' will be set with the username returned from the creation and the following cookies will be set:```
 cookies: { 
   uid : <some arbitary hash value>
-  loggedIn: true
+  username: <username>
 }```
 
 * **Creation Failed due to user existing:** a header 'error' will be set and 406 will be returned ex
@@ -94,22 +101,38 @@ body: {
 }
 ```
   __NOTE: All 3 fields are required.__
+2. Client will prompt user for their password, and store this in the body parameters.
+3. Server will validate password prior to attempting deletion
 * If user is not logged in, Server will redirect to home page
+* If the provided password is incorrect, server will set `error` header with message `deletion failed: bad password` and 406 will be returned.
 * if there was a problem with deletion, header 'error' will be set with message 'deletion failed' and 406 will be returned
-2. Server will delete client cookie and local session and redirect to `/`
+3. Server will delete client cookie and local session and redirect to `/`
 
 
 # Follow Interface
 ## **TODO:** Figure out how the frick to do updates for new posts when not following that topic.
 
-## Following A User
+## Following A User [: Topic]
+1. Client will `POST /api/follow/<params>` where params are the following URL Parameters: 
+```
+params: {
+  toFollow: <username of the user to follow>,
+  tags: [list of tags to follow, empty defualts to all posts],
+  follower: <username of user who is following>
+}
+```
+2. __TODO__
 
-## Following A User:Topic
+## Unfollowing A User [: Topic]
 
-## Unfollowing A user
-
-## Unfollowing A User:Topic
-
+1. Client will `POST /api/unfollow/<params>` where params are the following URL Parameters: 
+```
+params: {
+  toFollow: <username of the user to unfollow>,
+  tags: [list of tags to unfollow, empty defualts to all posts and entire user],
+  follower: <username of user who is unfollowing>
+}
+```
 
 # Spins Interface
 
@@ -127,16 +150,40 @@ body: {
 
 2. Server will return JSON of all spins in chronological order
 
+## Liking / Unliking a spin
+
+1. Client will `POST /api/spins/esteem/esteem` with the following parameters as an `esteem` object as a URL parameter request: 
+```
+params: 
+{
+  esteem: {
+    postAuthor: <author's username>,
+    action: <'like' or 'unlike'>,
+    liker: <username of the person liking the post>
+    spinId: <ID of the spin to be liked / unliked>
+  }
+}
+```
+
+2. Server will validate that `liker` is logged in and all that stuff
+3. Server will proceed to validate like status on the post:
+* If the user already likes the post and tries to like again, server will set header `error` with message `unable to like post`.
+* If the user tries to unlike a post and does not currently like it, server will set header `error` with message `unable to unlike post`
+* If liking / unliking is successful, server will return the spin's updated information
+3. Under error conditions, error headers will be set and server will respond with status `400: bad request`
+
 ## Adding a Spin
 
 __Note__ This functionality requires integration testing with client
-1. Client will `POST /api/add_spin` with the following parameters in the body:
+1. Client will `POST /api/add_spin/<username>` with `username` as a URL parameter with the following parameters in the body:
   ```
   body: {
     spinBody: [some arbitary text here. <= 90 characters in length],
     tags: [list of tags i.e. ['tag1', 'tag2']],
     is_quote: [boolean. True if quoted, false if not],
-    quote_origin: [username: post_id (front end will have a list of the post IDs available to it so this is possible)]
+    quote_origin: {
+      username: <username of original author>,
+      spinId: <id of original quote> //(front end will have a list of the post IDs available to it so this is possible)]
   }; 
   ```
 
@@ -148,9 +195,14 @@ __Note__ This functionality requires integration testing with client
     * __Success:__ If the post was successfully added, the server will set response header `spinId: [id]` and will send the index file.
 
 ##Deleting a Spin
-__NOTE:__ This functionality has not been implemented yet.
+<!-- __NOTE:__ This functionality has not been implemented yet. -->
 __NOTE:__ Only 1 post may be deleted at a time. No plans to implement bulk removal.
-1. Client will `POST /api/deleteSpin/` with the `spinId` being a URL parameter.
+1. Client will `POST /api/deleteSpin/<username>` with the `username` being a URL parameter and the `spinId` given in the body:
+```
+body: {
+  spinId: <id>
+} 
+```
 2. Server will validate the user session. 
 3. If the user session is valid, the username will be gathered from the `clientSession.uid` cookie in the request object. 
 4. Server will attempt to remove the post from the user's post table

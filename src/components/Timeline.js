@@ -20,37 +20,41 @@ class Timeline extends Component
     {
         super(props);
         this.username = this.props.username;
-        let spins = this.getTimelineSpins(this.props.username);
         this.state = {
-            spins : spins,
+            spins : [],
             error : {
                 exist : false, 
-                errorMessage : "",
+                message : "",
                 status : ""
             }
         }
         console.log(this.username);
     }
 
-    getTimelineSpins(username)
+    componentDidMount()
     {
-        fetch(`/api/timeline/${username}`, {
+        const self = this;
+        fetch(`/api/timeline/${this.username}`, {
             method: "POST",
             headers: {
                 "Content-Type" : "application/json"
             }
         }).then(function(res){
-            if(res.status === "200")
+            if(res.status === 200)
             {
-                return res.json();
+                res.json().then(function(jsonData){
+                    const dataDict = JSON.parse(jsonData);
+                    console.log(jsonData);
+                }).catch(function(error){
+                    console.log(error);
+                });
             }
             else{
-                this.setState({error: {exist: true, message: res.headers.error, status:res.status}});
+                self.setState({error: {exist: true, message: res.headers.error, status:res.status}});
             }
         }).catch(function(err){
-            this.setState({error: {exist: true, message: err, status:"404"}});
+            self.setState({error: {exist: true, message: err, status:"404"}});
         });
-
     }
 
     render()

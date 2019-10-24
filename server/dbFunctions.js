@@ -20,21 +20,24 @@ var userExists = async function (user) {
   var params = [];
   // console.log(user);
   var query = `SELECT * FROM ${USER_TABLE} `;
-  if(user.email === "")
+
+  if(user.username)
   {
     query += `WHERE USERNAME=$1`;
     params.push(user.username);
   }
-  else if(user.username === "")
+  else if(user.email)
   {
     query += `WHERE EMAIL=$1`;
     params.push(user.email);
   }
-  else{
+  else {
     //Unexpected error here.
+    console.log("what the fuck")
     return false;
   }
   var res = await pool.query(query, params);
+
   // response is a json 
   // need to get rows, which is a list
   // console.log(res);
@@ -111,7 +114,7 @@ function userSpinTableName(username) {
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
       name, followers, following, interests, accessibility_features) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING id`;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON) RETURNING username`;
 
     res = await client.query(query, args);
     // console.log("2nd res: ", res.rows);
@@ -129,11 +132,8 @@ function userSpinTableName(username) {
     client.release();
   }
   // console.log(rows);
-  if (rows.length === 0 && TEST){
-    return 'user exists';
-  }
 
-  return (rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? 'unable to create user' : rows[0].username);
 };
 
 
@@ -195,7 +195,7 @@ async function updateUser(user) {
     await client.query('BEGIN');
 
     var args = [
-      user.id,
+      user.username,
       hash, 
       user.bio, 
       user.name, 
@@ -207,7 +207,7 @@ async function updateUser(user) {
     var query = `UPDATE ${USER_TABLE} 
       SET passhash = $2, bio = $3, name = $4, interests = $5, 
       accessibility_features = $6, profile_pic = $7
-      WHERE id = $1 
+      WHERE username = $1 
       RETURNING username`
     ;
 
@@ -216,7 +216,7 @@ async function updateUser(user) {
       query = `UPDATE ${USER_TABLE} 
         SET bio = $2, name = $3, interests = $4, 
         accessibility_features = $5, profile_pic = $6
-        WHERE id = $1 
+        WHERE username = $1 
         RETURNING username`
       ;
     }
@@ -242,14 +242,27 @@ async function updateUser(user) {
 
 // Function to update the last login time
 // return true on success, false on error
-async function updateLoginTime(username){
+async function updateLoginTime(user){
   var client = await pool.connect();
   var rows;
+  var query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE`;
+  var arg = '';
+  if (!user.username)
+  {
+    query +=` email = $1 RETURNING username`;
+    arg = user.email;
+  }
+  else {
+    query += ` USERNAME = $1 RETURNING username`;
+    arg = user.username;
+  }
+  console.log(query)
   try{
+    // console.log(user);
     await client.query('BEGIN');
-    const tablename = userSpinTableName(username);
-    const query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE USERNAME = $1`;
-    var res = await client.query(query, [username]);
+    // const tablename = userSpinTableName(username);
+    var res = await client.query(query, [arg]);
+    // var res = await client.query(query);
     rows = res.rows;
     await client.query('COMMIT');
   }
@@ -260,7 +273,7 @@ async function updateLoginTime(username){
   finally {
     client.release();
   }
-
+  // console.log(res.rows);
   return (rows.length === 0 ? false : true);
 };
 
@@ -326,12 +339,12 @@ async function getSpins(users) {
 // @param user = user who created the spin
 // @param spin = spin to be added into the user's spin table
 // @return spin id if success, false if failure
-async function addSpin(user, spin) {
+async function addSpin(username, spin) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user.username);
+    var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
     var args = [
@@ -341,7 +354,7 @@ async function addSpin(user, spin) {
       spin.likes,
       spin.quotes,
       spin.is_quote,
-      spin.quote_origin,
+      JSON.stringify(spin.quote_origin),
       spin.like_list
     ];
 
@@ -366,12 +379,12 @@ async function addSpin(user, spin) {
 };
 
 
-async function deleteSpin(user, spin_id) {
+async function deleteSpin(username, spin_id) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user.username);
+    var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
     var query = 
@@ -398,8 +411,71 @@ async function showNotification(user, res) {
 
 };
 
-async function followTopicUserPair(pair) {
+async function followTopicUserPair(username, tofollow, tags) {
+  const client = await pool.connect();
+  var rows = [];
 
+  try{
+    
+    await client.query('BEGIN');
+
+    var args = [
+      username
+    ];
+
+    var query = `SELECT follwing FROM ${USER_TABLE} WHERE username = $1`;
+
+    var res = await client.query(query, [args]);
+    
+    var add = res[0];
+    var b = -1;
+    for (var i = 0; i < add.users.length(); i++) {
+      if (add.users[i].username === tofollow) {
+        b = i;
+      }
+    }
+    if (b === -1) {
+      var follow = {};
+      var key1 = 'username';
+      var key2 = 'tags';
+      follow[key1] = username;
+      follow[key2] = tags;
+      add.users.push(follow);
+    }
+    else {
+      for (var i = 0; i <tags.length(); i++) {
+        add.users[b].tags.push(tags[i])
+      }
+    }
+
+    args = [
+      username,
+      add
+    ];
+
+    var query = `UPDATE ${USER_TABLE} 
+      SET following = $2
+      WHERE username = $1 
+      RETURNING username`
+    ;
+
+    var res = await client.query(query, [args]);
+
+    await client.query('COMMIT');
+    rows = res.rows;
+
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    // console.log(`Error caught by error handler: ${ e }`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+  // console.log("Rows: ", rows);
+  // console.log(rows.length === 0 ? false : rows[0].username);
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 async function unfollowTopicUserPair(pair) {
@@ -412,40 +488,39 @@ async function unfollowTopicUserPair(pair) {
 // @param user_liker: username of user which is liking the spin
 // @param user_poster: username of user which is recieveing the like on his spin
 // @param spin: spin which is being liked
-// @return true on success and false on failure
+// @return the spin which was liked on success and false on failure
 async function likeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster.username);
+    var tablename = userSpinTableName(user_poster);
     
     await client.query('BEGIN');
    
-    var args = [spin.id];
-    var query = `SELECT like_list FROM ${tablename} 
-    WHERE id = $1`;
+    var args = [spin];
+    var query = `SELECT like_list FROM ${tablename} WHERE id = $1`;
 
     var res = await client.query(query, args);
+    var like_list = res.rows[0].like_list;
+    // console.log(like_list);
 
-    if (res[0].indexOf(user_like.username) > -1) {
-      console.log("user_liker has already liked the spin")
+    // check that the user has not already liked the spin
+    if (like_list.indexOf(user_liker) > -1) {
+      console.log(user_liker + " has already liked the spin")
+      await client.query('ROLLBACK');
       return false;
     } 
     else {
 
-      res[0].push(user_liker.username);
-      args = [res[0], spin.id];
-      query = `UPDATE ${tablename} 
-      SET 
-      likelist = $1, 
-      likes = likes + 1
-      WHERE id = $2`;
+      like_list.push(user_liker);
+      args = [like_list, spin];
+      query = `UPDATE ${tablename} SET like_list = $1, likes = likes + 1 WHERE id = $2 RETURNING *`;
 
       res = await client.query(query, args);
       
       rows = res.rows;
-
+      // console.log(rows);
       await client.query('COMMIT');
     }
   } catch(e) {
@@ -455,7 +530,7 @@ async function likeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows);
 };
 
 // funtion decrements like number of the spin by 1
@@ -464,39 +539,43 @@ async function likeSpin(user_liker, user_poster, spin) {
 // @param user_liker: username of user which is unliking the spin
 // @param user_poster: username of user which is poster of spin
 // @param spin: spin which is being unliked
-// @return true on success and false on failure
+// @return the spin which was unliked on success and false on failure
 async function unlikeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
   var rows = [];
 
   try {
-    var tablename = userSpinTableName(user_poster.username);
+    var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');
     
-    var args = [spin.id];
+    var args = [spin];
     var query = `SELECT like_list FROM ${tablename} 
     WHERE id = $1`;
 
     var res = await client.query(query, args);
-    var index = res[0].indexOf(user_like.username);
+    // get the like list from the response object
+    var like_list = res.rows[0].like_list;
+
+    var index = like_list.indexOf(user_liker);
+    // if the user is found in the like list then we remove the name
+    // and write to the database
     if (index > -1) {
 
-      res[0].splice(index, 1);
+      like_list.splice(index, 1);
       
-      args = [res[0], spin.id];
-      query = `UPDATE ${tablename} 
-      SET 
-      likelist = $1, 
-      likes = likes - 1
-      WHERE id = $2`;
+      args = [like_list, spin];
+      query = `UPDATE ${tablename} SET likelist = $1, likes = likes - 1 
+      WHERE id = $2 RETURNING *`;
 
       res = await client.query(query);
 
       rows = res.rows;
 
       await client.query('COMMIT');
-    } else {
-      console.log("user_liker has not liked the spin")
+    } 
+    else {
+      console.log(user_liker + " has not liked the spin")
+      await client.query("ROLLBACK");
       return false;
     }
   } catch(e) {
@@ -506,16 +585,9 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : true);
+  return (rows.length === 0 ? false : rows[0]);
 };
 
-async function reSpin(user, res) {
-
-};
-
-async function getQuoteOrigin(user, res) {
-
-};
 
 
 // error handler
@@ -531,8 +603,6 @@ module.exports = {
   unfollowTopicUserPair,
   likeSpin,
   unlikeSpin,
-  reSpin,
-  getQuoteOrigin,
   createUser,
   userExists,
   deleteUser,

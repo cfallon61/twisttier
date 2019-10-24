@@ -10,11 +10,10 @@
 
   "sessionSetup":{
     "cookieName": "clientSession",
+    "key": "uid",
     "secret": "thisIsSupposedToBeALongUnguessableStringSoHereYouGoEverybody",
-    "duration": 86400000,
-    "activeDuration": 3600000,
-    "secure": true,
-    "httpOnly": true,
-    "ephemeral": false
+    "cookie": {
+      "maxAge": 86400000
+    }
   }
 }

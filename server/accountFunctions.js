@@ -5,6 +5,7 @@ const {
 const db = require('./dbFunctions');
 const express = require('express');
 const bcrypt = require('bcrypt');
+const extFuncs = require('./helpers.js');
 
 
 
@@ -13,11 +14,9 @@ const bcrypt = require('bcrypt');
 // @return: none
 async function postCreateUser(req, res, next) {
 
-  console.log('postCreateUser called');
-  // console.log(req.body);
-
-  if (check_errors(req, res)) {
-    return next();
+  // TODO figure out why express-validator isnt working
+  if (extFuncs.check_errors(req, res)) {
+    // return next();
   }
 
   var accountInfo = {
@@ -27,14 +26,14 @@ async function postCreateUser(req, res, next) {
     username: req.body.username,
     bio: req.body.bio
   };
-
+  
   var userCreated = await db.createUser(accountInfo);
-
+  // console.log(userCreated);
   // userCreated is the empty rows or false, return error
   if (!userCreated) {
     res.setHeader('errors', userCreated);
   } else {
-    res.setHeader('username', userCreated.username);
+    res.setHeader('username', userCreated);
   }
 
   return next();
@@ -53,7 +52,6 @@ async function authorize(req, res, next) {
   // console.log(user);
 
   var userData = await db.userExists(user);
-  // console.log(userData);
 
   if (userData === false) {
     console.log('invalid username');
@@ -61,7 +59,7 @@ async function authorize(req, res, next) {
     return next();
   }
   var match = await bcrypt.compare(user.password, userData.passhash);
-
+  // console.log(match);
   // password doesn't match
   if (!match) {
     console.log('invalid password');
@@ -71,7 +69,7 @@ async function authorize(req, res, next) {
       //1st index is the username
       user.username = userData[1];
     }
-    updateLoginTimeBool = db.updateLoginTime(user.username);
+    updateLoginTimeBool = await db.updateLoginTime(user);
 
     // check whether login time was successfully updated
     if (!updateLoginTimeBool) {
@@ -79,7 +77,8 @@ async function authorize(req, res, next) {
       res.setHeader('error', 'Login time could not be updated');
     }
   }
-  return next(req, res, user);
+  res.setHeader('username', userData.username);
+  return next();
 
 }
 
@@ -93,11 +92,13 @@ async function deleteAccount(req, res, next) {
     email: req.body.email
   };
 
-  var exist = await db.userExists(user);
+  var userData = await db.userExists(user);
+
+  var goodPass = await bcrypt.compare(user.password, userData.passhash);
 
   // check if the user exists
   // if it exists, call the delete user function of db
-  if (exist !== false) {
+  if (userData !== false && goodPass) {
 
     var deleteSuccess = await db.deleteUser(req.body.username);
 
@@ -107,7 +108,7 @@ async function deleteAccount(req, res, next) {
       res.setHeader('error', 'deletion failed');
     }
   } else {
-    res.setHeader('error', 'deletion failed');
+    res.setHeader('error', 'deletion failed: bad password');
   }
   return next();
 
@@ -211,9 +212,9 @@ async function getTimeline(req, res, next) {
   if (followedSpins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
-
+  // console.log(followedSpins);
   res.json(JSON.stringify(followedSpins));
-  return next();
+  // return next();
 
   // TODO error check here and make sure that it returns good data
 
@@ -222,11 +223,12 @@ async function getTimeline(req, res, next) {
 // updates user profile information from request
 async function updateProfileInfo(req, res, next) {
 
-  if (check_errors(req, res)) {
-    return next();
+  if (extFuncs.check_errors(req, res)) {
+    // return next();
   }
 
   var user = {
+    username: req.body.username,
     password: req.body.password,
     bio: req.body.bio,
     name: req.body.name,
@@ -249,81 +251,6 @@ async function updateProfileInfo(req, res, next) {
 }
 
 
-// @brief: middleware to create a post. sets 'error' header if
-//         errors occur
-// @return: none
-async function createSpin(req, res, next) {
-  if (check_errors(req, res)) {
-    return next();
-  }
-
-  var spin = {
-    content: req.body.spinBody,
-    tags: req.body.tags,
-    edited: false,
-    likes: 0,
-    quotes: 0,
-    is_quote: req.body.is_quote,
-    quote_origin: req.body.quote_origin, // TODO define how this works I still don't understand the whole quote origin thing
-    like_list: []
-  };
-
-  // if it is a quote but no original author is specified, error
-  if (spin.is_quote && quote_origin === undefined) {
-    res.setHeader("error", "no quote origin specified");
-    return next();
-  }
-
-  var user = {
-    username: req.clientSession.uid
-  };
-
-  var added = await db.addSpin(user, spin);
-  if (!added) {
-    res.setHeader("error", "unable to add spin");
-  } else {
-    res.setHeader("spinId", added);
-  }
-  return next();
-}
-
-// @brief: middleware to delete a post. sets 'error' header if
-//         errors occur
-// @return: none
-async function removeSpin(req, res, next) {
-  if (check_errors(req, res)) {
-    return next();
-  }
-
-  var spin_id = req.params.spinId;
-
-  var user = {
-    username: req.clientSession.uid
-  };
-
-  var deleted = await db.deleteSpin(user, spin_id);
-  if (!deleted) {
-    res.setHeader("error", "unable to delete spin");
-  } else {
-    res.setHeader("spinId", deleted);
-  }
-  return next();
-}
-
-// @brief generic function for checking if a request has invalid input.
-// @return: true if there are errors present, false if none
-function check_errors(req, res) {
-  const errors = validationResult(req);
-
-  // verify that the spin fits within the legnth bounds
-  if (!errors.isEmpty()) {
-    res.setHeader('error', errors.array());
-    return true;
-  }
-
-  return false;
-}
-
 
 module.exports = {
   postCreateUser,
@@ -333,6 +260,5 @@ module.exports = {
   updateProfileInfo,
   getUserInfo,
   getPosts,
-  createSpin,
-  removeSpin
+  
 };

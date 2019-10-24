@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
 
-describe('database functions test', function() {
+describe.skip('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
@@ -32,21 +32,45 @@ describe('database functions test', function() {
     });
   });
   describe("#db.userExists()", async () => {
-    it("should return user data for this user", async () => {
+    it("@test email does exist", async () => {
+      console.log("@test email does exist")
       user = {
         email: "test@test.com",
-        username: "test"
       };
 
       var res = await db.userExists(user);
+      console.log(res);
 
       assert.notDeepStrictEqual(res, false);
     });
 
-    it("should return false", async () => {
+    it("@test email not exist", async () => {
+      console.log("@test email not exist")
       user = {
         email: "test@test656565.com",
-        username: "test656565"
+      };
+
+      var res = await db.userExists(user);
+
+      assert.deepStrictEqual(res, false);
+    });
+
+    it("@test username does exist", async () => {
+      console.log("@test username does exist");
+      user = {
+        username: "test",
+      };
+
+      var res = await db.userExists(user);
+      // console.log(res);
+
+      assert.notDeepStrictEqual(res, false);
+    });
+
+    it("@test username not exist", async () => {
+      console.log("@test username not exist");
+      user = {
+        username: "i_wish_to_die",
       };
 
       var res = await db.userExists(user);
@@ -58,7 +82,8 @@ describe('database functions test', function() {
  
   describe("#db.createUser()", () => {
 
-    it ('@test not exist: should return true', async () => {
+    it.skip ('@test not exist: should return true', async () => {
+      console.log('@test not exist: should return true');
       var user = {
         username: 'bringMeDeath',
         email: 'welcometohell@gmail.com',
@@ -76,19 +101,10 @@ describe('database functions test', function() {
         assert.notDeepStrictEqual(res, false);
       } 
     });
-    it.skip('@recreate doeJohn user, not an actual test', async () => {
-      var user = {
-        username: 'doeJohn',
-        email: 'email@email.com',
-        name: "Harvey",
-        password: "password",
-        bio: 'my name is Harvey Hinkelberg, but they call me john',
-      }
 
-      var res = await db.createUser(user);
-    });
     
-    it ('@test email exists: should fail', async () => {
+    it.skip('@test email exists: should fail', async () => {
+      console.log('@test email exists: should fail');
       var user = {
         username: 'jhfdjhfbh',
         email: 'test@test.com',
@@ -100,18 +116,6 @@ describe('database functions test', function() {
       var res = await db.createUser(user);
 
       assert.notDeepStrictEqual(res, true);
-    });
-    
-    it('@recreate K, not an actual test', async () => {
-      var user = {
-        username: 'k',
-        email: 'newK@gmail.com',
-        name: "KurtK",
-        password: "Kpassword",
-        bio: 'K is my bio',
-      }
-
-      var res = await db.createUser(user);
     });
 
     it ('@test user exists: should fail', async () => {
@@ -132,7 +136,8 @@ describe('database functions test', function() {
   describe('#updateUserInfo',  () => {
     it('@test change user info with password: should return user id', async () => {
       user = {
-        id: 1,
+        // id: 1,
+        username: 'test',
         password: 'passwordsr4losers',
         bio: 'i hate my life', 
         name: 'test', 
@@ -143,11 +148,11 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, 1);
+      assert.deepStrictEqual(res, user.username);
     });
-    it('@test change user info not password: should return user id', async () => {
+    it('@test change user info not password: should return username', async () => {
       user = {
-        id: 6,
+        username: 'doeJohn',
         bio: 'Harvey hates my life', 
         name: 'Harvey', 
         interests: [],
@@ -157,28 +162,13 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, 6);
-    });
-
-    it('@test change user , does not exist: should return false', async () => {
-      user = {
-        id: 675,
-        bio: 'Harvey hates my life', 
-        name: 'Harvey', 
-        interests: [],
-        accessibility_features: {},
-        profile_pic: []
-      };
-
-      var res = await db.updateUser(user);
-      // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, user.username);
     });
 
   });
 
   
-  describe('#deleteUser',  () => {
+  describe.skip('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
       username = "k";
@@ -189,19 +179,6 @@ describe('database functions test', function() {
       assert.notDeepStrictEqual(res, false);
 
       var res = await db.deleteUser(user);
-    });
-
-    it('user does not exist: should return false', async () => {
-      
-      var  username = "notExist";
-      
-     
-      var res = await db.deleteUser(username);
-      
-      // console.log("DELETE response: ", res);
-      
-      // assert
-      assert.deepStrictEqual(res, true);
     });
   });
 

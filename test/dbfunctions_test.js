@@ -9,7 +9,6 @@ const bcrypt = require('bcrypt');
 describe('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
-
       user = {
         email: "jdoe@purdue.edu",
         username: "doeJohn"
@@ -30,7 +29,31 @@ describe('database functions test', function() {
       var spin_id = await db.deleteSpin(user, res.id);
       assert.equal(res.id, spin_id.id);
     });
+
+    it('Associated username or email does not exist. Should fail', async () => {
+      user = {
+        email: "notExistEmail",
+        username: "notExistUsername"
+      };
+
+      spin = {
+        content: 'I should fail',
+        tags: ['fail', 'or pass'],
+        edited: false,
+        likes: 0,
+        quotes: 0,
+        is_quote: false,
+        quote_origin: {},
+        like_list: []
+      };
+
+      var res = await db.addSpin(user, spin);
+      var spin_id = await db.deleteSpin(user, res.id);
+      assert.deepStrictEqual(res, false);
+    });
   });
+  
+  
   describe.skip("#db.userExists()", async () => {
     it("@test email does exist", async () => {
       console.log("@test email does exist")
@@ -182,7 +205,7 @@ describe('database functions test', function() {
     });
   });
 
-  describe('#followTopicUserPair',  () => {
+  describe.skip('#followTopicUserPair',  () => {
     
     it('follows user: should return username', async () => {
       
@@ -191,9 +214,9 @@ describe('database functions test', function() {
       tags = [];
       
       var res = await db.followTopicUserPair(username, tofollow, tags);  
-  });
+    });
 
-  it('@test add user topic pair: should return username', async () => {
+    it.skip('@test add user topic pair: should return username', async () => {
     user = {
       username: 'testingUser',
       password: 'passwordsr4losers',
@@ -216,5 +239,7 @@ describe('database functions test', function() {
     // assert
     assert.deepStrictEqual(res, user.username);
   });
+
+});
 
 });

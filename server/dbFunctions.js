@@ -374,7 +374,7 @@ async function addSpin(username, spin) {
   return (rows.length === 0 ? false : rows[0].id);
 };
 
-
+// Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
   const client = await pool.connect();
   var rows = [];
@@ -401,6 +401,8 @@ async function deleteSpin(username, spin_id) {
   return (rows.length === 0 ? false : rows[0].id);
 }
 
+
+// shows notifications 
 async function showNotification(user, res) {
 
 };

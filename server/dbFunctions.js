@@ -402,12 +402,6 @@ async function deleteSpin(username, spin_id) {
   return (rows.length === 0 ? false : rows[0].id);
 }
 
-
-// shows notifications 
-async function showNotification(user, res) {
-
-};
-
 // adds the userToFollow,tags pair into the following list of user
 // @param username: username of the user will follow
 // @param tofollow: username of user to add in following

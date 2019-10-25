@@ -257,27 +257,46 @@ describe('database functions test', function() {
   describe('#followTopicUserPair',  () => {
     
     it('@test add user topic pair: should return username', async () => {
-    user = {
-      username: 'testingUser',
-      password: 'passwordsr4losers',
-      email: 'kaizer@von.heimer',
-      bio: 'i hate my life', 
-      name: 'testing, delete if bad'
-    };
-    console.log("yupyup");
-    var res = await db.createUser(user);
-    console.log(res);
+      user = {
+        username: 'testingUser',
+        password: 'passwordsr4losers',
+        email: 'kaizer@von.heimer',
+        bio: 'i hate my life', 
+        name: 'testing, delete if bad'
+      };
+      console.log("yupyup");
+      var res = await db.createUser(user);
+      console.log(res);
 
-    tofollow = {
-      username: 'tofollow',
-      tags: ['cats', 'dogs']
-    };
+      tofollow = {
+        username: 'tofollow',
+        tags: ['cats', 'dogs']
+      };
 
-    var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
-    // assert
-    assert.deepStrictEqual(res, user.username);
+      var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
+      // assert
+      assert.deepStrictEqual(res, user.username);
+    });
+
+    it('@test add user topic pair: should return username', async () => {
+      user = {
+        username: 'testingUser',
+        password: 'passwordsr4losers',
+        email: 'kaizer@von.heimer',
+        bio: 'i hate my life', 
+        name: 'testing, delete if bad'
+      };
+
+      tofollow = {
+        username: 'tofollow',
+        tags: ['memes', 'joeMama']
+      };
+
+      var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
+      // assert
+      assert.deepStrictEqual(res, user.username);
+    });
+
   });
-
-});
 
 });

@@ -464,8 +464,8 @@ async function followTopicUserPair(username, tofollow, tags) {
     // if exists add non-duplicate tags into tag list
     else {
       for (var i = 0; i < tags.length; i++) {
-        if (!following['users'][tofollowIndex].tags.inculdes(tags[i])) {
-          following['users'][tofollowIndex].tags.push(tags[i]);
+        if (!following['users'][tofollowIndex]['tags'].includes(tags[i])) {
+          following['users'][tofollowIndex]['tags'].push(tags[i]);
         }
       }
     }
@@ -493,7 +493,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     client.release();
   }
   
-  return (rows.length === 0 ? false : rows[0]);
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 async function unfollowTopicUserPair(follower, tags, toUnfollow) {

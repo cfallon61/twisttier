@@ -97,7 +97,7 @@ describe('database functions test', function() {
   });
   
   
-  describe.skip("#db.userExists()", async () => {
+  describe("#db.userExists()", async () => {
     it("@test email does exist", async () => {
       console.log("@test email does exist")
       user = {
@@ -146,9 +146,9 @@ describe('database functions test', function() {
   });
 
  
-  describe.skip("#db.createUser()", () => {
+  describe("#db.createUser()", () => {
 
-    it.skip ('@test not exist: should return true', async () => {
+    it ('@test not exist: should return true', async () => {
       console.log('@test not exist: should return true');
       var user = {
         username: 'bringMeDeath',
@@ -169,7 +169,7 @@ describe('database functions test', function() {
     });
 
     
-    it.skip('@test email exists: should fail', async () => {
+    it('@test email exists: should fail', async () => {
       console.log('@test email exists: should fail');
       var user = {
         username: 'jhfdjhfbh',
@@ -199,7 +199,7 @@ describe('database functions test', function() {
     
   });
 
-  describe.skip('#updateUserInfo',  () => {
+  describe('#updateUserInfo',  () => {
     it('@test change user info with password: should return user id', async () => {
       user = {
         // id: 1,
@@ -237,9 +237,15 @@ describe('database functions test', function() {
   describe.skip('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
-      username = "k";
+      user = {
+        username: 'testingUser',
+        password: 'passwordsr4losers',
+        email: 'kaizer@von.heimer',
+        bio: 'i hate my life', 
+        name: 'testing, delete if bad'
+      };
      
-      var res = await db.deleteUser(username);
+      var res = await db.deleteUser(user.username);
       
       // assert
       assert.notDeepStrictEqual(res, false);
@@ -248,28 +254,17 @@ describe('database functions test', function() {
     });
   });
 
-  describe.skip('#followTopicUserPair',  () => {
+  describe('#followTopicUserPair',  () => {
     
-    it('follows user: should return username', async () => {
-      
-      username = 'f';
-      tofollow = 'seriously';
-      tags = [];
-      
-      var res = await db.followTopicUserPair(username, tofollow, tags);  
-    });
-
-    it.skip('@test add user topic pair: should return username', async () => {
+    it('@test add user topic pair: should return username', async () => {
     user = {
       username: 'testingUser',
       password: 'passwordsr4losers',
+      email: 'kaizer@von.heimer',
       bio: 'i hate my life', 
-      name: 'testing will delete if bad', 
-      interests: [],
-      accessibility_features: {},
-      profile_pic: []
+      name: 'testing, delete if bad'
     };
-
+    console.log("yupyup");
     var res = await db.createUser(user);
     console.log(res);
 

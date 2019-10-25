@@ -76,19 +76,19 @@ function userSpinTableName(username) {
 
     // dynamically create tables based on if this is development or not
     var tablename = userSpinTableName(accountInfo.username);
-    
+    console.log(SPIN_TEMPLATE);
     var args = [tablename, SPIN_TEMPLATE];
     
     // begins transaction
     await client.query('BEGIN');
-    
+
     // create the user table
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
-    // console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
+    console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
     var res = await client.query(query);
-
+    console.log("hello");
+    console.log(JSON.stringify(res[0]));
     // console.log(accountInfo);
-
     args = [
       accountInfo.email,
       accountInfo.username,
@@ -98,20 +98,17 @@ function userSpinTableName(username) {
       accountInfo.bio,
       accountInfo.name,
       [], // followers
-      {
-        users: JSON.stringify([
-          { username: accountInfo.username, tags: [] }
-        ]),
-       }, // following
+      {users: [ { username: accountInfo.username, tags: [] } ] }, // following
       [], // interests
       {}, // accessibility features
       accountInfo.profile_pic,
+      []
     ];
-
+    console.log(args[8]);
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
-      name, followers, following, interests, accessibility_features, profile_pic) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON, $12::TEXT) 
+      name, followers, following, interests, accessibility_features, profile_pic, tags_associated) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON, $12::TEXT, $13::VARCHAR(19)[]) 
       RETURNING username, profile_pic, last_login`;
 
     res = await client.query(query, args);
@@ -425,7 +422,9 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     await client.query('BEGIN');
 
-    var args = ["test"];
+    var args = [
+      username
+    ];
 
     // gets the users following list
     // var query = `SELECT username FROM ${USER_TABLE} WHERE USERNAME=$1`;
@@ -436,44 +435,46 @@ async function followTopicUserPair(username, tofollow, tags) {
     rows = res.rows;
     
     console.log(rows[0].following);
+    console.log(JSON.stringify(rows[0].following));
     
     // checks if tofollow exists
     var following = rows[0].following;
 
     var tofollowIndex = -1;
 
+    console.log(Array.isArray(following['users']));
+
     if (following != null) {
-      for (var i = 0; i < following.length(); i++) {
-        if (following[i].username === tofollow) {
+      for (var i = 0; i < following['users'].length; i++) {
+        if (following['users'][i].username === tofollow) {
           tofollowIndex = i;
         }
       }
     }
     
     // if not exists add new user
-    if (b === -1) {
+    if (tofollowIndex === -1) {
       var follow = {};
       var key1 = 'username';
       var key2 = 'tags';
-      follow[key1] = username;
+      follow[key1] = tofollow;
       follow[key2] = tags;
-      console.log(Array.isArray(add['users']));
-      console.log(add['users']);
-      add['users'].push(follow);
+      following['users'].push(follow);
     }
     // if exists add non-duplicate tags into tag list
     else {
       for (var i = 0; i < tags.length; i++) {
-        if (!add['users'][b].tags.inculdes(tags[i])) {
-          add['users'][b].tags.push(tags[i]);
+        if (!following['users'][tofollowIndex].tags.inculdes(tags[i])) {
+          following['users'][tofollowIndex].tags.push(tags[i]);
         }
       }
     }
     args = [
       username,
-      JSON.stringify( { users: following } )
+      following
     ];
 
+    console.log(following);
     // update new following
     var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 

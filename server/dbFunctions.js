@@ -76,7 +76,7 @@ function userSpinTableName(username) {
 
     // dynamically create tables based on if this is development or not
     var tablename = userSpinTableName(accountInfo.username);
-    console.log(SPIN_TEMPLATE);
+
     var args = [tablename, SPIN_TEMPLATE];
     
     // begins transaction
@@ -84,10 +84,9 @@ function userSpinTableName(username) {
 
     // create the user table
     var query = `CREATE TABLE IF NOT EXISTS ${tablename} () INHERITS (${SPIN_TEMPLATE})`;
-    console.log("REACHED, tablename: ", tablename, SPIN_TEMPLATE);
+
     var res = await client.query(query);
-    console.log("hello");
-    console.log(JSON.stringify(res[0]));
+
     // console.log(accountInfo);
     args = [
       accountInfo.email,
@@ -104,7 +103,7 @@ function userSpinTableName(username) {
       accountInfo.profile_pic,
       []
     ];
-    console.log(args[8]);
+
     query = `INSERT INTO ${USER_TABLE} (email, 
       username, passhash, create_date, last_login, bio, 
       name, followers, following, interests, accessibility_features, profile_pic, tags_associated) 
@@ -434,19 +433,13 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     rows = res.rows;
     
-    console.log(rows[0].following);
-    console.log(JSON.stringify(rows[0].following));
-    
     // checks if tofollow exists
     var following = rows[0].following;
 
     var tofollowIndex = -1;
-
-    console.log(Array.isArray(following['users']));
-
     if (following != null) {
-      for (var i = 0; i < following['users'].length; i++) {
-        if (following['users'][i].username === tofollow) {
+      for (var i = 0; i < following.users.length; i++) {
+        if (following.users[i].username === tofollow) {
           tofollowIndex = i;
         }
       }
@@ -454,27 +447,24 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     // if not exists add new user
     if (tofollowIndex === -1) {
-      var follow = {};
-      var key1 = 'username';
-      var key2 = 'tags';
-      follow[key1] = tofollow;
-      follow[key2] = tags;
-      following['users'].push(follow);
+      var follow = {'username': tofollow, 'tags': tags};
+      following.users.push(follow);
     }
+
     // if exists add non-duplicate tags into tag list
     else {
       for (var i = 0; i < tags.length; i++) {
-        if (!following['users'][tofollowIndex]['tags'].includes(tags[i])) {
-          following['users'][tofollowIndex]['tags'].push(tags[i]);
+        if (!following.users[tofollowIndex].tags.includes(tags[i])) {
+          following.users[tofollowIndex].tags.push(tags[i]);
         }
       }
     }
+
     args = [
       username,
       following
     ];
 
-    console.log(following);
     // update new following
     var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 

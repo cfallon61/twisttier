@@ -288,8 +288,8 @@ describe('database functions test', function() {
       };
 
       tofollow = {
-        username: 'tofollow',
-        tags: ['memes', 'joeMama']
+        username: 'deadInside',
+        tags: ['goth', 'tittyGF']
       };
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);

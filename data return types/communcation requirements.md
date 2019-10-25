@@ -80,6 +80,8 @@ userdata : {
   };
 ```
 
+* __Successful login:__ a cookie `loggedIn` will be set true and `uid` cookie will be set with the hash of the user's username, and a header `username: <username>` will be set.
+
 ## Getting a user's profile
 
 1. Client will `POST /api/user/` with the username as a URL parameter ex `username=steve`

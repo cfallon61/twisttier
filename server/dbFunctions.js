@@ -354,6 +354,8 @@ async function addSpin(username, spin) {
       spin.like_list
     ];
 
+    console.log("REACHED 1");
+
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
@@ -361,6 +363,9 @@ async function addSpin(username, spin) {
     ;
 
     var res = await client.query(query, args);
+
+    console.log("REACHED 2");
+
     rows = res.rows;
     await client.query('COMMIT');
     

@@ -9,10 +9,8 @@ const bcrypt = require('bcrypt');
 describe('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
-      user = {
-        email: "jdoe@purdue.edu",
-        username: "doeJohn"
-      };
+
+      var username = "f";
 
       spin = {
         content: 'god is upon us',
@@ -25,16 +23,59 @@ describe('database functions test', function() {
         like_list: []
       };
 
-      var res = await db.addSpin(user, spin);
-      var spin_id = await db.deleteSpin(user, res.id);
-      assert.equal(res.id, spin_id.id);
+      var res = await db.addSpin(username, spin);
+      console.log(res);
+      assert.notEqual(res, false);
+    });
+
+    it('No tags given to a post. Should still pass', async () => {
+
+      var username = "f";
+
+      spin = {
+        content: 'I should fail',
+        tags: [],
+        edited: false,
+        likes: 0,
+        quotes: 0,
+        is_quote: false,
+        quote_origin: {},
+        like_list: []
+      };
+
+      var res = await db.addSpin(username, spin);
+      console.log(res);
+      assert.notEqual(res, false);
     });
 
     it('Associated username or email does not exist. Should fail', async () => {
-      user = {
-        email: "notExistEmail",
-        username: "notExistUsername"
+
+      var username = "notExistUsername";
+
+      spin = {
+        content: 'I should fail',
+        tags: ['fail', 'or pass'],
+        edited: false,
+        likes: 0,
+        quotes: 0,
+        is_quote: false,
+        quote_origin: {},
+        like_list: []
       };
+
+      var res = await db.addSpin(username, spin);
+      console.log(res);
+      assert.deepStrictEqual(res, false);
+    });
+
+
+    it('Wrong parameters entered. Should fail', async () => {
+
+      user = {
+        username : "f",
+        email: "myEmail",
+        bs : "bsss"
+      }
 
       spin = {
         content: 'I should fail',
@@ -48,9 +89,11 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(user, spin);
-      var spin_id = await db.deleteSpin(user, res.id);
+      console.log(res);
       assert.deepStrictEqual(res, false);
     });
+
+    
   });
   
   

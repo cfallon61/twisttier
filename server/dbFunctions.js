@@ -483,7 +483,7 @@ async function followTopicUserPair(username, tofollow, tags) {
 
 // unfollows a topic user pair
 async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
-  console.log("REACHED");
+
   const client = await pool.connect();
   var rows = [];
 
@@ -492,33 +492,67 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     await client.query('BEGIN');
 
     var args = [
-      username
+      unfollowingUser
     ];
 
     // gets the users following list
-    
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
     
     var res = await client.query(query,args);
     
     rows = res.rows;
-    
-    // checks if tofollow exists
-    var following = rows[0].following;
 
+    var users = rows[0].following.users;
+    console.log(rows[0].following.users);
+
+    // if followed user found, delete the tags
+    for (var i = 0; i < rows[0].following.users.length; i++) {
+      if (rows[0].following.users[i].username === unfollowedUser) {
+        // console.log(unfollowedUser);
+        unfollowedUserTags = rows[0].following.users[i].tags;
+        // console.log(unfollowedUserTags);
+        
+        for (var j = 0; j < tags.length; j++) {
+
+          var index = rows[0].following.users[i].tags.indexOf(tags[j]);
+          if (index > -1) {
+            rows[0].following.users[i].tags.splice(index, 1);
+          }        
+        }
+        
+
+        // rows[0].following.users[i].tags = unfollowedUserTags;
+        console.log(rows[0].following.users);
+      }
+    }
+
+    // send the new list of tags to database
+    query = `UPDATE ${USER_TABLE} 
+    SET 
+      following = $2 
+    WHERE 
+      username = $1 
+    RETURNING 
+      username`;
+
+    args = [unfollowingUser, rows[0].following]
+
+    var res = await client.query(query, args);
+    console.log(res.rows);    
+ 
+    await client.query('COMMIT');
     
 
   } 
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
-    // return e;
   } 
   finally {
     client.release();
   }
   
-  return (rows.length === 0 ? false : rows[0].username);
+  return false;
 };
 
 // funtion increments like number of the spin by 1

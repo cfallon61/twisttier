@@ -234,7 +234,7 @@ describe('database functions test', function() {
   });
 
   
-  describe.skip('#deleteUser',  () => {
+  describe('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
       user = {
@@ -303,14 +303,14 @@ describe('database functions test', function() {
     
     it('@preliminary test for function checking', async () => {
 
-      unfollowingUser = "test";
-      unfollowedUser = "f";
-      tags = ['pass', 'fail'];
+      unfollowingUser = "testingUser";
+      unfollowedUser = "deadInside";
+      tags = ['tittyGF'];
 
-      var res = await db.followTopicUserPair(unfollowingUser, unfollowedUser, tags);
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
       
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.deepStrictEqual(res, false);
     });
 
   });

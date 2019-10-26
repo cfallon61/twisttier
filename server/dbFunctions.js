@@ -480,8 +480,45 @@ async function followTopicUserPair(username, tofollow, tags) {
   return (rows.length === 0 ? false : rows[0].username);
 };
 
-async function unfollowTopicUserPair(follower, tags, toUnfollow) {
 
+// unfollows a topic user pair
+async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
+  console.log("REACHED");
+  const client = await pool.connect();
+  var rows = [];
+
+  try{
+    
+    await client.query('BEGIN');
+
+    var args = [
+      username
+    ];
+
+    // gets the users following list
+    
+    var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
+    
+    var res = await client.query(query,args);
+    
+    rows = res.rows;
+    
+    // checks if tofollow exists
+    var following = rows[0].following;
+
+    
+
+  } 
+  catch (e) {
+    await client.query('ROLLBACK');
+    console.log(`Error caught by error handler: ${ e }`);
+    // return e;
+  } 
+  finally {
+    client.release();
+  }
+  
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 // funtion increments like number of the spin by 1
@@ -600,7 +637,6 @@ pool.on('error', (err, client) => {
 module.exports = {
   getSpins,
   addSpin,
-  showNotification,
   followTopicUserPair,
   unfollowTopicUserPair,
   likeSpin,
@@ -610,5 +646,6 @@ module.exports = {
   deleteUser,
   updateLoginTime,
   updateUser,
-  deleteSpin
+  deleteSpin,
+  unfollowTopicUserPair
 };

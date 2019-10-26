@@ -24,7 +24,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.notEqual(res, false);
     });
 
@@ -44,7 +44,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.notEqual(res, false);
     });
 
@@ -64,7 +64,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.deepStrictEqual(res, false);
     });
 
@@ -89,7 +89,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(user, spin);
-      console.log(res);
+
       assert.deepStrictEqual(res, false);
     });
 
@@ -293,6 +293,22 @@ describe('database functions test', function() {
       };
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
+      // assert
+      assert.deepStrictEqual(res, user.username);
+    });
+
+  });
+
+  describe('#unfollowTopicUserPair',  () => {
+    
+    it('@preliminary test for function checking', async () => {
+
+      unfollowingUser = "test";
+      unfollowedUser = "f";
+      tags = ['pass', 'fail'];
+
+      var res = await db.followTopicUserPair(unfollowingUser, unfollowedUser, tags);
+      
       // assert
       assert.deepStrictEqual(res, user.username);
     });

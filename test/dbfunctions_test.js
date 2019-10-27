@@ -315,12 +315,12 @@ describe('database functions test', function() {
     
     it('@preliminary test for function checking', async () => {
 
-      unfollowingUser = "testingUser";
-      unfollowedUser = "deadInside";
-      tags = ['tittyGF'];
+      unfollowingUser = "f";
+      unfollowedUser = "seriously";
+      tags = ['random1'];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
-      
+      // console.log(res);
       // assert
       assert.deepStrictEqual(res, true);
     });

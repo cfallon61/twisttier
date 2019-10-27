@@ -267,7 +267,6 @@ describe('database functions test', function() {
       
       //var res = await db.createUser(user);
       
-
       tofollow = {
         username: 'f',
         tags: ['chungus', 'hotdogs']
@@ -304,11 +303,9 @@ describe('database functions test', function() {
       tofollow = "seriously";
 
       tags = ["random1", "random2"];
-      
-
+  
       var res = await db.followTopicUserPair(username, tofollow, tags);
       
-      // assert
       assert.deepStrictEqual(res, username);
     });
 

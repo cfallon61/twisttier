@@ -325,7 +325,7 @@ describe('database functions test', function() {
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
       
       // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, true);
     });
 
   });

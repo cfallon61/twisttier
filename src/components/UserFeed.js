@@ -5,6 +5,8 @@ import Profile from "./Profile.js";
 import { template } from '@babel/core';
 import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
+import Modal from './Modal.js';
+import App from '../App.jsx';
 
 // Styling the user feed.
 const pageStyle = {
@@ -27,9 +29,13 @@ class UserFeed extends Component
                 exist : false, 
                 message : "",
                 status : ""
-            }
+            },
+            showFollowModal : false
         }
-        console.log(this.username);
+
+        this.onFollowPressed = this.onFollowPressed.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.showModal = this.showModal.bind(this);
     }
 
     updateUserSpins(username)
@@ -71,6 +77,23 @@ class UserFeed extends Component
         this.updateUserSpins(this.username);
     }
 
+    onFollowPressed()
+    {
+        console.log("Follow pressed.");
+        this.showModal();
+    }
+
+    showModal()
+    {
+        console.log("Showing modal...");
+        this.setState({showFollowModal : true});
+    }
+
+    closeModal()
+    {
+        this.setState({showFollowModal : false});
+    }
+
     render()
     {
         //Right now we will use three parts of the spin.
@@ -92,10 +115,11 @@ class UserFeed extends Component
         }
 
         let followButton = null;
+
         //If cookie is not empty, an authenticated user entered the page.
         if(document.cookie !== "")
         {
-            followButton = <Button>Follow</Button>;
+            followButton = <Button onClick={this.onFollowPressed}>Follow</Button>;
         }
         /**
          * The view organized by these parts:
@@ -107,10 +131,14 @@ class UserFeed extends Component
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                     {followButton}
+                    <Modal show={this.state.showFollowModal} onClose={this.closeModal}>
+                        <p>Example modal.</p>
+                    </Modal>
                 </div>
                 <div className="user-feed-middle">
                     {feed.render()}
                 </div>
+
             </div>
         );     
 

@@ -502,15 +502,10 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     rows = res.rows;
 
-    var users = rows[0].following.users;
-    console.log(rows[0].following.users);
 
     // if followed user found, delete the tags
     for (var i = 0; i < rows[0].following.users.length; i++) {
       if (rows[0].following.users[i].username === unfollowedUser) {
-        // console.log(unfollowedUser);
-        unfollowedUserTags = rows[0].following.users[i].tags;
-        // console.log(unfollowedUserTags);
         
         for (var j = 0; j < tags.length; j++) {
 
@@ -522,7 +517,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
         
 
         // rows[0].following.users[i].tags = unfollowedUserTags;
-        console.log(rows[0].following.users);
+        // console.log(rows[0].following.users);
       }
     }
 
@@ -538,7 +533,13 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     args = [unfollowingUser, rows[0].following]
 
     var res = await client.query(query, args);
-    console.log(res.rows);    
+    // console.log(res.rows);  
+    
+    query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
+    
+    args = [unfollowedUser];
+    
+    res = await client.query(query,args);
  
     await client.query('COMMIT');
     

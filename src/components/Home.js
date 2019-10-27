@@ -1,6 +1,13 @@
 import React, {Component} from 'react';
 import Button from 'react-bootstrap/Button';
-import Spin from './spin.jsx';
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Nav from 'react-bootstrap/Nav';
+import {
+  Link
+} from 'react-router-dom';
+import './Home.css';
 
 
 class Home extends Component{
@@ -18,15 +25,41 @@ class Home extends Component{
     {
         //Decide which page to show.
         
-        
     }
 
     render()
     {
         return (
-            <div>
-                <h3>Welcome to Twister!</h3>
-                <Spin className="spintest" username="tgul" content="Say hi to spins." timestamp="12:56 pm, 9/18/2019" />
+            <div class = "centered">
+                <Container>
+                <Row>
+                    <Col>
+                    <h3>Welcome to Twister!</h3>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                    <h4>Get swept up in the conversation.</h4>
+                    </Col>
+                </Row>  
+                <Row>
+                    <Col>
+                        <Nav.Link>
+                           <Link to = "/login"><Button variant="primary" width="50%">Log in</Button>
+                           </Link> 
+                        </Nav.Link> 
+                    </Col>
+                </Row>  
+                <Row>
+                <Col>
+                        <Nav.Link>
+                           <Link to = "/signup"><Button variant="secondary" width="50%">Sign up</Button>
+                           </Link> 
+                        </Nav.Link> 
+                    </Col>
+                </Row>    
+                </Container>
+
             </div>
         );
     }

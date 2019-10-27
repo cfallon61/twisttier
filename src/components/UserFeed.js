@@ -4,6 +4,7 @@ import Spin from './spin.jsx';
 import Profile from "./Profile.js";
 import { template } from '@babel/core';
 import Error from './Error.js';
+import Button from 'react-bootstrap/Button';
 
 // Styling the user feed.
 const pageStyle = {
@@ -89,6 +90,13 @@ class UserFeed extends Component
         else{
             feed.addSpin(<h6>This user currently has no spins...</h6>);
         }
+
+        let followButton = null;
+        //If cookie is not empty, an authenticated user entered the page.
+        if(document.cookie !== "")
+        {
+            followButton = <Button>Follow</Button>;
+        }
         /**
          * The view organized by these parts:
          *          Page
@@ -98,6 +106,7 @@ class UserFeed extends Component
             <div className="user-feed-page" style={pageStyle}>
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
+                    {followButton}
                 </div>
                 <div className="user-feed-middle">
                     {feed.render()}

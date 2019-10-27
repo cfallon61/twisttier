@@ -5,6 +5,7 @@ import Profile from "./Profile.js";
 import { template } from '@babel/core';
 import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
+import Dropdown from 'react-bootstrap/Dropdown'
 import Modal from './Modal.js';
 import App from '../App.jsx';
 
@@ -25,6 +26,7 @@ class UserFeed extends Component
         this.username = this.props.match.params.username;
         this.state = {
             spins : [],
+            interests : [],
             error : {
                 exist : false, 
                 message : "",
@@ -68,7 +70,6 @@ class UserFeed extends Component
             console.log(err);
             this.setState({error: {exist: true, message: err, status:404}});
         });
-
     }
 
     componentDidMount()
@@ -92,6 +93,68 @@ class UserFeed extends Component
     closeModal()
     {
         this.setState({showFollowModal : false});
+    }
+
+    async getTagData()
+    {
+        let data = null;
+        let response = await fetch(`api/users/${this.username}`, {
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application-json'
+            }
+        });
+        if(response.status === 200)
+        {
+            data = await response.json();
+            console.log(data);
+            return data;
+        }
+        else{
+            return null;
+        }
+        
+       
+    }
+
+    renderFollowForm()
+    {
+        let followTags = this.getTagData();
+        let followItems = [];
+        let disableTagDropdown = false;
+        for(var i = 0; i < followTags.length; i++)
+        {
+            followItems.push(<Dropdown.Item>followTags[i]</Dropdown.Item>);
+        }
+        if(followItems.length === 0)
+        {
+            disableTagDropdown = true;
+        }
+
+        let dropdownList = (
+            <Dropdown>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+                Tags
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+                {followItems}
+            </Dropdown.Menu>
+            </Dropdown>
+        );
+
+        let dropdownListView = disableTagDropdown ? <h4>The user don't follow any tags at the moment.</h4> : dropdownList;
+
+        return (
+            <div className="follow-form">
+                <h3>Which tags you want to follow from the user?</h3>
+                {dropdownListView}
+                <div className="modal-footer">
+                    <Button>Follow</Button>
+                    <Button onClick={this.closeModal}> Cancel </Button>
+                </div>
+            </div>
+        );
     }
 
     render()
@@ -131,8 +194,8 @@ class UserFeed extends Component
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                     {followButton}
-                    <Modal show={this.state.showFollowModal} onClose={this.closeModal}>
-                        <p>Example modal.</p>
+                    <Modal show={this.state.showFollowModal}>
+                        {this.renderFollowForm()}
                     </Modal>
                 </div>
                 <div className="user-feed-middle">

@@ -350,7 +350,6 @@ async function addSpin(username, spin) {
       spin.like_list
     ];
 
-    console.log("REACHED 1");
 
     var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
@@ -359,8 +358,6 @@ async function addSpin(username, spin) {
     ;
 
     var res = await client.query(query, args);
-
-    console.log("REACHED 2");
 
     rows = res.rows;
     await client.query('COMMIT');
@@ -529,13 +526,13 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var res = await client.query(query,args);
     
-    rows = res.rows;
-
+    rows = res.rows;    
 
     // if followed user found, delete the tags
     for (var i = 0; i < rows[0].following.users.length; i++) {
+      
       if (rows[0].following.users[i].username === unfollowedUser) {
-        
+        // this loop will only run once, so complexity is fine
         for (var j = 0; j < tags.length; j++) {
 
           var index = rows[0].following.users[i].tags.indexOf(tags[j]);
@@ -577,14 +574,17 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     res = await client.query(query,args);
     console.log("ROWS: ", res.rows);
 
-    var followers = res.rows[0];
+    var followers = res.rows[0].followers;
     console.log("followers: " , followers);
+    
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
     
     if (unfollowingUserIndex > -1) {
       followers.splice(unfollowingUserIndex, 1);
     } 
+
+    console.log("followers: " , followers);
 
     query = `UPDATE ${USER_TABLE} 
     SET 
@@ -596,7 +596,8 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
     args = [unfollowedUser, followers];
     res = await client.query(query,args);
-    console.log(res.rows[0].username);
+    console.log("followers changed for: ", res.rows[0].username);
+    
     // checking if the followed part has been done correctly
     var secondCheck = 0;
     if (res.rows[0].username === unfollowedUser) {

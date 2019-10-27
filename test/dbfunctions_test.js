@@ -234,7 +234,7 @@ describe('database functions test', function() {
   });
 
   
-  describe('#deleteUser',  () => {
+  describe.skip('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
       user = {
@@ -264,13 +264,13 @@ describe('database functions test', function() {
         bio: 'i hate my life', 
         name: 'testing, delete if bad'
       };
-      // console.log("yupyup");
-      var res = await db.createUser(user);
-      // console.log(res);
+      
+      //var res = await db.createUser(user);
+      
 
       tofollow = {
-        username: 'tofollow',
-        tags: ['cats', 'dogs']
+        username: 'f',
+        tags: ['chungus', 'hotdogs']
       };
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
@@ -288,8 +288,8 @@ describe('database functions test', function() {
       };
 
       tofollow = {
-        username: 'deadInside',
-        tags: ['goth', 'tittyGF']
+        username: 'seriously',
+        tags: ['chris', 'nazim']
       };
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);

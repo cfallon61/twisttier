@@ -455,11 +455,35 @@ async function followTopicUserPair(username, tofollow, tags) {
     }
 
     args = [
+      tofollow,
+    ];
+
+    var query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
+    
+    var res = await client.query(query,args);
+    rows = res.rows;
+
+    var followers = rows[0].followers;
+    
+    if(!followers.includes(username)) {
+      followers.push(username);
+    }
+    // update new following
+
+    args = [
+      tofollow,
+      followers
+    ];
+
+    var query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
+
+    var res = await client.query(query, args);
+
+    args = [
       username,
       following
     ];
 
-    // update new following
     var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
     var res = await client.query(query, args);

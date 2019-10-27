@@ -24,7 +24,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.notEqual(res, false);
     });
 
@@ -44,7 +44,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.notEqual(res, false);
     });
 
@@ -64,7 +64,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(username, spin);
-      console.log(res);
+
       assert.deepStrictEqual(res, false);
     });
 
@@ -89,7 +89,7 @@ describe('database functions test', function() {
       };
 
       var res = await db.addSpin(user, spin);
-      console.log(res);
+
       assert.deepStrictEqual(res, false);
     });
 
@@ -234,7 +234,7 @@ describe('database functions test', function() {
   });
 
   
-  describe.skip('#deleteUser',  () => {
+  describe('#deleteUser',  () => {
     
     it('user exists: should return username', async () => {
       user = {
@@ -264,9 +264,9 @@ describe('database functions test', function() {
         bio: 'i hate my life', 
         name: 'testing, delete if bad'
       };
-      console.log("yupyup");
+      // console.log("yupyup");
       var res = await db.createUser(user);
-      console.log(res);
+      // console.log(res);
 
       tofollow = {
         username: 'tofollow',
@@ -295,6 +295,37 @@ describe('database functions test', function() {
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
       // assert
       assert.deepStrictEqual(res, user.username);
+    });
+
+    it('@adding follow topic for an existing username in database, needed for unfollow test', async () => {
+      
+      username = "f";
+
+      tofollow = "seriously";
+
+      tags = ["random1", "random2"];
+      
+
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      // assert
+      assert.deepStrictEqual(res, username);
+    });
+
+  });
+
+  describe('#unfollowTopicUserPair',  () => {
+    
+    it('@preliminary test for function checking', async () => {
+
+      unfollowingUser = "testingUser";
+      unfollowedUser = "deadInside";
+      tags = ['tittyGF'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+      
+      // assert
+      assert.deepStrictEqual(res, true);
     });
 
   });

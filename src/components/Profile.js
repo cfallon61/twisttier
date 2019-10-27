@@ -95,6 +95,10 @@ class Profile extends Component{
                 tagViews.push(<h6 className="tag-entry">{currentTags[i]}</h6>);
             }
         }
+        else
+        {
+            tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
+        }
         return (
             <div className="profile-container">
                 <div className="profile-info">

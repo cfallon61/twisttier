@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
 
-describe('database functions test', function() {
+describe.skip('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
@@ -308,21 +308,44 @@ describe('database functions test', function() {
       
       assert.deepStrictEqual(res, username);
     });
-
   });
 
   describe('#unfollowTopicUserPair',  () => {
     
-    it('@preliminary test for function checking', async () => {
+    it('@both users and tags exist, should return true', async () => {
 
       unfollowingUser = "f";
       unfollowedUser = "seriously";
       tags = ['random1'];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
-      // console.log(res);
+
       // assert
       assert.deepStrictEqual(res, true);
+    });
+
+    it('@unfollowing user does not exist, should return false', async () => {
+
+      unfollowingUser = "iDoNotExist";
+      unfollowedUser = "seriously";
+      tags = ['random1'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, false);
+    });
+
+    it('@unfollowed user does not exist, should return false', async () => {
+
+      unfollowingUser = "f";
+      unfollowedUser = "iDoNotExist";
+      tags = ['random1'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, false);
     });
 
   });

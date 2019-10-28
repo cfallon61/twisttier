@@ -572,10 +572,10 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     // THIS PART NEEDS TESTING ONCE FOLLOW USER WORKS PROPERLY
     res = await client.query(query,args);
-    console.log("ROWS: ", res.rows);
+    // console.log("ROWS: ", res.rows);
 
     var followers = res.rows[0].followers;
-    console.log("followers: " , followers);
+    // console.log("followers: " , followers);
     
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
@@ -584,7 +584,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
       followers.splice(unfollowingUserIndex, 1);
     } 
 
-    console.log("followers: " , followers);
+    // console.log("followers: " , followers);
 
     query = `UPDATE ${USER_TABLE} 
     SET 
@@ -596,7 +596,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
     args = [unfollowedUser, followers];
     res = await client.query(query,args);
-    console.log("followers changed for: ", res.rows[0].username);
+    // console.log("followers changed for: ", res.rows[0].username);
     
     // checking if the followed part has been done correctly
     var secondCheck = 0;

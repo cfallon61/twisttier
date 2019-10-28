@@ -308,6 +308,7 @@ async function getSpins(users) {
   var tagList = []
   var followed = JSON.parse(users.users);
   var res = [];
+  var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
   try {
     // SELECT new_tag_posts from USERS_TABLE where username 
@@ -491,7 +492,8 @@ async function deleteSpin(username, spin_id) {
 
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }

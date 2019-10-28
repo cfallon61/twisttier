@@ -153,9 +153,9 @@ The rough outline for this process is as follows:
 
 
 ## Following/Unfollowing A User [: Topic]
-1. Client will `POST /api/updateFollowing/<params>` where params are the following URL Parameters: 
+1. Client will `POST /api/updateFollowing` where params are the following body Parameters: 
 ```
-params: {
+body: {
   toFollow: <username of the user to follow or unfollow>,
   tags: [list of tags to follow, empty defualts to all posts / entire user for unfollowing case],
   follower: <username of user who is following>,
@@ -201,9 +201,9 @@ params: {
 
 ## Liking / Unliking a spin
 
-1. Client will `POST /api/spins/esteem/esteem` with the following parameters as an `esteem` object as a URL parameter request: 
+1. Client will `POST /api/spins/esteem` with the following parameters as an `esteem` object as a body parameter request: 
 ```
-params: 
+body: 
 {
   esteem: {
     postAuthor: <author's username>,

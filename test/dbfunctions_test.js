@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 const assert = require('assert');
 const bcrypt = require('bcrypt');
 
-describe.skip('database functions test', function() {
+describe('database functions test', function() {
   describe('#dp.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
@@ -307,6 +307,32 @@ describe.skip('database functions test', function() {
       var res = await db.followTopicUserPair(username, tofollow, tags);
       
       assert.deepStrictEqual(res, username);
+    });
+
+    it('@following username does not exist - should return false', async () => {
+      
+      username = "iDoNotExist";
+
+      tofollow = "seriously";
+
+      tags = ["random1", "random2"];
+  
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      assert.deepStrictEqual(res, false);
+    });
+
+    it('@toFollow username does not exist - should return false', async () => {
+      
+      username = "f";
+
+      tofollow = "iDoNotExist";
+
+      tags = ["random1", "random2"];
+  
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      assert.deepStrictEqual(res, false);
     });
   });
 

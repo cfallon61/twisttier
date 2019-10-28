@@ -236,7 +236,7 @@ app.post('/api/posts/:username', users.getPosts, (req, res) => {
 
 // @brief: endpoint for the following api
 // @return: leave me alone
-app.post('/api/updateFollowing/:params', helpers.loggedIn, users.updateFollowing, (req, res) => {
+app.post('/api/updateFollowing', helpers.loggedIn, users.updateFollowing, (req, res) => {
   if (res.getHeader('error')) {
     res.status(418).sendFile(index);
   }
@@ -283,7 +283,7 @@ app.post('/api/deleteSpin/:username', helpers.loggedIn, spins.removeSpin, (req, 
 
 
 // @brief: endpoint for liking and unliking a spin.
-app.post('/api/spins/esteem/:esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => {
+app.post('/api/spins/esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => {
   if (res.getHeader('error')) {
     res.status(400).send('bad request');
   }

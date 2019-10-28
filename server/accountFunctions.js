@@ -329,10 +329,10 @@ async function updateProfileInfo(req, res, next) {
 // updates following and followers of two relevant users depending on 
 // whether the action is follow or unfollow
 async function updateFollowing(req, res, next) {
-  const action = req.params.action;
-  const toFollow = req.params.toFollow;
-  const tags = req.params.tags;
-  const follower = req.params.follower;
+  const action = req.body.action;
+  const toFollow = req.body.toFollow;
+  const tags = req.body.tags;
+  const follower = req.body.follower;
   var followUpdate;
   var user = { username: toFollow };
   

@@ -325,7 +325,7 @@ describe("middleware / routing function tests", () => {
         {
           method: "POST",
           url: '/updateFollowing',
-          params: {
+          body: {
             action : "unfollow",
             toFollow : "seriously",
             tags : ['random1'],
@@ -349,7 +349,7 @@ describe("middleware / routing function tests", () => {
         {
           method: "POST",
           url: '/updateFollowing',
-          params: {
+          body: {
             action : "follow",
             toFollow : "seriously",
             tags : ['newFollowTag'],

@@ -308,6 +308,7 @@ async function getSpins(users) {
   var tagList = []
   var followed = JSON.parse(users.users);
   var res = [];
+  var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
   try {
     // SELECT new_tag_posts from USERS_TABLE where username 
@@ -419,13 +420,8 @@ async function addSpin(username, spin) {
       spin.like_list,
     ];
 
-<<<<<<< HEAD
     
     query = `INSERT INTO ${tablename} 
-=======
-
-    var query = `INSERT INTO ${tablename} 
->>>>>>> 0b6522ecdbe95e74d59cd76b6424e68bb888e542
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
       RETURNING id`
@@ -433,7 +429,6 @@ async function addSpin(username, spin) {
 
     var res = await client.query(query, args);
 
-<<<<<<< HEAD
     var postid = res.rows[0].id;
     // if there are any new tags, then add this post's id to the new post column
     if (newtags.length > 0) {
@@ -455,8 +450,6 @@ async function addSpin(username, spin) {
       setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
     }
 
-=======
->>>>>>> 0b6522ecdbe95e74d59cd76b6424e68bb888e542
     rows = res.rows;
     await client.query('COMMIT');
     
@@ -499,7 +492,8 @@ async function deleteSpin(username, spin_id) {
 
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }

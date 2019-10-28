@@ -6,7 +6,7 @@ const spins = require('../server/spinMiddlewares.js');
 
 
 
-describe.skip("middleware / routing function tests", () => {
+describe("middleware / routing function tests", () => {
   describe("#createUser !exist", async () => { 
     it("should return a redirect to the upload profile image page", async () => {
         const req = httpMocks.createRequest(

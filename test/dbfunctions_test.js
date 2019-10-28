@@ -200,7 +200,7 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('@test change user info with password: should return user id', async () => {
+    it('@test change user info with password: should return user username, last_login, and profile_pic', async () => {
       user = {
         // id: 1,
         username: 'test',
@@ -214,9 +214,9 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.notDeepStrictEqual(res, false);
     });
-    it('@test change user info not password: should return username', async () => {
+    it('@test change user info not password: should return username, last_login, and profile_pic', async () => {
       user = {
         username: 'doeJohn',
         bio: 'Harvey hates my life', 
@@ -228,7 +228,7 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.notDeepStrictEqual(res, false);
     });
 
   });

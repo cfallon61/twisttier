@@ -148,8 +148,8 @@ The rough outline for this process is as follows:
 
 1. A user will create a new post with a tag which they are previously unassociated with (a new column must be added to the database to support this).
 2. The `addSpin` functionality will check the tags of this post and see if they already exist.
-3. If the post does not exist in the user's tag list, then the post will get a reserved `__new` tag which will expire in 24 hours. All posts tagged with `__new` will automatically show up in the users feed, and the new tag will then be added to the poster's tag list. 
-3. __(Alternative approach):__ If the post is not in the tags_associated list, the post ID will be placed into a `__new` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
+3. If the post is not in the tags_associated list, the post ID will be placed into a `new_tag_posts` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
+4. When the `getSpins / getTimeline` functions find a post in this column, they will apply an additional label to the post object: `__new_post: true`
 
 
 ## Following/Unfollowing A User [: Topic]

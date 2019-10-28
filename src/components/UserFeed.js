@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown'
 import Modal from './Modal.js';
 import App from '../App.jsx';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 
 // Styling the user feed.
 const pageStyle = {
@@ -32,10 +33,13 @@ class UserFeed extends Component
                 message : "",
                 status : ""
             },
-            showFollowModal : false
+            showFollowModal : false,
+            //This is for the follow modal to keep track of the items selected.
+            toFollowInterests : []
         }
 
         this.onFollowPressed = this.onFollowPressed.bind(this);
+        this.onFollowPressedAtModal = this.onFollowPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
     }
@@ -84,6 +88,11 @@ class UserFeed extends Component
         this.showModal();
     }
 
+    onFollowPressedAtModal()
+    {
+
+    }
+
     showModal()
     {
         console.log("Showing modal...");
@@ -93,6 +102,13 @@ class UserFeed extends Component
     closeModal()
     {
         this.setState({showFollowModal : false});
+    }
+
+    addInterestToList(interest)
+    {
+        let interestList = this.state.toFollowInterests;
+        interestList.push(interest);
+        this.setState({toFollowInterests : interestList});
     }
 
     async getTagData()
@@ -143,14 +159,38 @@ class UserFeed extends Component
             </Dropdown>
         );
 
-        let dropdownListView = disableTagDropdown ? <h4>The user don't follow any tags at the moment.</h4> : dropdownList;
+        let addedInterestList = [];
+        for(var i = 0; i < this.state.toFollowInterests.length; i++)
+        {
+            addedInterestList.push(<p>{this.state.toFollowInterests.length}</p>);
+        }
 
+        let addedListView = (
+            <div>
+            <h6>Interests you decided to follow:</h6>
+            {addedInterestList}
+            </div>
+        );
+        let dropdownListView = null;
+
+        if(disableTagDropdown)
+        {
+            dropdownListView = <h4>The user don't follow any tags at the moment.</h4>;
+        }
+        else
+        {
+            dropdownListView = (<div>
+                                    {dropdownList}
+                                    {addedListView}
+                                </div>);
+        }
+        
         return (
             <div className="follow-form">
                 <h3>Which tags you want to follow from the user?</h3>
                 {dropdownListView}
                 <div className="modal-footer">
-                    <Button>Follow</Button>
+                    <Button onClick={this.onFollowPressedAtModal}>Follow</Button>
                     <Button onClick={this.closeModal}> Cancel </Button>
                 </div>
             </div>

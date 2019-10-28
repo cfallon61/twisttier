@@ -419,8 +419,13 @@ async function addSpin(username, spin) {
       spin.like_list,
     ];
 
+<<<<<<< HEAD
     
     query = `INSERT INTO ${tablename} 
+=======
+
+    var query = `INSERT INTO ${tablename} 
+>>>>>>> 0b6522ecdbe95e74d59cd76b6424e68bb888e542
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
       RETURNING id`
@@ -428,6 +433,7 @@ async function addSpin(username, spin) {
 
     var res = await client.query(query, args);
 
+<<<<<<< HEAD
     var postid = res.rows[0].id;
     // if there are any new tags, then add this post's id to the new post column
     if (newtags.length > 0) {
@@ -449,6 +455,8 @@ async function addSpin(username, spin) {
       setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
     }
 
+=======
+>>>>>>> 0b6522ecdbe95e74d59cd76b6424e68bb888e542
     rows = res.rows;
     await client.query('COMMIT');
     
@@ -628,13 +636,13 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var res = await client.query(query,args);
     
-    rows = res.rows;
-
+    rows = res.rows;    
 
     // if followed user found, delete the tags
     for (var i = 0; i < rows[0].following.users.length; i++) {
+      
       if (rows[0].following.users[i].username === unfollowedUser) {
-        
+        // this loop will only run once, so complexity is fine
         for (var j = 0; j < tags.length; j++) {
 
           var index = rows[0].following.users[i].tags.indexOf(tags[j]);
@@ -668,10 +676,11 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     // THIS PART NEEDS TESTING ONCE FOLLOW USER WORKS PROPERLY
     res = await client.query(query,args);
-    console.log("ROWS: ", res.rows);
+    // console.log("ROWS: ", res.rows);
 
-    var followers = res.rows[0];
-    console.log("followers: " , followers);
+    var followers = res.rows[0].followers;
+    // console.log("followers: " , followers);
+    
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
     
@@ -679,12 +688,15 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
       followers.splice(unfollowingUserIndex, 1);
     } 
 
+    // console.log("followers: " , followers);
+
     query = `UPDATE ${USER_TABLE} 
     SET followers = $2 WHERE username = $1 RETURNING username`;
 
     args = [unfollowedUser, followers];
     res = await client.query(query,args);
-    console.log(res.rows[0].username);
+    // console.log("followers changed for: ", res.rows[0].username);
+    
     // checking if the followed part has been done correctly
     var secondCheck = 0;
     if (res.rows[0].username === unfollowedUser) {

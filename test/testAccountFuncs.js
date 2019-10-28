@@ -6,7 +6,7 @@ const spins = require('../server/spinMiddlewares.js');
 
 
 
-describe.skip("middleware / routing function tests", () => {
+describe("middleware / routing function tests", () => {
   describe("#createUser !exist", async () => { 
     it("should return a redirect to the upload profile image page", async () => {
         const req = httpMocks.createRequest(
@@ -319,18 +319,17 @@ describe.skip("middleware / routing function tests", () => {
   });
 
   describe("#updateFollowing", async () => { 
-    // will fail for now, needs to fix followers for it to pass
+
     it("Unfollowing: tags and toFollow exists - error should be undefined", async () => {
         const req = httpMocks.createRequest(
         {
           method: "POST",
           url: '/updateFollowing',
-          body: {
+          params: {
             action : "unfollow",
             toFollow : "seriously",
-            tags : ['tittyGF'],
-            follower : "testingUser"
-            
+            tags : ['random1'],
+            follower : "f"  
           }
         });
 
@@ -344,33 +343,34 @@ describe.skip("middleware / routing function tests", () => {
       
       assert.deepStrictEqual(actualRes, undefined);
     }); 
+
+    it("Follow: toFollow and follower exist - error should be undefined", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateFollowing',
+          params: {
+            action : "follow",
+            toFollow : "seriously",
+            tags : ['newFollowTag'],
+            follower : "testingUser"  
+          }
+        });
     
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.updateFollowing(req, mockres, () => {});
+      
+      const actualRes = mockres.getHeader('error');
+      // console.log(actualRes);
+      
+      assert.deepStrictEqual(actualRes, undefined);
+    }); 
+      
   });
   
-  it("Follow: toFollow exists: error should be undefined", async () => {
-    const req = httpMocks.createRequest(
-    {
-      method: "POST",
-      url: '/updateFollowing',
-      body: {
-        action : "follow",
-        toFollow : "f",
-        tags : ['newFollowTag'],
-        follower : "testingUser"
-        
-      }
-    });
-
-  const mockres = httpMocks.createResponse();
   
-  // post to router
-  await router.updateFollowing(req, mockres, () => {});
-  
-  const actualRes = mockres.getHeader('error');
-  // console.log(actualRes);
-  
-  assert.deepStrictEqual(actualRes, undefined);
-}); 
 
 });
 

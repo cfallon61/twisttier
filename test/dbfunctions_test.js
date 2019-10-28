@@ -200,7 +200,7 @@ describe('database functions test', function() {
   });
 
   describe('#updateUserInfo',  () => {
-    it('@test change user info with password: should return user id', async () => {
+    it('@test change user info with password: should return user username, last_login, and profile_pic', async () => {
       user = {
         // id: 1,
         username: 'test',
@@ -214,9 +214,9 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.notDeepStrictEqual(res, false);
     });
-    it('@test change user info not password: should return username', async () => {
+    it('@test change user info not password: should return username, last_login, and profile_pic', async () => {
       user = {
         username: 'doeJohn',
         bio: 'Harvey hates my life', 
@@ -228,7 +228,7 @@ describe('database functions test', function() {
 
       var res = await db.updateUser(user);
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.notDeepStrictEqual(res, false);
     });
 
   });
@@ -309,20 +309,69 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, username);
     });
 
+    it('@following username does not exist - should return false', async () => {
+      
+      username = "iDoNotExist";
+
+      tofollow = "seriously";
+
+      tags = ["random1", "random2"];
+  
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      assert.deepStrictEqual(res, false);
+    });
+
+    it('@toFollow username does not exist - should return false', async () => {
+      
+      username = "f";
+
+      tofollow = "iDoNotExist";
+
+      tags = ["random1", "random2"];
+  
+      var res = await db.followTopicUserPair(username, tofollow, tags);
+      
+      assert.deepStrictEqual(res, false);
+    });
   });
 
   describe('#unfollowTopicUserPair',  () => {
     
-    it('@preliminary test for function checking', async () => {
+    it('@both users and tags exist, should return true', async () => {
 
       unfollowingUser = "f";
       unfollowedUser = "seriously";
       tags = ['random1'];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
-      // console.log(res);
+
       // assert
       assert.deepStrictEqual(res, true);
+    });
+
+    it('@unfollowing user does not exist, should return false', async () => {
+
+      unfollowingUser = "iDoNotExist";
+      unfollowedUser = "seriously";
+      tags = ['random1'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, false);
+    });
+
+    it('@unfollowed user does not exist, should return false', async () => {
+
+      unfollowingUser = "f";
+      unfollowedUser = "iDoNotExist";
+      tags = ['random1'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, false);
     });
 
   });

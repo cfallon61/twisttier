@@ -163,7 +163,7 @@ async function deleteUser(username){
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    // console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.deleteUser: ${ e }`);
     // return e;
   } 
   finally {
@@ -223,7 +223,7 @@ async function updateUser(user) {
   }
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(e);
+    console.log(`An error occurred in db.updateUser: ${e}`);
   }
   finally {
     client.release();
@@ -261,7 +261,7 @@ async function updateLoginTime(user){
   }
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(e);
+    console.log(`An error occurred in db.updateLoginTime: ${e}`);
   }
   finally {
     client.release();
@@ -295,7 +295,9 @@ async function getSpins(users) {
       // get the post id of the new topic thing idk 
       var newpostid = await pool.query(
         `SELECT username, new_tag_posts from ${USER_TABLE} 
-         WHERE username = $1`, [username]).rows[0];
+         WHERE username = $1`, [item.username]);
+
+      newpostid = newpostid.rows[0];
       
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
@@ -338,7 +340,7 @@ async function getSpins(users) {
     query += ' ORDER BY date DESC';
     
     console.log(query);
-    res = await client.query(query, tagList);
+    res = await pool.query(query, tagList);
     posts.regularposts = res.rows;
 
     query = '';
@@ -355,7 +357,7 @@ async function getSpins(users) {
     }
   }
   catch (e) {
-    console.log('Error encounterd in getSpins:', e);  
+    console.log('Error encounterd in db.getSpins:', e);  
   }
   
   return posts;
@@ -398,7 +400,7 @@ async function addSpin(username, spin) {
     
   } catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.addspin: ${ e }`);
   }
   finally {
     client.release();
@@ -426,7 +428,7 @@ async function deleteSpin(username, spin_id) {
   } 
   catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.deleteSpin: ${ e }`);
   }
   finally {
     client.release();
@@ -517,7 +519,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.followTopicUserPair: ${ e }`);
     // return e;
   } 
   finally {
@@ -612,7 +614,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.unfollowTopicUserPair: ${ e }`);
   } 
   finally {
     client.release();
@@ -665,7 +667,7 @@ async function likeSpin(user_liker, user_poster, spin) {
     }
   } catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.likespin: ${ e }`);
   }
   finally {
     client.release();
@@ -720,7 +722,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     }
   } catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.unlikeSpin: ${ e }`);
   }
   finally {
     client.release();

@@ -102,11 +102,11 @@ class UserFeed extends Component
         }
         else
         {
-            let loggedInUser = document.cookie.split('=')[0];
+            let loggedInUser = document.cookie.split('=')[1];
             let jsonBody = {
                 action : 'follow',
                 toFollow : this.username,
-                tags : this.toFollowInterests,
+                tags : this.state.toFollowInterests,
                 follower : loggedInUser
             };
             console.log(jsonBody);

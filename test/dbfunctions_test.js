@@ -221,7 +221,7 @@ describe('database functions test', function() {
         username: 'doeJohn',
         bio: 'Harvey hates my life', 
         name: 'Harvey', 
-        interests: [],
+        interests: ['i love tarcan'],
         accessibility_features: {},
         profile_pic: []
       };
@@ -338,7 +338,7 @@ describe('database functions test', function() {
 
   describe('#unfollowTopicUserPair',  () => {
     
-    it('@both users and tags exist, should return true', async () => {
+    it('@both users and tags exist, should return unfollowedUser', async () => {
 
       unfollowingUser = "f";
       unfollowedUser = "seriously";
@@ -347,7 +347,7 @@ describe('database functions test', function() {
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 
       // assert
-      assert.deepStrictEqual(res, true);
+      assert.deepStrictEqual(res, unfollowedUser);
     });
 
     it('@unfollowing user does not exist, should return false', async () => {

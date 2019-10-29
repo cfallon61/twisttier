@@ -11,8 +11,6 @@ const pool = new Pool(credentials.database);
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true");
-// 5 minutes for testing or 24 hours for deployed environment
-const NEW_POST_TIMEOUT = (process.env.NEW_POST_TIMEOUT || 24 * 60 * 60 * 1000); 
 const reservedTag = require('./config.json').reservedTag;
 
 
@@ -233,34 +231,6 @@ async function updateUser(user) {
   return (rows.length === 0 ? false : rows[0]);
 }
 
-
-// @brief: timer function which will clear any new posts from the
-//         user's new posts column
-// @param: username: the user's username so it can find the row. 
-// @return: none
-async function clearNewPostColumn(username) {
-  var client = await pool.connect();
-  var query;
-
-  try {
-    client.query("BEGIN");
-
-    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
-
-    await client.query(query, [username]);
-
-    await client.query('COMMIT');
-  }
-  catch (e) {
-    console.log('clearNewPostColumn encountered an error: ' + `${e}`);
-    await client.query('ROLLBACK');
-  }
-  finally {
-    client.release();
-  }
-
-};
-
 // Function to update the last login time
 // return true on success, false on error
 async function updateLoginTime(user){
@@ -307,73 +277,53 @@ async function getSpins(users) {
   var query = '';
   var tagList = []
   var followed = JSON.parse(users.users);
-  var res = [];
-  var newposts = []; // list of objects : {username: <username>, postid: <postid>}
-
-  try {
-    // SELECT new_tag_posts from USERS_TABLE where username 
-    // ful SQL injection vulnerability mode: Engaged
-    // for each user in the user list, append their spin table to a query string
-    // and also search for tags associated with the supplied followed users list 
-    // in the followed user's posts
-    followed.forEach((item, index) => {
-      // get the post id of the new topic thing idk 
-      var newpostid = await pool.query(
-        `SELECT username, new_tag_posts from ${USER_TABLE} 
-         WHERE username = $1`, [username]);
-
-      // check to see that there is a new post
-      newpostid = newpostid.rows[0].id
-
-      // select * from <username_spins>  
-      query += baseQuery + userSpinTableName(item.username);
-
-      // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
-      if (item.tags.length > 0 && item.tags[0] != reservedTag) {
-        tagList.push(item.tags);
-        // supposed to search in the range of a list supplied
-        // hopefully postgres decides to parse this correctly
-        // select * from <username_spins> where @> tags
-        var where = ' WHERE @> $' + String(tagList.length);
-        if (newpostid) {
-          where += ` OR id = ${newpostid} `;
-        }
-    
-        // for each tag in the tag list, append it to a where statement
-        // item.tags.forEach((tag, i) => {
-        //   where += tag + ' IN tags';
-        //   // if i is not the last index, append an or
-        //   if (i < item.tags.length - 1){
-        //     where += ' OR ';
-        //   }
-        // });
-        // append the conditions to the select query
-        // SELECT * FROM < user1_spins > WHERE tags @> <tags>
-        query += where;
-      }
-
-      // if last item in list do not append union
-      if (index < followed.length - 1)
-      {
-        query += ' UNION ALL';
-      }
-    });
-    // final string:
-    // SELECT * FROM <user1_spins> WHERE tags @> <tags>
-    // UNION ALL
-    // SELECT * FROM <user2_spins> WHERE tags @> <tags>
-    // UNION ALL
-    // ...
-    // ORDER BY date DESC;
-    query += ' ORDER BY date DESC';
-    
-    console.log(query);
-    res = await client.query(query, tagList);
-  }
-  catch (e) {
-    console.log('Error encounterd in getSpins:', e);  
-  }
   
+  // ful SQL injection vulnerability mode: Engaged
+  // for each user in the user list, append their spin table to a query string
+  // and also search for tags associated with the supplied followed users list 
+  // in the followed user's posts
+  followed.forEach((item, index) => {
+    // select * from <username_spins>  
+    query += baseQuery + userSpinTableName(item.username);
+
+    // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
+    if (item.tags.length > 0 && item.tags[0] != reservedTag) {
+      tagList.push(item.tags);
+      // supposed to search in the range of a list supplied
+      // hopefully postgres decides to parse this correctly
+      // select * from <username_spins> where @> tags
+      var where = ' WHERE @> $' + String(tagList.length);
+  
+      // for each tag in the tag list, append it to a where statement
+      // item.tags.forEach((tag, i) => {
+      //   where += tag + ' IN tags';
+      //   // if i is not the last index, append an or
+      //   if (i < item.tags.length - 1){
+      //     where += ' OR ';
+      //   }
+      // });
+      // append the conditions to the select query
+      query += where;
+    }
+
+    // if last item in list do not append union
+    if (index < followed.length - 1)
+    {
+      query += ' UNION ALL';
+    }
+
+  });
+  // final string:
+  // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+  // UNION ALL
+  // ...
+  // ORDER BY date;
+  query += ' ORDER BY date DESC';
+  
+  console.log(query);
+  var res = await pool.query(query, tagList);
   return res.rows;
 };
 
@@ -384,30 +334,10 @@ async function getSpins(users) {
 async function addSpin(username, spin) {
   const client = await pool.connect();
   var rows = [];
-  var query;
 
   try {
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
-    var newtags = [];
-    // get the tags that the user currently posts about.
-    var asstags = await client.query(`
-        SELECT tags_associated, new_tag_posts 
-        FROM ${tablename} 
-        WHERE username=$1`, [username]
-        ).rows[0].tags_associated;
-
-    // check for the tag already existing in the taglist
-    for (var i = 0; i < spin.tags.length; i++) {
-      for (var j = 0; j < asstags.length; j++) {
-        if (spin.tags[i] === asstags[j]) {
-          break;
-        }
-        if (j === asstags.length && asstags[j] != spin.tags[i]) {
-          newtags.push(spin.tags[i]);
-        }
-      }
-    }
 
     var args = [
       spin.content,
@@ -417,11 +347,11 @@ async function addSpin(username, spin) {
       spin.quotes,
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
-      spin.like_list,
+      spin.like_list
     ];
 
-    
-    query = `INSERT INTO ${tablename} 
+
+    var query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
       RETURNING id`
@@ -429,32 +359,10 @@ async function addSpin(username, spin) {
 
     var res = await client.query(query, args);
 
-    var postid = res.rows[0].id;
-    // if there are any new tags, then add this post's id to the new post column
-    if (newtags.length > 0) {
-      // splice the previously associated tags with the new tags
-      asstags.splice(spin.tags.length - 1, 0, newtags);
-      args = [
-        asstags,
-        postid,
-        username,
-      ];
-      // add the post to the new tag posts column and set a timer function
-      query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2 
-                WHERE username = $3 RETURNING username`;
-      await client.query(query, args);
-      
-      // trigger a function to delete the post id from the new post column after
-      // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
-      // actual
-      setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
-    }
-
     rows = res.rows;
     await client.query('COMMIT');
     
-  } 
-  catch(e) {
+  } catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
@@ -473,27 +381,15 @@ async function deleteSpin(username, spin_id) {
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
-    // actually delete the post from the table.
-    var query = `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`;
+    var query = 
+      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`
+    ;
+
     var res = await client.query(query, [spin_id]);
     rows = res.rows;
-
-    // check if the deleted post is in the newpost columnt
-    query = `SELECT new_tag_posts FROM ${USER_TABLE} WHERE username = $1`;
-    var newtagres = await client.query(query, [username]).rows;
-
-    // check if there are any entries in rows and if the id matches the deleted post
-    if (newtagres.length > 0 && newtagres[0].id === rows[0].id) {
-      await client.query(
-        `UPDATE ${USER_TBALE} SET new_tag_posts NULL 
-          WHERE username = $1 
-          RETURNING username`, [username]);
-    }
-
     await client.query('COMMIT');
     
-  } 
-  catch(e) {
+  } catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
@@ -521,22 +417,17 @@ async function followTopicUserPair(username, tofollow, tags) {
     ];
 
     // gets the users following list
-    // var query = `SELECT username FROM ${USER_TABLE} WHERE USERNAME=$1`;
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
-    // console.log(args);
+
     var res = await client.query(query,args);
-    
     rows = res.rows;
     
-    // checks if tofollow exists
     var following = rows[0].following;
 
     var tofollowIndex = -1;
-    if (following != null) {
-      for (var i = 0; i < following.users.length; i++) {
-        if (following.users[i].username === tofollow) {
-          tofollowIndex = i;
-        }
+    for (var i = 0; i < following.users.length; i++) {
+      if (following.users[i].username === tofollow) {
+        tofollowIndex = i;
       }
     }
     
@@ -555,9 +446,7 @@ async function followTopicUserPair(username, tofollow, tags) {
       }
     }
 
-    args = [
-      tofollow,
-    ];
+    args = [tofollow];
 
     var query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
@@ -569,21 +458,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     if(!followers.includes(username)) {
       followers.push(username);
     }
-    // update new following
 
-    args = [
-      tofollow,
-      followers
-    ];
+    // update new following and new followers
+    args = [tofollow, followers];
 
     var query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
     var res = await client.query(query, args);
 
-    args = [
-      username,
-      following
-    ];
+    args = [username, following];
 
     var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
@@ -630,51 +513,37 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var res = await client.query(query,args);
     
-    rows = res.rows;    
+    rows = res.rows;   
+    var following = rows[0].following;
 
     // if followed user found, delete the tags
-    for (var i = 0; i < rows[0].following.users.length; i++) {
-      
-      if (rows[0].following.users[i].username === unfollowedUser) {
-        // this loop will only run once, so complexity is fine
+    for (var i = 0; i < following.users.length; i++) {
+      if (following.users[i].username === unfollowedUser) {
         for (var j = 0; j < tags.length; j++) {
-
-          var index = rows[0].following.users[i].tags.indexOf(tags[j]);
+          var index = following.users[i].tags.indexOf(tags[j]);
           if (index > -1) {
-            rows[0].following.users[i].tags.splice(index, 1);
+            following.users[i].tags.splice(index, 1);
           }        
         }
       }
     }
 
     // send the new list of tags to database
-    query = `UPDATE ${USER_TABLE} 
-    SET following = $2 WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
-    args = [unfollowingUser, rows[0].following]
+    args = [unfollowingUser, following]
 
     var res = await client.query(query, args);
-    // console.log(res.rows);  
-
-    // checking if following part has been done correctly
-    var firstCheck = 0;
-    if (res.rows[0].username === unfollowingUser) {
-      firstCheck = 1;
-    }
-    
 
     // update the followers list of the user who was unfollowed
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
     args = [unfollowedUser];
-    
-    // THIS PART NEEDS TESTING ONCE FOLLOW USER WORKS PROPERLY
-    res = await client.query(query,args);
-    // console.log("ROWS: ", res.rows);
 
-    var followers = res.rows[0].followers;
-    // console.log("followers: " , followers);
-    
+    res = await client.query(query,args);
+    rows = res.rows;
+
+    var followers = rows[0].followers;
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
     
@@ -684,23 +553,15 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
     // console.log("followers: " , followers);
 
-    query = `UPDATE ${USER_TABLE} 
-    SET followers = $2 WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
     args = [unfollowedUser, followers];
+
     res = await client.query(query,args);
-    // console.log("followers changed for: ", res.rows[0].username);
     
-    // checking if the followed part has been done correctly
-    var secondCheck = 0;
-    if (res.rows[0].username === unfollowedUser) {
-      secondCheck = 1;
-    }
-
-
     // end the database transaction
     await client.query('COMMIT');
-
+    rows = res.rows;
   } 
   catch (e) {
     await client.query('ROLLBACK');
@@ -711,11 +572,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   }
   
   // return true on success, false otherwise
-  if (firstCheck === 1 && secondCheck === 1) {
-    return true;
-  } else {
-    return false;
-  }
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 // funtion increments like number of the spin by 1

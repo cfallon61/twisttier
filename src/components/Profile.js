@@ -78,10 +78,7 @@ class Profile extends Component{
             self.setState({error : err});
         })
         ;
-        
-        
     }
-
 
     render()
     {

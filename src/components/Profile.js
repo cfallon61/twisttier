@@ -20,7 +20,7 @@ class Profile extends Component{
        
         this.state = {
             profilePicLink : "",
-            profilePic : this.defaultProfileView,
+            profilePic : '',
             username : this.props.username,
             bio : "",
             interests : [],
@@ -46,6 +46,7 @@ class Profile extends Component{
             res.json().then(function(jsonData)
             {
                 const dataDict = JSON.parse(jsonData);
+
                 console.log(jsonData);
                 let chosenProfilePic = self.defaultProfileView;
                 //If link is not empty
@@ -63,10 +64,19 @@ class Profile extends Component{
                       chosenProfilePic = (<div>
                         <img src={self.state.profilePicLink} alt={self.state.username} style={imgScale}/>
                           </div>);
+                      
                     }
-                    self.setState({ bio: dataDict.bio, interests: dataDict.interests, profilePic: chosenProfilePic});
+                    self.setState({ profilePic: chosenProfilePic });
                   });
                 }
+                else 
+                {
+                  self.setState({ profilePic: chosenProfilePic });
+
+                }
+              self.setState({ bio: dataDict.bio, interests: dataDict.interests});
+
+
               }).catch(function(error){
                   self.setState({error:{exist:true, message:error, status:404}});
               });

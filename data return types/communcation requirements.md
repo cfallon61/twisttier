@@ -157,10 +157,13 @@ The rough outline for this process is as follows:
 ```
 body: {
   toFollow: <username of the user to follow or unfollow>,
-  tags: [list of tags to follow, empty defualts to all posts / entire user for unfollowing case],
+  tags: [list of tags to follow],
   follower: <username of user who is following>,
   action: <"follow" or "unfollow">
 }
+Note: When a user is to be unfollowed completely, the front end will send all
+the tags of the user and the backend will use the same unfollow function 
+to remove all tags.
 ```
 2. Server will verify that user is logged in, that both accounts exist, and the following circumstances: 
 * __Following Errors:__

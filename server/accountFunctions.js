@@ -71,7 +71,7 @@ async function authorize(req, res, next) {
     password: req.body.password,
     email: req.body.email
   };
-  console.log("body =", req.body);
+  // console.log("body =", req.body);
 
   if (!user.password && !user.username || !user.password && !user.email) {
     res.setHeader('error', 'invalid user');
@@ -115,7 +115,7 @@ async function authorize(req, res, next) {
       res.setHeader('error', 'Login time could not be updated');
     }
   }
-  console.log(userData);
+  // console.log(userData);
   res.userdata = {
     username: userData.username,
     profile_pic: userData.profile_pic,
@@ -326,6 +326,8 @@ async function updateProfileInfo(req, res, next) {
 
 }
 
+// updates following and followers of two relevant users depending on 
+// whether the action is follow or unfollow
 async function updateFollowing(req, res, next) {
   const action = req.body.action;
   const toFollow = req.body.toFollow;
@@ -335,12 +337,13 @@ async function updateFollowing(req, res, next) {
   var user = { username: toFollow };
   
   // don't allow for following or unfollowing of yourself.
+  // console.log("testing: ", follower);
+  // console.log("tofollow: ", toFollow);
   if (toFollow === follower) {
     res.setHeader('error', 'nice try bucko you can\'t do that though.');
     return next();
   }
   // auto follow all __new posts
-  // 
   tags.push(reservedTag);
 
   // make sure tofollow exists probably not necessary.

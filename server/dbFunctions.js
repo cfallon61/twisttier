@@ -308,6 +308,7 @@ async function getSpins(users) {
   var tagList = []
   var followed = JSON.parse(users.users);
   var res = [];
+  var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
   try {
     // SELECT new_tag_posts from USERS_TABLE where username 
@@ -491,7 +492,8 @@ async function deleteSpin(username, spin_id) {
 
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
@@ -519,22 +521,17 @@ async function followTopicUserPair(username, tofollow, tags) {
     ];
 
     // gets the users following list
-    // var query = `SELECT username FROM ${USER_TABLE} WHERE USERNAME=$1`;
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
-    // console.log(args);
+
     var res = await client.query(query,args);
-    
     rows = res.rows;
     
-    // checks if tofollow exists
     var following = rows[0].following;
 
     var tofollowIndex = -1;
-    if (following != null) {
-      for (var i = 0; i < following.users.length; i++) {
-        if (following.users[i].username === tofollow) {
-          tofollowIndex = i;
-        }
+    for (var i = 0; i < following.users.length; i++) {
+      if (following.users[i].username === tofollow) {
+        tofollowIndex = i;
       }
     }
     
@@ -553,9 +550,7 @@ async function followTopicUserPair(username, tofollow, tags) {
       }
     }
 
-    args = [
-      tofollow,
-    ];
+    args = [tofollow];
 
     var query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
@@ -567,21 +562,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     if(!followers.includes(username)) {
       followers.push(username);
     }
-    // update new following
 
-    args = [
-      tofollow,
-      followers
-    ];
+    // update new following and new followers
+    args = [tofollow, followers];
 
     var query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
     var res = await client.query(query, args);
 
-    args = [
-      username,
-      following
-    ];
+    args = [username, following];
 
     var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
@@ -628,18 +617,16 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var res = await client.query(query,args);
     
-    rows = res.rows;
-
+    rows = res.rows;   
+    var following = rows[0].following;
 
     // if followed user found, delete the tags
-    for (var i = 0; i < rows[0].following.users.length; i++) {
-      if (rows[0].following.users[i].username === unfollowedUser) {
-        
+    for (var i = 0; i < following.users.length; i++) {
+      if (following.users[i].username === unfollowedUser) {
         for (var j = 0; j < tags.length; j++) {
-
-          var index = rows[0].following.users[i].tags.indexOf(tags[j]);
+          var index = following.users[i].tags.indexOf(tags[j]);
           if (index > -1) {
-            rows[0].following.users[i].tags.splice(index, 1);
+            following.users[i].tags.splice(index, 1);
           }        
         }
       }
@@ -649,29 +636,19 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     query = `UPDATE ${USER_TABLE} 
     SET following = $2 WHERE username = $1 RETURNING username`;
 
-    args = [unfollowingUser, rows[0].following]
+    args = [unfollowingUser, following]
 
     var res = await client.query(query, args);
-    // console.log(res.rows);  
-
-    // checking if following part has been done correctly
-    var firstCheck = 0;
-    if (res.rows[0].username === unfollowingUser) {
-      firstCheck = 1;
-    }
-    
 
     // update the followers list of the user who was unfollowed
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
     args = [unfollowedUser];
-    
-    // THIS PART NEEDS TESTING ONCE FOLLOW USER WORKS PROPERLY
-    res = await client.query(query,args);
-    console.log("ROWS: ", res.rows);
 
-    var followers = res.rows[0];
-    console.log("followers: " , followers);
+    res = await client.query(query,args);
+    rows = res.rows;
+
+    var followers = rows[0].followers;
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
     
@@ -682,19 +659,15 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     query = `UPDATE ${USER_TABLE} 
     SET followers = $2 WHERE username = $1 RETURNING username`;
 
+    query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
+
     args = [unfollowedUser, followers];
+
     res = await client.query(query,args);
-    console.log(res.rows[0].username);
-    // checking if the followed part has been done correctly
-    var secondCheck = 0;
-    if (res.rows[0].username === unfollowedUser) {
-      secondCheck = 1;
-    }
-
-
+    
     // end the database transaction
     await client.query('COMMIT');
-
+    rows = res.rows;
   } 
   catch (e) {
     await client.query('ROLLBACK');
@@ -705,11 +678,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   }
   
   // return true on success, false otherwise
-  if (firstCheck === 1 && secondCheck === 1) {
-    return true;
-  } else {
-    return false;
-  }
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 // funtion increments like number of the spin by 1

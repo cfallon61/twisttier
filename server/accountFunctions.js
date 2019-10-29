@@ -327,10 +327,10 @@ async function updateProfileInfo(req, res, next) {
 }
 
 async function updateFollowing(req, res, next) {
-  const action = req.params.action;
-  const toFollow = req.params.toFollow;
-  const tags = req.params.tags;
-  const follower = req.params.follower;
+  const action = req.body.action;
+  const toFollow = req.body.toFollow;
+  const tags = req.body.tags;
+  const follower = req.body.follower;
   var followUpdate;
   var user = { username: toFollow };
   
@@ -339,9 +339,6 @@ async function updateFollowing(req, res, next) {
     res.setHeader('error', 'nice try bucko you can\'t do that though.');
     return next();
   }
-  // auto follow all __new posts
-  // 
-  tags.push(reservedTag);
 
   // make sure tofollow exists probably not necessary.
   const userData = await db.userExists(user);

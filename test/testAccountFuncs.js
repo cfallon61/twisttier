@@ -344,6 +344,19 @@ describe.skip("middleware / routing function tests", () => {
       
       assert.deepStrictEqual(actualRes, undefined);
     }); 
+
+    it("Follow: toFollow and follower exist - error should be undefined", async () => {
+        const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateFollowing',
+          body: {
+            action : "follow",
+            toFollow : "seriously",
+            tags : ['newFollowTag'],
+            follower : "testingUser"  
+          }
+        });
     
   });
   

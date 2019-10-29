@@ -301,7 +301,7 @@ async function getSpins(users) {
       
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      if (newpostid.username) 
+      if (newpostid.postid) 
       {
         newposts.push({ username: newpostid.username, postid: newpostid.id} );
       }
@@ -350,9 +350,15 @@ async function getSpins(users) {
       {
         var post = newposts[i];
         query += baseQuery + ` ${userSpinTableName(post.username)} 
-        WHERE id = ${post.postid} UNION ALL`;
+        WHERE id = ${post.postid}`;
+
+        // if last item in list do not append union
+        if (i < newposts.length - 1) {
+          query += ' UNION ALL';
+        }
       }
       query += ' ORDER BY date DESC';
+      console.log('newtagposts query =', query);
       posts.newtagposts = await pool.query(query).rows;
     }
   }

@@ -38,40 +38,47 @@ class Profile extends Component{
                 'Content-Type' : 'application/json'
             }
         })
-        .then(function(res){
-            console.log(res);
-            if(res.status === 200)
+        .then(function(res)
+        {
+          // console.log(res);
+          if(res.status === 200)
+          {
+            res.json().then(function(jsonData)
             {
-                res.json().then(function(jsonData){
-                    const dataDict = JSON.parse(jsonData);
-                    console.log(jsonData);
-                    let chosenProfilePic = self.defaultProfileView;
-                    //If link is not empty
-                    if(dataDict.profile_pic !== "")
-                        {
-                            console.log("/" + dataDict.profile_pic);
-                            fetch("/" + dataDict.profile_pic).then(function(res){
-                                console.log(res);
-                                if(res.status === 200)
-                                {
-                                    chosenProfilePic = (<div>
-                                        <img src={self.state.profilePic} alt={self.state.username}/>
-                                        </div>);
-                                }
-                            });
-                        }
-                    self.setState({bio : dataDict.bio, interests : dataDict.interests, profilePic : chosenProfilePic});
-                }).catch(function(error){
-                    self.setState({error:{exist:true, message:error, status:404}});
-                });
-            }
-            else{
-                if(res.headers.error)
+                const dataDict = JSON.parse(jsonData);
+                console.log(jsonData);
+                let chosenProfilePic = self.defaultProfileView;
+                //If link is not empty
+                if(dataDict.profile_pic !== "")
                 {
-                    NotificationManager.error(res.headers.error);
-                    self.setState({error : res.headers.error});
+                  console.log("/" + dataDict.profile_pic);
+                  fetch("/" + dataDict.profile_pic).then(function(res)
+                  {
+                    console.log('received ', res, 'from server');
+                    if(res.status === 200)
+                    {
+                      self.state.profilePicLink = res.url;
+
+                      // console.log('profile pic url =', self.state.profilePicLink);
+                      chosenProfilePic = (<div>
+                        <img src={self.state.profilePicLink} alt={self.state.username} style={imgScale}/>
+                          </div>);
+                    }
+                    self.setState({ bio: dataDict.bio, interests: dataDict.interests, profilePic: chosenProfilePic});
+                  });
                 }
+              }).catch(function(error){
+                  self.setState({error:{exist:true, message:error, status:404}});
+              });
+          }
+          else
+          {
+            if(res.headers.error)
+            {
+              NotificationManager.error(res.headers.error);
+              self.setState({error : res.headers.error});
             }
+          }
         })
         .catch(function(err){
             console.log(err);

@@ -231,7 +231,7 @@ async function getPosts(req, res, next) {
   }
   // console.log(spins);
   res.json(JSON.stringify(spins));
-  return next();
+  // return next();
 
   // TODO error check here and make sure that it returns good data
 }

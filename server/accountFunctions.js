@@ -255,6 +255,11 @@ async function getTimeline(req, res, next) {
 
   var followedSpins = await db.getSpins(following);
 
+  if (req.clientSession.uid != user.username)
+  {
+    followedSpins.newtagposts = [];
+  }
+
   if (followedSpins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }

@@ -307,6 +307,7 @@ async function getSpins(users) {
   var query = '';
   var tagList = []
   var followed = JSON.parse(users.users);
+  var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
@@ -316,15 +317,20 @@ async function getSpins(users) {
     // for each user in the user list, append their spin table to a query string
     // and also search for tags associated with the supplied followed users list 
     // in the followed user's posts
-    followed.forEach((item, index) => {
+    for (var index = 0; index < followed.length; index++)
+    {
+      var item = followed[index];
       // get the post id of the new topic thing idk 
       var newpostid = await pool.query(
         `SELECT username, new_tag_posts from ${USER_TABLE} 
-         WHERE username = $1`, [username]);
-
-      // check to see that there is a new post
-      newpostid = newpostid.rows[0].id
-
+         WHERE username = $1`, [username]).rows[0];
+      
+      // if there is a new post found in the column, push an object with its
+      // id and username to an array.
+      if (newpostid.username) 
+      {
+        newposts.push({ username: newpostid.username, postid: newpostid.id} );
+      }
       // select * from <username_spins>  
       query += baseQuery + userSpinTableName(item.username);
 
@@ -335,18 +341,8 @@ async function getSpins(users) {
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
         var where = ' WHERE @> $' + String(tagList.length);
-        if (newpostid) {
-          where += ` OR id = ${newpostid} `;
-        }
+       
     
-        // for each tag in the tag list, append it to a where statement
-        // item.tags.forEach((tag, i) => {
-        //   where += tag + ' IN tags';
-        //   // if i is not the last index, append an or
-        //   if (i < item.tags.length - 1){
-        //     where += ' OR ';
-        //   }
-        // });
         // append the conditions to the select query
         // SELECT * FROM < user1_spins > WHERE tags @> <tags>
         query += where;
@@ -357,7 +353,9 @@ async function getSpins(users) {
       {
         query += ' UNION ALL';
       }
-    });
+    };
+
+    
     // final string:
     // SELECT * FROM <user1_spins> WHERE tags @> <tags>
     // UNION ALL
@@ -369,12 +367,26 @@ async function getSpins(users) {
     
     console.log(query);
     res = await client.query(query, tagList);
+    posts.regularposts = res.rows;
+
+    query = '';
+    if (newposts.length > 0) 
+    {
+      for (var i = 0; i < newposts.length; i++) 
+      {
+        var post = newposts[i];
+        query += baseQuery + ` ${userSpinTableName(post.username)} 
+        WHERE id = ${post.postid} UNION ALL`;
+      }
+      query += ' ORDER BY date DESC';
+      posts.newtagposts = await pool.query(query).rows;
+    }
   }
   catch (e) {
     console.log('Error encounterd in getSpins:', e);  
   }
   
-  return res.rows;
+  return posts;
 };
 
 // Adds the users spin into their spin table
@@ -791,7 +803,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
 
 // error handler
 pool.on('error', (err, client) => {
-  console.error('An error occurred: ', err);
+  console.error('An unknown database error occurred: ', err);
 });
 
 module.exports = {

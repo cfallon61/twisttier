@@ -359,7 +359,7 @@ describe('database functions test', function() {
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 
       // assert
-      assert.deepStrictEqual(res, true);
+      assert.deepStrictEqual(res, unfollowedUser);
     });
 
     it('@unfollowing user does not exist, should return false', async () => {

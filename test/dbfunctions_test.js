@@ -354,7 +354,7 @@ describe('database functions test', function() {
 
       unfollowingUser = "f";
       unfollowedUser = "seriously";
-      tags = ['random2'];
+      tags = ['random2', 'chocolate'];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 

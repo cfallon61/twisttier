@@ -17,6 +17,7 @@ async function postCreateUser(req, res, next) {
     // return next();
   }
 
+  
   var profile_pic_path = null;
   // if there is a file then add it to the thing
   console.log(req.file);

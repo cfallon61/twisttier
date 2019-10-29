@@ -428,6 +428,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     for (var i = 0; i < following.users.length; i++) {
       if (following.users[i].username === tofollow) {
         tofollowIndex = i;
+        break;
       }
     }
     
@@ -523,15 +524,15 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     rows = res.rows;
     var followers = rows[0].followers;
 
-    console.log(following);
     // if followed user found, delete the tags
     var followingIndex = -1;
     for (var i = 0; i < following.users.length; i++) {
       if (following.users[i].username === unfollowedUser) {
         followingIndex = i;
+        break;
       }
     }
-    console.log(tags);
+    
     var empty = false;
     if (followingIndex > -1) {
       if (tags.length === 0) {

@@ -11,6 +11,8 @@ const pool = new Pool(credentials.database);
 const USER_TABLE = process.env.USER_TABLE;
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true");
+// 5 minutes for testing or 24 hours for deployed environment
+const NEW_POST_TIMEOUT = (process.env.NEW_POST_TIMEOUT || 24 * 60 * 60 * 1000);
 const reservedTag = require('./config.json').reservedTag;
 
 
@@ -412,9 +414,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     await client.query('BEGIN');
 
-    var args = [
-      username
-    ];
+    var args = [username];
 
     // gets the users following list
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
@@ -435,6 +435,11 @@ async function followTopicUserPair(username, tofollow, tags) {
     if (tofollowIndex === -1) {
       var follow = {'username': tofollow, 'tags': tags};
       following.users.push(follow);
+    }
+
+    //if its all tags
+    else if (Array.isArray(tags) && tags.length) {
+      following.users[tofollowIndex].tags = tags;
     }
 
     // if exists add non-duplicate tags into tag list
@@ -504,108 +509,69 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     // begin database transaction
     await client.query('BEGIN');
 
-    var args = [
-      unfollowingUser
-    ];
-
-    // used to check for the case when a user is to be deleted completely
-    var unfollowedUserFlag = 0;
-    var secondCheck = 0;
-
-    // gets the users following list
+    var args = [unfollowingUser];
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
     
     var res = await client.query(query,args);
-    
-    rows = res.rows;    
-    
-    userFoundInFollowing = 0;
+    rows = res.rows;   
+    var following = rows[0].following;
 
+    args = [unfollowedUser];
+    query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
+    
+    res = await client.query(query,args);
+    rows = res.rows;
+    var followers = rows[0].followers;
+
+    console.log(following);
     // if followed user found, delete the tags
-    for (var i = 0; i < rows[0].following.users.length; i++) {
-      
-      if (rows[0].following.users[i].username === unfollowedUser) {
-       
-        userFoundInFollowing = 1;
-        // console.log("Tags before: ", rows[0].following.users[i].tags);
-         // this loop will only run once, so complexity is fine
-        for (var j = 0; j < tags.length; j++) {
-          var index = following.users[i].tags.indexOf(tags[j]);
+    var followingIndex = -1;
+    for (var i = 0; i < following.users.length; i++) {
+      if (following.users[i].username === unfollowedUser) {
+        followingIndex = i;
+      }
+    }
+    console.log(tags);
+    var empty = false;
+    if (followingIndex > -1) {
+      if (tags.length === 0) {
+        following.users.splice(followingIndex, 1);
+        empty = true;
+      }
+      if (!empty) {
+        for (var i = 0; i < tags.length; i++) {
+          var index = following.users[followingIndex].tags.indexOf(tags[i]);
           if (index > -1) {
-            following.users[i].tags.splice(index, 1);
+            following.users[followingIndex].tags.splice(index, 1);
           }        
         }
-        // console.log("Tags after: ", rows[0].following.users[i].tags.length);
-      
-        // if tags become empty, unfollow the user
-        if (rows[0].following.users[i].tags.length === 0) {
-          rows[0].following.users.splice(i,1);
-          unfollowedUserFlag = 1;
+        // if the removing tags makes it empty
+        if (following.users[followingIndex].tags.length === 0) {
+          following.users.splice(followingIndex, 1);
+          empty = true;
         }
       }
     }
 
-    // if user to unfollow does not exist, set the flag to return false
-    if (userFoundInFollowing === 0) {
-      secondCheck = -1;
+    // delete the followingUsername from list
+    var unfollowingUserIndex = followers.indexOf(unfollowingUser);
+    if (unfollowingUserIndex > -1 && empty) {
+      followers.splice(unfollowingUserIndex, 1);
     }
-
+    
     // send the new list of tags to database
     query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
     args = [unfollowingUser, following]
 
     var res = await client.query(query, args);
-
-
-    // checking if following part has been done correctly
-    var firstCheck = 0;
-    if (res.rows[0].username === unfollowingUser) {
-      firstCheck = 1;
-    }
     
+    query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
-    // if user has been deleted from following, update the followers list 
-    // of the user who was unfollowed
-    // console.log("outside condition ", unfollowedUserFlag);
-    if (unfollowedUserFlag === 1) {
-      console.log("I AM DELETING THE FOLLOWER");
-      secondCheck = -1;
-      
-      query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
+    args = [unfollowedUser, followers];
+
+    res = await client.query(query,args);
     
-      args = [unfollowedUser];
-      
-      res = await client.query(query,args);
-      // console.log("ROWS: ", res.rows);
-
-      var followers = res.rows[0].followers;
-      // console.log("followers: " , followers);
-      
-      // delete the followingUsername from list
-      var unfollowingUserIndex = followers.indexOf(unfollowingUser);
-      
-      if (unfollowingUserIndex > -1) {
-        followers.splice(unfollowingUserIndex, 1);
-      } 
-
-      // console.log("followers: " , followers);
-
-      query = `UPDATE ${USER_TABLE} 
-      SET followers = $2 WHERE username = $1 RETURNING username`;
-
-      args = [unfollowedUser, followers];
-      res = await client.query(query,args);
-      // console.log("followers changed for: ", res.rows[0].username);
-      
-      // checking if the followed part has been done correctly
-      if (res.rows[0].username === unfollowedUser) {
-        secondCheck = 1;
-      }
-    }
-    
-
-
     // end the database transaction
     await client.query('COMMIT');
     rows = res.rows;
@@ -619,11 +585,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   }
   
   // return true on success, false otherwise
-  if (firstCheck === 1 && secondCheck != -1) {
-    return true;
-  } else {
-    return false;
-  }
+  return (rows.length === 0 ? false : rows[0].username);
 };
 
 // funtion increments like number of the spin by 1
@@ -731,7 +693,6 @@ async function unlikeSpin(user_liker, user_poster, spin) {
   }
   return (rows.length === 0 ? false : rows[0]);
 };
-
 
 
 // error handler

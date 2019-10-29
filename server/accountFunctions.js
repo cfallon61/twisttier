@@ -348,11 +348,6 @@ async function updateFollowing(req, res, next) {
     res.setHeader('error', 'nice try bucko you can\'t do that though.');
     return next();
   }
-<<<<<<< HEAD
-  // auto follow all __new posts
-  tags.push(reservedTag);
-=======
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
 
   // make sure tofollow exists probably not necessary.
   const userData = await db.userExists(user);

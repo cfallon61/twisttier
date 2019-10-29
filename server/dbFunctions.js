@@ -277,56 +277,6 @@ async function getSpins(users) {
   var query = '';
   var tagList = []
   var followed = JSON.parse(users.users);
-<<<<<<< HEAD
-  
-  // ful SQL injection vulnerability mode: Engaged
-  // for each user in the user list, append their spin table to a query string
-  // and also search for tags associated with the supplied followed users list 
-  // in the followed user's posts
-  followed.forEach((item, index) => {
-    // select * from <username_spins>  
-    query += baseQuery + userSpinTableName(item.username);
-
-    // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
-    if (item.tags.length > 0 && item.tags[0] != reservedTag) {
-      tagList.push(item.tags);
-      // supposed to search in the range of a list supplied
-      // hopefully postgres decides to parse this correctly
-      // select * from <username_spins> where @> tags
-      var where = ' WHERE @> $' + String(tagList.length);
-  
-      // for each tag in the tag list, append it to a where statement
-      // item.tags.forEach((tag, i) => {
-      //   where += tag + ' IN tags';
-      //   // if i is not the last index, append an or
-      //   if (i < item.tags.length - 1){
-      //     where += ' OR ';
-      //   }
-      // });
-      // append the conditions to the select query
-      query += where;
-    }
-
-    // if last item in list do not append union
-    if (index < followed.length - 1)
-    {
-      query += ' UNION ALL';
-    }
-
-  });
-  // final string:
-  // SELECT * FROM <user1_spins> WHERE tags @> <tags>
-  // UNION ALL
-  // SELECT * FROM <user2_spins> WHERE tags @> <tags>
-  // UNION ALL
-  // ...
-  // ORDER BY date;
-  query += ' ORDER BY date DESC';
-  
-  console.log(query);
-  var res = await pool.query(query, tagList);
-  return res.rows;
-=======
   var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
@@ -407,7 +357,6 @@ async function getSpins(users) {
   }
   
   return posts;
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
 };
 
 // Adds the users spin into their spin table
@@ -601,27 +550,12 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var res = await client.query(query,args);
     
-<<<<<<< HEAD
-    rows = res.rows;    
-    
-    userFoundInFollowing = 0;
-
-    // if followed user found, delete the tags
-    for (var i = 0; i < rows[0].following.users.length; i++) {
-      
-      if (rows[0].following.users[i].username === unfollowedUser) {
-       
-        userFoundInFollowing = 1;
-        // console.log("Tags before: ", rows[0].following.users[i].tags);
-         // this loop will only run once, so complexity is fine
-=======
     rows = res.rows;   
     var following = rows[0].following;
 
     // if followed user found, delete the tags
     for (var i = 0; i < following.users.length; i++) {
       if (following.users[i].username === unfollowedUser) {
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
         for (var j = 0; j < tags.length; j++) {
           var index = following.users[i].tags.indexOf(tags[j]);
           if (index > -1) {
@@ -649,25 +583,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     args = [unfollowingUser, following]
 
     var res = await client.query(query, args);
-<<<<<<< HEAD
-
-
-    // checking if following part has been done correctly
-    var firstCheck = 0;
-    if (res.rows[0].username === unfollowingUser) {
-      firstCheck = 1;
-    }
-    
-
-    // if user has been deleted from following, update the followers list 
-    // of the user who was unfollowed
-    // console.log("outside condition ", unfollowedUserFlag);
-    if (unfollowedUserFlag === 1) {
-      console.log("I AM DELETING THE FOLLOWER");
-      secondCheck = -1;
-      
-      query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
-=======
 
     // update the followers list of the user who was unfollowed
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
@@ -680,7 +595,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     var followers = rows[0].followers;
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
     
       args = [unfollowedUser];
       
@@ -697,25 +611,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
         followers.splice(unfollowingUserIndex, 1);
       } 
 
-<<<<<<< HEAD
-      // console.log("followers: " , followers);
-
-      query = `UPDATE ${USER_TABLE} 
-      SET followers = $2 WHERE username = $1 RETURNING username`;
-
-      args = [unfollowedUser, followers];
-      res = await client.query(query,args);
-      // console.log("followers changed for: ", res.rows[0].username);
-      
-      // checking if the followed part has been done correctly
-      if (res.rows[0].username === unfollowedUser) {
-        secondCheck = 1;
-      }
-    }
-    
-=======
     query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
 
     args = [unfollowedUser, followers];
 
@@ -734,15 +630,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   }
   
   // return true on success, false otherwise
-<<<<<<< HEAD
-  if (firstCheck === 1 && secondCheck != -1) {
-    return true;
-  } else {
-    return false;
-  }
-=======
   return (rows.length === 0 ? false : rows[0].username);
->>>>>>> a9fc8f974c9a99d0eebbbe4f1e46a885dafd9a07
 };
 
 // funtion increments like number of the spin by 1

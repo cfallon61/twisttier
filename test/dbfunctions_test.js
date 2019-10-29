@@ -302,7 +302,7 @@ describe('database functions test', function() {
 
       tofollow = "seriously";
 
-      tags = ["random1", "random2"];
+      tags = ["random1", "random2", "chocolate"];
   
       var res = await db.followTopicUserPair(username, tofollow, tags);
       

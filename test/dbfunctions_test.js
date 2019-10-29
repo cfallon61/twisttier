@@ -350,11 +350,23 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, true);
     });
 
+    it('@testing where user is deleted completely, should return true', async () => {
+
+      unfollowingUser = "f";
+      unfollowedUser = "seriously";
+      tags = ['random2'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, true);
+    });
+
     it('@unfollowing user does not exist, should return false', async () => {
 
       unfollowingUser = "iDoNotExist";
       unfollowedUser = "seriously";
-      tags = ['random1'];
+      tags = ['random1', 'random2'];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 

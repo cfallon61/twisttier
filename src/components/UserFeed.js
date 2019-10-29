@@ -53,14 +53,14 @@ class UserFeed extends Component
             method: "POST",
             credentials: 'same-origin'
         }).then(function(res){
-            console.log(res);
+            // console.log(res);
             if(res.status === 200)
             {
                 //res.json also is a promise thus we attach a success callback
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
                     console.log(jsonData);
-                    self.setState({spins : dataDict});
+                    self.setState({spins : dataDict.regularposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
                 });

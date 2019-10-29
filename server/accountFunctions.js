@@ -17,6 +17,7 @@ async function postCreateUser(req, res, next) {
     // return next();
   }
 
+  
   var profile_pic_path = null;
   // if there is a file then add it to the thing
   console.log(req.file);
@@ -255,6 +256,11 @@ async function getTimeline(req, res, next) {
 
   var followedSpins = await db.getSpins(following);
 
+  if (req.clientSession.uid != user.username)
+  {
+    followedSpins.newtagposts = [];
+  }
+
   if (followedSpins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
@@ -343,8 +349,6 @@ async function updateFollowing(req, res, next) {
     res.setHeader('error', 'nice try bucko you can\'t do that though.');
     return next();
   }
-  // auto follow all __new posts
-  tags.push(reservedTag);
 
   // make sure tofollow exists probably not necessary.
   const userData = await db.userExists(user);

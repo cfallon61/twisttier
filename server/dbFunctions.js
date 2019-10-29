@@ -279,54 +279,86 @@ async function getSpins(users) {
   var query = '';
   var tagList = []
   var followed = JSON.parse(users.users);
-  
-  // ful SQL injection vulnerability mode: Engaged
-  // for each user in the user list, append their spin table to a query string
-  // and also search for tags associated with the supplied followed users list 
-  // in the followed user's posts
-  followed.forEach((item, index) => {
-    // select * from <username_spins>  
-    query += baseQuery + userSpinTableName(item.username);
+  var posts = {newtagposts: [], regularposts:[]};
+  var res = [];
+  var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
-    // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
-    if (item.tags.length > 0 && item.tags[0] != reservedTag) {
-      tagList.push(item.tags);
-      // supposed to search in the range of a list supplied
-      // hopefully postgres decides to parse this correctly
-      // select * from <username_spins> where @> tags
-      var where = ' WHERE @> $' + String(tagList.length);
-  
-      // for each tag in the tag list, append it to a where statement
-      // item.tags.forEach((tag, i) => {
-      //   where += tag + ' IN tags';
-      //   // if i is not the last index, append an or
-      //   if (i < item.tags.length - 1){
-      //     where += ' OR ';
-      //   }
-      // });
-      // append the conditions to the select query
-      query += where;
-    }
-
-    // if last item in list do not append union
-    if (index < followed.length - 1)
+  try {
+    // SELECT new_tag_posts from USERS_TABLE where username 
+    // ful SQL injection vulnerability mode: Engaged
+    // for each user in the user list, append their spin table to a query string
+    // and also search for tags associated with the supplied followed users list 
+    // in the followed user's posts
+    for (var index = 0; index < followed.length; index++)
     {
-      query += ' UNION ALL';
-    }
+      var item = followed[index];
+      // get the post id of the new topic thing idk 
+      var newpostid = await pool.query(
+        `SELECT username, new_tag_posts from ${USER_TABLE} 
+         WHERE username = $1`, [username]).rows[0];
+      
+      // if there is a new post found in the column, push an object with its
+      // id and username to an array.
+      if (newpostid.username) 
+      {
+        newposts.push({ username: newpostid.username, postid: newpostid.id} );
+      }
+      // select * from <username_spins>  
+      query += baseQuery + userSpinTableName(item.username);
 
-  });
-  // final string:
-  // SELECT * FROM <user1_spins> WHERE tags @> <tags>
-  // UNION ALL
-  // SELECT * FROM <user2_spins> WHERE tags @> <tags>
-  // UNION ALL
-  // ...
-  // ORDER BY date;
-  query += ' ORDER BY date DESC';
+      // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
+      if (item.tags.length > 0 && item.tags[0] != reservedTag) {
+        tagList.push(item.tags);
+        // supposed to search in the range of a list supplied
+        // hopefully postgres decides to parse this correctly
+        // select * from <username_spins> where @> tags
+        var where = ' WHERE @> $' + String(tagList.length);
+       
+    
+        // append the conditions to the select query
+        // SELECT * FROM < user1_spins > WHERE tags @> <tags>
+        query += where;
+      }
+
+      // if last item in list do not append union
+      if (index < followed.length - 1)
+      {
+        query += ' UNION ALL';
+      }
+    };
+
+    
+    // final string:
+    // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+    // UNION ALL
+    // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+    // UNION ALL
+    // ...
+    // ORDER BY date DESC;
+    query += ' ORDER BY date DESC';
+    
+    console.log(query);
+    res = await client.query(query, tagList);
+    posts.regularposts = res.rows;
+
+    query = '';
+    if (newposts.length > 0) 
+    {
+      for (var i = 0; i < newposts.length; i++) 
+      {
+        var post = newposts[i];
+        query += baseQuery + ` ${userSpinTableName(post.username)} 
+        WHERE id = ${post.postid} UNION ALL`;
+      }
+      query += ' ORDER BY date DESC';
+      posts.newtagposts = await pool.query(query).rows;
+    }
+  }
+  catch (e) {
+    console.log('Error encounterd in getSpins:', e);  
+  }
   
-  console.log(query);
-  var res = await pool.query(query, tagList);
-  return res.rows;
+  return posts;
 };
 
 // Adds the users spin into their spin table
@@ -699,7 +731,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
 
 // error handler
 pool.on('error', (err, client) => {
-  console.error('An error occurred: ', err);
+  console.error('An unknown database error occurred: ', err);
 });
 
 module.exports = {

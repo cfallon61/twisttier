@@ -149,7 +149,8 @@ The rough outline for this process is as follows:
 1. A user will create a new post with a tag which they are previously unassociated with (a new column must be added to the database to support this).
 2. The `addSpin` functionality will check the tags of this post and see if they already exist.
 3. If the post is not in the tags_associated list, the post ID will be placed into a `new_tag_posts` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
-4. When the `getSpins / getTimeline` functions find a post in this column, they will apply an additional label to the post object: `__new_post: true`
+4. When the `getSpins / getTimeline` functions find a post in this column, they will populate an additional field in the response json, `newtagposts`. Please see ["Getting a User's Timeline"](#getting-a-users-timeline) for a description of the response object.
+5. The client should then show a dialog prompting if the user would like to follow those tags, and then form a correct follow request. 
 
 
 ## Following/Unfollowing A User [: Topic]
@@ -201,6 +202,21 @@ to remove all tags.
     * if there are no spins from the user or any of the users they follow header 'alert' will be set with message 'no spins found :('
 
 2. Server will return JSON of all spins in chronological order
+__NOTE:__ When getting th elogged in individual's timeline, if there are posts made by the people `<logged in>` is following which contains tags that the poster did not posts about when `<logged in>` first followed them, the response object will look like the below. Otherwise `newtagposts` will be empty or left undefined, and `regularposts` will remain populated.
+```
+{
+  newtagposts: [
+    {<post 0 json>},
+    {<post 1 json>}
+    ...
+  ],
+  regularposts: [
+    {regular post 0},
+    {regular post 1},
+    ...
+  ]
+}
+```
 
 ## Liking / Unliking a spin
 

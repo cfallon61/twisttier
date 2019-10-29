@@ -7,8 +7,10 @@ import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown'
 import Modal from './Modal.js';
+import {NotificationManager} from 'react-notifications';
 import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
+import { body } from 'express-validator';
 
 // Styling the user feed.
 const pageStyle = {
@@ -42,6 +44,8 @@ class UserFeed extends Component
         this.onFollowPressedAtModal = this.onFollowPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
+        this.updateTagData = this.updateTagData.bind(this);
+        this.addInterestToList = this.addInterestToList.bind(this);
     }
 
     updateUserSpins(username)
@@ -72,7 +76,7 @@ class UserFeed extends Component
             }
         }).catch(function(err){
             console.log(err);
-            this.setState({error: {exist: true, message: err, status:404}});
+            self.setState({error: {exist: true, message: err, status:404}});
         });
     }
 
@@ -80,6 +84,7 @@ class UserFeed extends Component
     {
         console.log(this.username);
         this.updateUserSpins(this.username);
+        this.updateTagData();
     }
 
     onFollowPressed()
@@ -91,6 +96,37 @@ class UserFeed extends Component
     onFollowPressedAtModal()
     {
         //TODO
+        if(document.cookie === "") //No auth, just return.
+        {
+            return;
+        }
+        else
+        {
+            let loggedInUser = document.cookie.split('=')[1];
+            let jsonBody = {
+                action : 'follow',
+                toFollow : this.username,
+                tags : this.state.toFollowInterests,
+                follower : loggedInUser
+            };
+            console.log(jsonBody);
+            fetch("/api/updateFollowing", {
+                method : "POST",
+                headers : {
+                    "Content-Type" : "application/json"
+                },
+                body : JSON.stringify(jsonBody)
+            }).then(function(res){
+                if(res.status === 200)
+                {
+                    NotificationManager.success("Follow successful!");
+                    this.closeModal();
+                }
+                else{
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            });
+        }
     }
 
     showModal()
@@ -111,37 +147,43 @@ class UserFeed extends Component
         this.setState({toFollowInterests : interestList});
     }
 
-    async getTagData()
+    updateTagData()
     {
-        let data = null;
-        let response = await fetch(`api/users/${this.username}`, {
+        let self = this;
+        fetch(`/api/users/${this.username}`, {
             method : 'POST',
             headers : {
                 'Content-Type' : 'application-json'
             }
+        }).then(function(response){
+            if(response.status === 200)
+            {
+                response.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    console.log(data);
+                    let currentInterests = [];
+                    for(var i = 0; i < jsonData.interests.length; i++)
+                    {
+                        currentInterests.push(jsonData.interests[i]);
+                    }
+                    self.setState({interests : currentInterests});
+                });
+            }
         });
-        if(response.status === 200)
-        {
-            data = await response.json();
-            console.log(data);
-            return data;
-        }
-        else{
-            return null;
-        }
-        
-       
+
     }
 
     renderFollowForm()
     {
-        let followTags = this.getTagData();
         let followItems = [];
         let disableTagDropdown = false;
-        for(var i = 0; i < followTags.length; i++)
+        console.log(this.state.interests);
+        for(var i = 0; i < this.state.interests.length; i++)
         {
-            followItems.push(<Dropdown.Item>followTags[i]</Dropdown.Item>);
+            followItems.push(<Dropdown.Item onClick={() => this.addInterestToList(this.state.interests[i])}>{this.state.interests[i]}</Dropdown.Item>);
+            console.log(this.state.interests[i]);
         }
+        console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;
@@ -162,7 +204,7 @@ class UserFeed extends Component
         let addedInterestList = [];
         for(var i = 0; i < this.state.toFollowInterests.length; i++)
         {
-            addedInterestList.push(<p>{this.state.toFollowInterests.length}</p>);
+            addedInterestList.push(<p>{this.state.toFollowInterests[i]}</p>);
         }
 
         let addedListView = (

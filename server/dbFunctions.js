@@ -391,7 +391,8 @@ async function deleteSpin(username, spin_id) {
     rows = res.rows;
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }

@@ -383,12 +383,11 @@ async function addSpin(username, spin) {
     await client.query('BEGIN');
     var newtags = [];
     // get the tags that the user currently posts about.
-    var tags_associated = await client.query(`
-        SELECT tags_associated, new_tag_posts 
-        FROM ${tablename} 
-        WHERE username=$1`, [username]
-        ).rows[0].tags_associated;
+    var query = `SELECT tags_associated FROM ${USER_TABLE} WHERE username=$1`
+    var args = [username];
+    var res = await client.query(query, args);
 
+    var tags_associated = res.rows[0].tags_associated;
     // adds the tags in tags_associated which wasn't in it before
     // finds and adds the new tags in newtags
     for (var i = 0; i < spin.tags.length; i++) {

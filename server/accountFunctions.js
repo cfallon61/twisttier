@@ -192,6 +192,8 @@ async function getUserInfo(req, res, next) {
       following: data.following,
       interests: data.interests,
       profile_pic: data.profile_pic,
+      tags_associated: data.tags_associated,
+      new_tag_posts: data.new_tag_posts
     };
     // console.log(responseObject);
     // TODO change this to not be a .json response

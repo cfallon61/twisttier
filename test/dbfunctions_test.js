@@ -7,7 +7,7 @@ const assert = require('assert');
 const bcrypt = require('bcrypt');
 
 describe('database functions test', function() {
-  describe('#dp.addSpin()', async () => {
+  describe('#db.addSpin()', async () => {
     it('checks if spin gets added successfully', async () => {
 
       var username = "f";

@@ -39,7 +39,7 @@ function createSession(req, res) {
   // console.log('client session =',req.clientSession);
   res.setHeader("loggedIn", true);
   res.cookie('username', req.clientSession.uid, {
-    maxAge: 60 * 60 * 24
+    maxAge: 100 * 60 * 60 * 24
   });
 }
 

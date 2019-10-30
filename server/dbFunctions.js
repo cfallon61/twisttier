@@ -376,10 +376,27 @@ async function getSpins(users) {
 async function addSpin(username, spin) {
   const client = await pool.connect();
   var rows = [];
+  var query;
 
   try {
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
+    var newtags = [];
+    // get the tags that the user currently posts about.
+    var tags_associated = await client.query(`
+        SELECT tags_associated, new_tag_posts 
+        FROM ${tablename} 
+        WHERE username=$1`, [username]
+        ).rows[0].tags_associated;
+
+    // adds the tags in tags_associated which wasn't in it before
+    // finds and adds the new tags in newtags
+    for (var i = 0; i < spin.tags.length; i++) {
+      if (!tags_associated.includes(spin.tags[i])) {
+        tags_associated.push(spin.tags[i]);
+        newtags.push(spin.tags[i]);
+      }
+    }
 
     var args = [
       spin.content,
@@ -389,11 +406,11 @@ async function addSpin(username, spin) {
       spin.quotes,
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
-      spin.like_list
+      spin.like_list,
     ];
 
-
-    var query = `INSERT INTO ${tablename} 
+    
+    query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
       RETURNING id`
@@ -402,28 +419,31 @@ async function addSpin(username, spin) {
     var res = await client.query(query, args);
     rows = res.rows;
 
-    var args = [username];
-
-    var query = `SELECT tags_associated FROM ${USER_TABLE} WHERE username = $1`;
-    var res = await client.query(query, args);
-
-    var tags_associated = res.rows[0].tags_associated;
-    for (var i = 0; i < spin.tags.length; i++) {
-      if (!tags_associated.includes(spin.tags[i])) {
-        tags_associated.push(spin.tags[i]);
-      }
+    var postid = res.rows[0].id;
+    // if there are any new tags, then add this post's id to the new post column
+    if (newtags.length > 0) {
+      args = [
+        tags_associated,
+        postid,
+        username,
+      ];
+      // add the post to the new tag posts column and set a timer function
+      query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2 
+                WHERE username = $3 RETURNING username`;
+      await client.query(query, args);
+      
+      // trigger a function to delete the post id from the new post column after
+      // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
+      // actual
+      setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
     }
-
-    var args = [username, tags_associated];
-
-    var query = `UPDATE ${USER_TABLE} SET tags_associated = $2 WHERE username = $1 RETURNING username`;
-    var res = await client.query(query, args);
 
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
-    console.log(`An error occurred in db.addspin: ${ e }`);
+    console.log(`Error caught by error handler: ${ e }`);
   }
   finally {
     client.release();

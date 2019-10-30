@@ -400,8 +400,25 @@ async function addSpin(username, spin) {
     ;
 
     var res = await client.query(query, args);
-
     rows = res.rows;
+
+    var args = [username];
+
+    var query = `SELECT tags_associated FROM ${USER_TABLE} WHERE username = $1`;
+    var res = await client.query(query, args);
+
+    var tags_associated = res.rows[0].tags_associated;
+    for (var i = 0; i < spin.tags.length; i++) {
+      if (!tags_associated.includes(spin.tags[i])) {
+        tags_associated.push(spin.tags[i]);
+      }
+    }
+
+    var args = [username, tags_associated];
+
+    var query = `UPDATE ${USER_TABLE} SET tags_associated = $2 WHERE username = $1 RETURNING username`;
+    var res = await client.query(query, args);
+
     await client.query('COMMIT');
     
   } catch(e) {

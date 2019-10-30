@@ -340,7 +340,7 @@ class UserFeed extends Component
         //If cookie is not empty, an authenticated user entered the page.
         if(document.cookie !== "")
         {
-            followButton = <Button onClick={this.onFollowPressed}>Follow</Button>;
+            followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
         /**
          * The view organized by these parts:

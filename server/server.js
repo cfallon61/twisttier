@@ -84,6 +84,10 @@ const upload = multer({
       }
       
       console.log("image uploaded supposedly to " + file.path);
+      if (!file.path) {
+        console.log('in spite of what the above message says, the actual file path does not exist.');
+        return next(null, false);
+      }
       return next(null, true);
     }
     catch (e) {

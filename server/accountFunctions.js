@@ -375,6 +375,7 @@ async function updateFollowing(req, res, next) {
     return next();
   }
   else {
+    console.log(followUpdate);
     res.json(JSON.stringify(followUpdate));
   }
 }

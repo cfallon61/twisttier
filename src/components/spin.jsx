@@ -56,7 +56,7 @@ class Spin extends Component
             {
                 res.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    self.setState({likes : jsonData.likes});
+                    self.setState({likes : jsonData.likes, showLike : false});
                     NotificationManager.success('You liked the post!');
                 });
             }
@@ -76,7 +76,42 @@ class Spin extends Component
 
     unlikeSpin()
     {
-        console.log("Unliked spin.");
+        let esteemBody = {
+            postAuthor: this.author,
+            action: 'unlike',
+            liker: this.userToView,
+            spinID: this.spinID
+        };
+
+        let self = this;
+        console.log("Unliking spin");
+        fetch("/api/spins/esteem", {
+            method : 'POST',
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(esteemBody)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                res.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    self.setState({likes : jsonData.likes, showLike : false});
+                    NotificationManager.success('You liked the post!');
+                });
+            }
+            else
+            {
+                if(res.headers.has('error'))
+                {
+                    NotificationManager.error(res.headers['error']);
+                }
+                else
+                {
+                    NotificationManager.error("Unexpected error while liking spin.");
+                }
+            }
+        });
     }
 
     //Returns a boolean indicating the user already liked the spin.

@@ -344,6 +344,30 @@ describe("middleware / routing function tests", () => {
       assert.deepStrictEqual(actualRes, undefined);
     }); 
 
+    it("Duplicate check through middleware - there should be an error", async () => {
+      const req = httpMocks.createRequest(
+        {
+          method: "POST",
+          url: '/updateFollowing',
+          body: {
+            action : "follow",
+            toFollow : "seriously",
+            tags : ['newFollowTag'],
+            follower : "sidv"  
+          }
+        });
+    
+      const mockres = httpMocks.createResponse();
+      
+      // post to router
+      await router.updateFollowing(req, mockres, () => {});
+      
+      const actualRes = mockres.getHeader('error');
+      console.log(actualRes);
+      
+      assert.notEqual(actualRes, undefined);
+    });
+
     it("Unfollowing: tags and toFollow exists - error should be undefined", async () => {
         const req = httpMocks.createRequest(
         {
@@ -367,6 +391,30 @@ describe("middleware / routing function tests", () => {
       
       assert.deepStrictEqual(actualRes, undefined);
     }); 
+
+    it("Duplicate check for unfollowing through middleware - there should be an error", async () => {
+      const req = httpMocks.createRequest(
+      {
+        method: "POST",
+        url: '/updateFollowing',
+        body: {
+          action : "unfollow",
+          toFollow : "seriously",
+          tags : ['newFollowTag'],
+          follower : "sidv"  
+        }
+      });
+
+    const mockres = httpMocks.createResponse();
+    
+    // post to router
+    await router.updateFollowing(req, mockres, () => {});
+    
+    const actualRes = mockres.getHeader('error');
+    console.log(actualRes);
+    
+    assert.notEqual(actualRes, undefined);
+  });
 
     
      

@@ -277,23 +277,21 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, user.username);
     });
 
-    it('@test add user topic pair: should return username', async () => {
+    it('@duplicate follow  - should return false', async () => {
       user = {
         username: 'testingUser',
-        password: 'passwordsr4losers',
-        email: 'kaizer@von.heimer',
-        bio: 'i hate my life', 
-        name: 'testing, delete if bad'
       };
-
+      
+      //var res = await db.createUser(user);
+      
       tofollow = {
-        username: 'seriously',
-        tags: ['chris', 'nazim']
+        username: 'f',
+        tags: ['chungus', 'hotdogs']
       };
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
       // assert
-      assert.deepStrictEqual(res, user.username);
+      assert.deepStrictEqual(res, false);
     });
 
     it('@adding follow topic for an existing username in database, needed for unfollow test', async () => {
@@ -334,6 +332,8 @@ describe('database functions test', function() {
       
       assert.deepStrictEqual(res, false);
     });
+
+    
   });
 
   describe('#unfollowTopicUserPair',  () => {
@@ -350,11 +350,23 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, unfollowedUser);
     });
 
+    it('@duplicate unfollow - should return false', async () => {
+
+      unfollowingUser = "f";
+      unfollowedUser = "seriously";
+      tags = ['random1'];
+
+      var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
+
+      // assert
+      assert.deepStrictEqual(res, false);
+    });
+
     it('@testing where user is deleted completely, should return unfollowedUser', async () => {
 
       unfollowingUser = "f";
       unfollowedUser = "seriously";
-      tags = ['random2', 'chocolate'];
+      tags = [];
 
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 
@@ -384,6 +396,23 @@ describe('database functions test', function() {
 
       // assert
       assert.deepStrictEqual(res, false);
+    });
+
+    it('@not an actual test - undoring first follow test to properly check for duplicate', async () => {
+      user = {
+        username: 'testingUser',
+      };
+      
+      //var res = await db.createUser(user);
+      
+      tofollow = {
+        username: 'f',
+        tags: ['chungus', 'hotdogs']
+      };
+
+      var res = await db.unfollowTopicUserPair(user.username, tofollow.username, tofollow.tags);
+      // assert
+      assert.notEqual(res, false);
     });
 
   });

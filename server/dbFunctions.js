@@ -233,6 +233,33 @@ async function updateUser(user) {
   return (rows.length === 0 ? false : rows[0]);
 }
 
+// @brief: timer function which will clear any new posts from the
+//         user's new posts column
+// @param: username: the user's username so it can find the row. 
+// @return: none
+async function clearNewPostColumn(username) {
+  var client = await pool.connect();
+  var query;
+
+  try {
+    client.query("BEGIN");
+
+    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+
+    await client.query(query, [username]);
+
+    await client.query('COMMIT');
+  }
+  catch (e) {
+    console.log('clearNewPostColumn encountered an error: ' + `${e}`);
+    await client.query('ROLLBACK');
+  }
+  finally {
+    client.release();
+  }
+
+};
+
 // Function to update the last login time
 // return true on success, false on error
 async function updateLoginTime(user){
@@ -518,7 +545,7 @@ async function followTopicUserPair(username, tofollow, tags) {
       // console.log("HERE 1");
     }
 
-    //if its all tags
+    // if its all tags
     else if (Array.isArray(tags) && tags.length === 0) {
       following.users[tofollowIndex].tags = tags;
       changedInfo = 1;
@@ -822,5 +849,6 @@ module.exports = {
   updateLoginTime,
   updateUser,
   deleteSpin,
-  unfollowTopicUserPair
+  unfollowTopicUserPair,
+  clearNewPostColumn
 };

@@ -13,8 +13,8 @@ describe('database functions test', function() {
       var username = "f";
 
       spin = {
-        content: 'god is upon us',
-        tags: ['God is Chris', 'Chris is God'],
+        content: 'I think that this project is doomed',
+        tags: ['failing', 'CS307'],
         edited: false,
         likes: 0,
         quotes: 0,

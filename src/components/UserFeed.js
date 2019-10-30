@@ -129,7 +129,7 @@ class UserFeed extends Component
         let loggedInUser = this.getViewingUser();
         if(loggedInUser === null) return;
         let jsonBody = {
-            action : operation.toLowerCase,
+            action : operation.toLowerCase(),
             toFollow : this.username,
             tags : this.state.toFollowInterests,
             follower : loggedInUser

@@ -97,7 +97,7 @@ class Spin extends Component
                 res.json().then(function(data){
                     let jsonData = JSON.parse(data);
                     self.setState({likes : jsonData.likes, showLike : true});
-                    NotificationManager.success('You liked the post!');
+                    NotificationManager.success('Unlike successful.');
                 });
             }
             else

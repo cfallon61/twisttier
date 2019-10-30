@@ -174,6 +174,12 @@ class Spin extends Component
                 buttonToShow = <Button onClick={this.unlikeSpin}>Unlike</Button>;
             }
         }
+        let tagList = [];
+        for(var i = 0; i < this.state.tags.length; i++)
+        {
+            tagList.push(<Button style="height: 25%; width: 25%">{this.state.tags[i]}</Button>);
+        }
+
         return (
             <div className="spin-area">
                 <div className="username-section">
@@ -190,6 +196,9 @@ class Spin extends Component
                     <h6>
                         {this.state.timestamp}
                     </h6>
+                </div>
+                <div className="other-info">
+                    <p>Likes: {this.state.likes}</p>
                 </div>
                 {buttonToShow}
             </div>

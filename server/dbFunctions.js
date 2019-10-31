@@ -634,7 +634,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     var res = await client.query(query,args);
     rows = res.rows;   
     var following = rows[0].following;
-    var changedInfo = 0;
+    var changedInfo = false;
     
 
     args = [unfollowedUser];
@@ -659,22 +659,17 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
       if (tags.length === 0) {
         following.users.splice(followingIndex, 1);
         empty = true;
-        changedInfo = 1;
+        changedInfo = true;
 
       }
       if (!empty) {
-        
-        // console.log("Tags before: ", following.users[followingIndex].tags);
         for (var i = 0; i < tags.length; i++) {
           var index = following.users[followingIndex].tags.indexOf(tags[i]);
           if (index > -1) {
             following.users[followingIndex].tags.splice(index, 1);
-            changedInfo = 1;
+            changedInfo = true;
           }        
         }
-        // console.log("Tags after: ", following.users[followingIndex].tags);
-
-
         // if the removing tags makes it empty
         if (following.users[followingIndex].tags.length === 0) {
           following.users.splice(followingIndex, 1);
@@ -682,14 +677,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
         }
       }
     }
-
-    if (changedInfo === 0 || followingIndex === -1) {
-      console.log("NO CHANGE");
-      return false;
-    } 
-
-
-      
 
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
@@ -709,6 +696,10 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     args = [unfollowedUser, followers];
 
     res = await client.query(query,args);
+
+    if (!changedInfo) {
+      return "Error: nothing changed";
+    }
     
     // end the database transaction
     await client.query('COMMIT');

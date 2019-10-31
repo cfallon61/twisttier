@@ -57,7 +57,7 @@ class App extends Component {
       <div className="App">
         <Router>
           <div className="App-header">
-            <Navbardemo className="Navbardemo" />
+            <Navbardemo className="Navbardemo" loggedIn={this.state.isLoggedIn}/>
             <NotificationContainer/>
             <Switch>
               <Route exact path="/login" component={Login} />

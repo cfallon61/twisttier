@@ -22,6 +22,7 @@ class UserSettings extends Component {
     this.handleChangeEmail = this.handleChangeEmail.bind(this);
     this.handleEditBio = this.handleEditBio.bind(this);
     this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.handleDeleteAccount = this.handleDeleteAccount.bind(this);
   }
 
   handleChangeEmail(event) {}
@@ -29,6 +30,8 @@ class UserSettings extends Component {
   handleChangePassword(event) {}
 
   handleEditBio(event) {}
+
+  handleDeleteAccount(event) {}
 
   getUserInfo() {
     fetch("/api/users/:username", {
@@ -76,7 +79,7 @@ class UserSettings extends Component {
             </Col>
             <Col>
               <Button variant="secondary" onClick={this.handleChangeEmail}>
-                Change Email
+                change email
               </Button>
             </Col>
           </Row>
@@ -87,7 +90,7 @@ class UserSettings extends Component {
             </Col>
             <Col>
               <Button variant="secondary" onClick={this.handleEditBio}>
-                Change password
+                change password
               </Button>
             </Col>
           </Row>
@@ -98,7 +101,18 @@ class UserSettings extends Component {
             </Col>
             <Col>
               <Button variant="secondary" onClick={this.handleEditBio}>
-                Edit bio
+                edit bio
+              </Button>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col xs={10}>
+              <h3> delete </h3>
+            </Col>
+            <Col>
+              <Button variant="secondary" onClick={this.handleDeleteAccount}>
+                delete account
               </Button>
             </Col>
           </Row>

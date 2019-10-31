@@ -41,7 +41,7 @@ class Navbardemo extends Component {
                 <FormControl type="text" placeholder="Search" className="mr-sm-2" />
                 <Button variant="outline-success">Search</Button>
               </Form>
-              <Button variant="outline-success" onClick={() => this.props.history.push("/login")}>Login</Button>
+              <Button variant="outline-success" onClick={() => this.props.history.push("/login")}>Log in</Button>
           </Navbar.Collapse>
           </Nav>
         </Navbar>

@@ -2,8 +2,13 @@ import React, {Component} from 'react';
 import Feed from './feed.jsx';
 import Spin from './spin.jsx';
 import Profile from "./Profile.js";
+import Form from 'react-bootstrap/Form';
 import { template } from '@babel/core';
 import Error from './Error.js';
+import Button from 'react-bootstrap/Button';
+import Modal from './Modal.js';
+import { NotificationManager } from 'react-notifications';
+
 
 // Styling the user feed.
 const pageStyle = {
@@ -26,8 +31,15 @@ class Timeline extends Component
                 exist : false, 
                 message : "",
                 status : ""
-            }
-        }
+            },
+            showSpinModal : false,
+            spin : ""
+        };
+
+        this.onSpinPressed = this.onSpinPressed.bind(this);
+        this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.showModal = this.showModal.bind(this);
         console.log(this.username);
     }
 
@@ -57,6 +69,55 @@ class Timeline extends Component
         });
     }
 
+    handleSpinChange(event){
+        this.setState({spin : event.target.value});
+        NotificationManager.error(this.state.spin.length);
+    }
+
+    onSpinPressed() {
+        console.log("Spin pressed.");
+        this.showModal();
+    }
+
+    onSpinPressedAtModal() {
+        // if(this.state.spin.length <= 0 ){
+        //     NotificationManager.error("Spin is too short!");
+        // } else if (this.spin.state.length > 70) {
+        //     NotificationManager.error("Spin is too long!");
+        // }
+        // //TODO: send text to server
+        // else {
+        //     this.closeModal()
+        // }
+    }
+
+    showModal() {
+        console.log("Showing spin modal...");
+        this.setState({showSpinModal : true})
+    }
+
+    closeModal() {
+        this.setState({showSpinModal : false})
+    }
+
+    renderSpinForm() {
+
+        return (
+            <div className="spin-form">
+                    <Form onSpin = {this.handleSpin} >
+                        <Form.Label>Spin</Form.Label>
+                        <Form.Control as = "textarea" placeholder="Your Spin here" rows="3" 
+                            onChange = {this.handleSpinChange}/>
+                    </Form>
+                <div className="modal-footer">
+                    <Button onClick={this.onSpinPressedAtModal}>Spin</Button>
+                    <Button onClick={this.closeModal}>Cancel</Button>
+                </div>
+            </div>
+
+        );
+    }
+
     render()
     {
         //Right now we will use three parts of the spin.
@@ -76,6 +137,9 @@ class Timeline extends Component
         else{
             feed.addSpin(<h6>Follow user-tags to see spins here!</h6>);
         }
+
+        let spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
+        
         /**
          * The view organized by these parts:
          *          Page
@@ -88,6 +152,10 @@ class Timeline extends Component
                 </div>
                 <div className="user-feed-middle">
                     <h4>Hello {this.username}!</h4>
+                    {spinButton}
+                    <Modal show={this.state.showSpinModal}>
+                        {this.renderSpinForm()}
+                    </Modal>
                     {feed.render()}
                 </div>
             </div>

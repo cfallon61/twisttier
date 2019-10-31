@@ -723,7 +723,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 async function likeSpin(user_liker, user_poster, spin) {
   const client = await pool.connect();
   var rows = [];
-
+  console.log(user_liker, user_poster, spin);
   try {
     var tablename = userSpinTableName(user_poster);
     
@@ -795,10 +795,10 @@ async function unlikeSpin(user_liker, user_poster, spin) {
       like_list.splice(index, 1);
       
       args = [like_list, spin];
-      query = `UPDATE ${tablename} SET likelist = $1, likes = likes - 1 
+      query = `UPDATE ${tablename} SET like_list = $1, likes = likes - 1 
       WHERE id = $2 RETURNING *`;
 
-      res = await client.query(query);
+      res = await client.query(query, args);
 
       rows = res.rows;
 

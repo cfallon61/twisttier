@@ -121,7 +121,7 @@ function userSpinTableName(username) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${e}`);
+    console.log(`An error occurred in db.createUser: ${e}`);
     // return e;
   } 
   finally {
@@ -461,7 +461,7 @@ async function addSpin(username, spin) {
       // trigger a function to delete the post id from the new post column after
       // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
       // actual
-      setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
+      setTimeout(() => { clearNewPostColumn(username); }, NEW_POST_TIMEOUT);
     }
 
     await client.query('COMMIT');
@@ -469,7 +469,7 @@ async function addSpin(username, spin) {
   } 
   catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.addSpin: ${ e }`);
   }
   finally {
     client.release();
@@ -836,6 +836,24 @@ pool.on('error', (err, client) => {
   console.error('An unknown database error occurred: ', err);
 });
 
+// @brief: Function to perform a lookup of a given user.
+// @return: False if the user is not found, 
+async function searchForUser(userdata) 
+{
+  var query = `SELECT * FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
+  var results = [];
+  try 
+  {
+    results = pool.query(query, [userdata]);
+  }
+  catch (e) 
+  {
+    console.log("Error encountered in db.searchForUser: ", e);
+    return false;
+  }
+  return (results.rows.length > 0 ? results.rows : false);
+}
+
 module.exports = {
   getSpins,
   addSpin,
@@ -850,5 +868,5 @@ module.exports = {
   updateUser,
   deleteSpin,
   unfollowTopicUserPair,
-  clearNewPostColumn
+  searchForUser,
 };

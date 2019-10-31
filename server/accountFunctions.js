@@ -220,6 +220,7 @@ async function getPosts(req, res, next) {
     res.setHeader('error', 'user not found');
     return next();
   }
+  // idk why i do json.stringify here
   var request = {
     users: JSON.stringify([{
       username: user.username,

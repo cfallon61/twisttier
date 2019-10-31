@@ -1,6 +1,34 @@
 
 # Profile Interface
 
+## Searching for a user's profile TODO
+__NOTE__ This functionality is not yet implemented. This is a preliminary specification only. 
+* __NOTE__ This functionality can be performed while a user is not logged in, and should be displayed on the main page, timeline, and all subsequent pages. 
+
+1. Client will `POST /api/search/:user` where `user` is a url parameter of the search string i.e. `?user=<arbitrary username or arbitrary name>`
+2. Server will check that `user` is not empty. 
+    * If the field is empty, server will reply with `406` and header `error: query cannot be empty` will be returned. 
+2. Server will perform a lookup, returning all results in the form of a JSON where the `username` or `name` fields are like the value provided by `:user` as given by the below example response:
+
+    * Client Request: `POST /api/search/s`
+    * Response: 
+        ```
+        [
+          {
+            username: 'seriously1',
+            profile_pic: 'profileImages/1571946143009_IMG_20180804_121544677_copy.jpg',
+            tags_associated: []
+          },
+          {
+            username: 'sidv',
+            profile_pic: 'profileImages\\1572393972370_pic.jpg',
+            tags_associated: []
+          },
+        ]
+        ```
+3. If the user is not found, server will respond with `404` and set header `error: no users found matching that search parameter`. 
+4. Client will be responsible for creating and displaying live links to the users' profiles which the server returns. 
+
 ## Querying User Login Status
 * This is an endpoint strictly for querying whether a user is logged in. 
 Client will `POST /api/login_status`
@@ -142,7 +170,7 @@ body: {
 
 
 ## New Tags Posted
-###TODO
+
 This is less of a communication specification and more of a procedural specification for how this functionality will work. 
 The rough outline for this process is as follows:
 

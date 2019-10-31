@@ -12,9 +12,68 @@ import icon_settings from './settingsIcon.png'
 import icon_home from  './homeIcon.png'
 import icon_twister from './twisterIcon.png'
 import { withRouter } from 'react-router-dom';
+import { NotificationManager } from 'react-notifications';
+import { selectFields } from 'express-validator/src/select-fields';
 
 class Navbardemo extends Component {
+  constructor(props)
+  {
+    super(props);
+    this.logOut = this.logOut.bind(this);
+    this.onLogoutClicked = this.onLogoutClicked.bind(this);
+  }
+
+  logOut()
+  {
+    fetch("/logout").then(function(res){
+      if(res.status === 200)
+      {
+        NotificationManager.success("Logout successful");
+        document.cookie = ""; //Clear cookies.
+      }
+      else{
+        if(res.headers.has('error'))
+        {
+          NotificationManager.error(res.headers['error']);
+        }
+        else
+        {
+          NotificationManager.error("Unexpected error occured.");
+        }
+      }
+    });
+  }
+
+  onLogoutClicked()
+  {
+    this.logOut();
+    window.location.reload();
+  }
+
   render() {
+    let dynamicView = null;
+    if(this.props.loggedIn)
+    {
+      dynamicView = (
+        <div>
+          <Navbar.Collapse>
+          <Link to="/">
+          <Image src={icon_home}  className='icon'/>
+          </Link>
+
+          <Link to="/userSettings">
+          <Image src={icon_settings}  className='icon' />
+          </Link>
+
+          </Navbar.Collapse>
+          <Button variant="outline-success" onClick={this.onLogoutClicked}>Logout</Button>
+        </div>
+      ); 
+    }
+    else
+    {
+      dynamicView = <Button variant="outline-success" onClick={() => this.props.history.push("/login")}>Login</Button>
+    }
     return (
       <div>
 
@@ -26,23 +85,15 @@ class Navbardemo extends Component {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Nav className="ml-auto">
 
-          <Navbar.Collapse>
-          <Link to="/timeline">
-          <Image src={icon_home}  className='icon'/>
-          </Link>
-
-          <Link to="/userSettings">
-          <Image src={icon_settings}  className='icon' />
-          </Link>
-          </Navbar.Collapse>
 
           <Navbar.Collapse id="basic-navbar-nav">
               <Form inline>
                 <FormControl type="text" placeholder="Search" className="mr-sm-2" />
                 <Button variant="outline-success">Search</Button>
               </Form>
-              <Button variant="outline-success" onClick={() => this.props.history.push("/login")}>Log in</Button>
+              
           </Navbar.Collapse>
+          {dynamicView}
           </Nav>
         </Navbar>
       </div>

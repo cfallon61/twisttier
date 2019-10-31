@@ -37,3 +37,9 @@ curl -i -X POST 'http://localhost:8080/api/delete' \
 -F "username=killMeSir" \
 -F "email=kill@me.com" \
 -F "password=killmeplease" 
+
+
+// testing searching for a user
+curl -i -X POST 'http://localhost:8080/api/search/s' \
+-H "content-type: multipart/form-data"
+

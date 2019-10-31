@@ -11,12 +11,6 @@ import { NotificationManager } from 'react-notifications';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 
-// Styling the user feed.
-const pageStyle = {
-    display: "grid",
-    "grid-template-columns": "repeat(3, 1fr)"
-} 
-
 /**
  * UserFeed is the profile of a selected user.
  */
@@ -232,7 +226,7 @@ class Timeline extends Component
          *  Left | Middle | Right
          */
         return (
-            <div className="user-feed-page" style={pageStyle}>
+            <div className="user-feed-page">
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                 </div>

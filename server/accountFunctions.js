@@ -220,6 +220,7 @@ async function getPosts(req, res, next) {
     res.setHeader('error', 'user not found');
     return next();
   }
+  // idk why i do json.stringify here
   var request = {
     users: JSON.stringify([{
       username: user.username,
@@ -348,7 +349,7 @@ async function updateFollowing(req, res, next) {
   // console.log("testing: ", follower);
   // console.log("tofollow: ", toFollow);
   if (toFollow === follower) {
-    res.setHeader('error', 'nice try bucko you can\'t do that though.');
+    res.setHeader('error', 'nice try bucko you can\'t follow yourself though.');
     return next();
   }
 
@@ -375,13 +376,43 @@ async function updateFollowing(req, res, next) {
     return next();
   }
   else if (followUpdate === "Error: nothing changed") {
-    res.setHeader('error', "unable to " + action + " " + toFollow + "as it has already been done");
+    // sends alert if he tries to (un)follow something that has already been
+    res.setHeader('alert', "unable to " + action + " " + toFollow + "as it has already been done");
     return next();
   }
   else {
     console.log(followUpdate);
     res.json(JSON.stringify(followUpdate));
   }
+}
+
+// @brief: middleware for handling the searching for users. 
+async function search(req, res, next) 
+{
+  console.log('searching for', req.params.user);
+  const user = req.params.user;
+  // if the parameter is not definec
+  if (!user || user === "") 
+  {
+    res.status(406)
+    res.setHeader('error', "query cannot be empty");
+    return next();
+  }
+  
+  var results = await db.searchForUser(user);
+
+  if (!results)
+  {
+    res.status(404);
+    res.setHeader('error', "no users found matching that search parameter");
+    return next();
+  }
+  else 
+  {
+    res.json(JSON.stringify(results));
+  }
+
+
 }
 
 
@@ -395,4 +426,5 @@ module.exports = {
   getUserInfo,
   getPosts,
   updateFollowing,
+  search,
 };

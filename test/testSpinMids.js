@@ -6,7 +6,7 @@ const httpMocks = require('node-mocks-http');
 
 describe.skip('test spin middleware functions', async () => {
     
-  describe('#delete spin', async () => {
+  describe.skip('#delete spin', async () => {
     it ("@spin exists", async () => {
       console.log('delete existing spin');
       var testSpinId = await create_test_spin();
@@ -105,7 +105,7 @@ describe.skip('test spin middleware functions', async () => {
 
   });
 
-  describe('#like spin', async () => {
+  describe.skip('#like spin', async () => {
     it('@test like spin not in like list', async () => {
       console.log('@test like spin not in like list');
       const req = httpMocks.createRequest(
@@ -136,7 +136,7 @@ describe.skip('test spin middleware functions', async () => {
     });
   });
 
-  describe("#unlike spin", async () => {
+  describe.skip("#unlike spin", async () => {
     it('@test unlike spin not in like list', async () => {
       console.log('@test unlike spin not in like list');
 
@@ -151,23 +151,23 @@ describe.skip('test spin middleware functions', async () => {
 
 async function create_test_spin()
 {
-const req = httpMocks.createRequest(
-  {
-    method: "POST",
-    url: '/api/add_spin/f',
-    params: { username: 'f' },
-    body: {
-      spinBody: "yo screw you man",
-      tags: ['wtf', 'kill me'],
-      is_quote: false,
-      quote_origin: undefined
-    }
-  });
+  const req = httpMocks.createRequest(
+    {
+      method: "POST",
+      url: '/api/add_spin/f',
+      params: { username: 'f' },
+      body: {
+        spinBody: "yo screw you man",
+        tags: ['wtf', 'kill me'],
+        is_quote: false,
+        quote_origin: undefined
+      }
+    });
 
-const mockres = httpMocks.createResponse();
+  const mockres = httpMocks.createResponse();
 
-// post to router
-await spins.createSpin(req, mockres, () => {});
-const actualRes = mockres.getHeader('spinId');
-return actualRes;
+  // post to router
+  await spins.createSpin(req, mockres, () => {});
+  const actualRes = mockres.getHeader('spinId');
+  return actualRes;
 }

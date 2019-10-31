@@ -121,7 +121,7 @@ function userSpinTableName(username) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${e}`);
+    console.log(`An error occurred in db.createUser: ${e}`);
     // return e;
   } 
   finally {
@@ -461,9 +461,7 @@ async function addSpin(username, spin) {
       // trigger a function to delete the post id from the new post column after
       // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
       // actual
-      console.log("time");
-      setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
-      console.log("out");
+      setTimeout(() => { clearNewPostColumn(username); }, NEW_POST_TIMEOUT);
     }
 
     await client.query('COMMIT');
@@ -471,7 +469,7 @@ async function addSpin(username, spin) {
   } 
   catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.addSpin: ${ e }`);
   }
   finally {
     client.release();
@@ -627,7 +625,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   try{
     // begin database transaction
     await client.query('BEGIN');
-
+    
     var args = [unfollowingUser];
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
     
@@ -636,13 +634,11 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     var following = rows[0].following;
     var changedInfo = false;
     
-
     args = [unfollowedUser];
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
     res = await client.query(query,args);
-    rows = res.rows;
-    var followers = rows[0].followers;
+    var followers = res.rows[0].followers;
 
     // if followed user found, delete the tags
     var followingIndex = -1;
@@ -654,7 +650,8 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     }
     
     var empty = false;
-    if (followingIndex > -1) {
+    if (followingIndex > -1) 
+    {
       // if tags is empty, it means that delete all tags
       if (tags.length === 0) {
         following.users.splice(followingIndex, 1);
@@ -713,7 +710,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     client.release();
   }
   
-  // return true on success, false otherwise
   return (rows.length === 0 ? false : rows[0].username);
 };
 
@@ -829,6 +825,27 @@ pool.on('error', (err, client) => {
   console.error('An unknown database error occurred: ', err);
 });
 
+
+// @brief: Function to perform a lookup of a given user.
+// @return: False if the user is not found, 
+async function searchForUser(userdata) 
+{
+  var query = `SELECT username, profile_pic, tags_associated
+   FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
+  var results = [];
+  try 
+  {
+    results = await pool.query(query, ['\%' + userdata + '\%']);
+    console.log('users matching given criteria =', results.rows);
+    return (results.rows.length > 0 ? results.rows : false);
+  }
+  catch (e) 
+  {
+    console.log("Error encountered in db.searchForUser: ", e);
+    return false;
+  }
+}
+
 module.exports = {
   getSpins,
   addSpin,
@@ -843,5 +860,5 @@ module.exports = {
   updateUser,
   deleteSpin,
   unfollowTopicUserPair,
-  clearNewPostColumn
+  searchForUser,
 };

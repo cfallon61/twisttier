@@ -325,6 +325,15 @@ app.get('/profileImages/*', (req, res) => {
 });
 
 
+// TODO implement this endpoint and middlewares associated.
+app.post('/api/search/:user', users.search, (req, res) => {
+  if (res.getHeader('error'))
+  {
+    res.sendfile(index);
+  }
+});
+
+
 // wtf this actually fricken fixed it i am PISSED
 // TODO limit to non user pages, other pages are assumed to be user pages
 // NOTE MUST REMAIN AT THE BOTTOM OF THE FILE OTHERWISE OTHER ROUTES WILL NOT WORK

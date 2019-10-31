@@ -625,22 +625,19 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   try{
     // begin database transaction
     await client.query('BEGIN');
-
+    
     var args = [unfollowingUser];
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
     
     var res = await client.query(query,args);
-    rows = res.rows;   
-    var following = rows[0].following;
+    var following = res.rows[0].following;
     var changedInfo = 0;
     
-
     args = [unfollowedUser];
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
     
     res = await client.query(query,args);
-    rows = res.rows;
-    var followers = rows[0].followers;
+    var followers = res.rows[0].followers;
 
     // if followed user found, delete the tags
     var followingIndex = -1;
@@ -652,7 +649,8 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     }
     
     var empty = false;
-    if (followingIndex > -1) {
+    if (followingIndex > -1) 
+    {
       // if tags is empty, it means that delete all tags
       if (tags.length === 0) {
         following.users.splice(followingIndex, 1);
@@ -686,9 +684,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
       return false;
     } 
 
-
-      
-
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
     if (unfollowingUserIndex > -1 && empty) {
@@ -720,7 +715,6 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     client.release();
   }
   
-  // return true on success, false otherwise
   return (rows.length === 0 ? false : rows[0].username);
 };
 

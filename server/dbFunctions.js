@@ -836,22 +836,25 @@ pool.on('error', (err, client) => {
   console.error('An unknown database error occurred: ', err);
 });
 
+
 // @brief: Function to perform a lookup of a given user.
 // @return: False if the user is not found, 
 async function searchForUser(userdata) 
 {
-  var query = `SELECT * FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
+  var query = `SELECT username, profile_pic, tags_associated
+   FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
   var results = [];
   try 
   {
-    results = pool.query(query, [userdata]);
+    results = await pool.query(query, ['\%' + userdata + '\%']);
+    console.log('users matching given criteria =', results.rows);
+    return (results.rows.length > 0 ? results.rows : false);
   }
   catch (e) 
   {
     console.log("Error encountered in db.searchForUser: ", e);
     return false;
   }
-  return (results.rows.length > 0 ? results.rows : false);
 }
 
 module.exports = {

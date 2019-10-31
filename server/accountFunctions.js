@@ -349,7 +349,7 @@ async function updateFollowing(req, res, next) {
   // console.log("testing: ", follower);
   // console.log("tofollow: ", toFollow);
   if (toFollow === follower) {
-    res.setHeader('error', 'nice try bucko you can\'t do that though.');
+    res.setHeader('error', 'nice try bucko you can\'t follow yourself though.');
     return next();
   }
 
@@ -381,6 +381,35 @@ async function updateFollowing(req, res, next) {
   }
 }
 
+// @brief: middleware for handling the searching for users. 
+async function search(req, res, next) 
+{
+  console.log('searching for', req.params.user);
+  const user = req.params.user;
+  // if the parameter is not definec
+  if (!user || user === "") 
+  {
+    res.status(406)
+    res.setHeader('error', "query cannot be empty");
+    return next();
+  }
+  
+  var results = await db.searchForUser(user);
+
+  if (!results)
+  {
+    res.status(404);
+    res.setHeader('error', "no users found matching that search parameter");
+    return next();
+  }
+  else 
+  {
+    res.json(JSON.stringify(results));
+  }
+
+
+}
+
 
 
 module.exports = {
@@ -392,4 +421,5 @@ module.exports = {
   getUserInfo,
   getPosts,
   updateFollowing,
+  search,
 };

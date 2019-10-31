@@ -326,8 +326,11 @@ app.get('/profileImages/*', (req, res) => {
 
 
 // TODO implement this endpoint and middlewares associated.
-app.post('/api/search/:user', (req, res) => {
-
+app.post('/api/search/:user', users.search, (req, res) => {
+  if (res.getHeader('error'))
+  {
+    res.sendfile(index);
+  }
 });
 
 

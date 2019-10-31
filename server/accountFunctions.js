@@ -376,7 +376,8 @@ async function updateFollowing(req, res, next) {
     return next();
   }
   else if (followUpdate === "Error: nothing changed") {
-    res.setHeader('error', "unable to " + action + " " + toFollow + "as it has already been done");
+    // sends alert if he tries to (un)follow something that has already been
+    res.setHeader('alert', "unable to " + action + " " + toFollow + "as it has already been done");
     return next();
   }
   else {

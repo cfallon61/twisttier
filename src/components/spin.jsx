@@ -11,7 +11,10 @@ const tagContainerStyle = {
     "grid-template-columns" : "auto auto auto auto auto",
     "align-content" : "center",
     "max-width" : "100%",
-    "grid-size" : "auto"
+    "grid-size" : "auto",
+    zIndex: 0,
+    "margin" : "auto",
+    "padding-top" : "2vh"
 };
 
 /**
@@ -31,7 +34,8 @@ class Spin extends Component
             quoteOrigin: "",
             likes : 0,
             spinID : this.props.spinID,
-            showLike : true
+            showLike : true,
+            viewingUserTags : []
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -41,6 +45,36 @@ class Spin extends Component
         this.userToView = this.props.userToView;
         this.author = this.props.username;
         this.spinID = this.props.spinID;
+
+        //this.followTag = this.followTag.bind(this);
+        //this.unfollowTag = this.unfollowTag.bind(this);
+        this.updateViewerTags = this.updateViewerTags.bind(this);
+        this.updateWhetherViewerLikedTheSpin = this.updateWhetherViewerLikedTheSpin.bind(this);
+        this.getUserTags = this.getUserTags.bind(this);
+    }
+
+    /**
+     * Helper method for getting tags of the author
+     */
+    getUserTags(followingList, author)
+    {
+        console.log(followingList);
+        console.log(author);
+        if(followingList == undefined || followingList.users.length === 0) 
+        {
+            console.log("Return empty");
+            return [];//Empty list
+        }
+        console.log(followingList.users.length);
+        for(var i = 0; i < followingList.users.length; i++)
+        {
+            if(followingList.users[i].username === author)
+            {
+                return followingList.users[i].tags;
+            }
+        }
+        console.log("Return empty from end.");
+        return [];//Empty list
     }
     
     likeSpin()
@@ -105,8 +139,9 @@ class Spin extends Component
             {
                 res.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    self.setState({likes : jsonData.likes, showLike : true});
                     NotificationManager.success('Unlike successful.');
+                    self.setState({likes : jsonData.likes, showLike : true});
+
                 });
             }
             else
@@ -123,6 +158,81 @@ class Spin extends Component
         });
     }
 
+    followTag(tagName)
+    {
+        let tagList = [];
+        console.log(tagName);
+        tagList.push(tagName);
+        let jsonBody = {
+            action : 'follow',
+            toFollow : this.author,
+            tags : tagList,
+            follower : this.userToView
+        };
+        console.log(jsonBody);
+        let self = this;
+        fetch("/api/updateFollowing", {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(jsonBody)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                NotificationManager.success(`You followed ${tagName} from ${self.author}`);
+                self.updateViewerTags();
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
+    }
+
+    unfollowTag(tagName)
+    {
+        let tagList = [];
+        console.log(tagName);
+        tagList.push(tagName);
+        let jsonBody = {
+            action : 'unfollow',
+            toFollow : this.author,
+            tags : tagList,
+            follower : this.userToView
+        };
+        console.log(jsonBody);
+        let self = this;
+        fetch("/api/updateFollowing", {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(jsonBody)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
+                self.updateViewerTags();
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
+    }
     //Returns a boolean indicating the user already liked the spin.
     updateWhetherViewerLikedTheSpin()
     {
@@ -155,6 +265,49 @@ class Spin extends Component
         });
     }
 
+    updateViewerTags()
+    {
+        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        const self = this;
+        console.log(`/api/users/${self.userToView}`);
+        fetch(`/api/users/${self.userToView}`, {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        })
+        .then(function(res)
+        {
+          // console.log(res);
+          if(res.status === 200)
+          {
+            res.json().then(function(jsonData)
+            {
+                const dataDict = JSON.parse(jsonData);
+                let followingList = dataDict.following;
+                console.log(followingList);
+                console.log(self.author);
+                let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
+                console.log(followedTagsFromAuthor);
+                self.setState({ viewingUserTags: followedTagsFromAuthor});
+              })
+          }
+          else
+          {
+            if(res.headers.error)
+            {
+              NotificationManager.error(res.headers.error);
+              self.setState({error : res.headers.error});
+            }
+          }
+        })
+        .catch(function(err){
+            console.log(err);
+            self.setState({error : err});
+        })
+        ;
+    }
+
     viewerIsAuthenticated()
     {
         return document.cookie !== "";
@@ -165,13 +318,14 @@ class Spin extends Component
         if(this.viewerIsAuthenticated())
         {
             this.updateWhetherViewerLikedTheSpin();
+            this.updateViewerTags();
         }
-
     }
 
     render()
     {
         let buttonToShow = null;
+        let tagList = [];
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
@@ -182,19 +336,28 @@ class Spin extends Component
             {
                 buttonToShow = <Button onClick={this.unlikeSpin}>Unlike</Button>;
             }
-        }
-        let tagList = [];
-        if(this.state.tags.length === 0)
-        {
-            tagList.push(<h6>No associated tags found.</h6>);
-        }
-        else
-        {
-            for(var i = 0; i < this.state.tags.length; i++)
+
+            if(this.state.tags.length === 0)
             {
-                tagList.push(<Button size="sm">{this.state.tags[i]}</Button>);
+                tagList.push(<h6>No associated tags found.</h6>);
+            }
+            else
+            {
+                console.log(this.state.viewingUserTags);
+                tagList = this.state.tags.map( (tagName) => {
+                    if(this.state.viewingUserTags.includes(tagName))
+                    {
+                        return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
+                    }
+                    else
+                    {
+                        return <Button size="sm" variant="danger" onClick={() => this.followTag(tagName)}>{tagName}</Button>;
+                    }
+                });
             }
         }
+       
+
 
 
         return (
@@ -219,9 +382,7 @@ class Spin extends Component
                 </div>
                 {buttonToShow}
                 <div className="tags-container" style={tagContainerStyle}>
-                    <ButtonGroup className="mt-3">
                     {tagList}
-                    </ButtonGroup>
                 </div>
             </div>
         );

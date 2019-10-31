@@ -33,7 +33,10 @@ class Timeline extends Component
                 status : ""
             },
             showSpinModal : false,
-            spin : ""
+            spin : {
+                text : "",
+                chars : null
+            }
         };
 
         this.onSpinPressed = this.onSpinPressed.bind(this);
@@ -70,8 +73,8 @@ class Timeline extends Component
     }
 
     handleSpinChange(event){
-        this.setState({spin : event.target.value});
-        NotificationManager.error(this.state.spin.length);
+        this.setState({spin: {chars: event.target.value.length}});
+
     }
 
     onSpinPressed() {
@@ -79,16 +82,19 @@ class Timeline extends Component
         this.showModal();
     }
 
-    onSpinPressedAtModal() {
-        // if(this.state.spin.length <= 0 ){
-        //     NotificationManager.error("Spin is too short!");
-        // } else if (this.spin.state.length > 70) {
-        //     NotificationManager.error("Spin is too long!");
-        // }
-        // //TODO: send text to server
-        // else {
-        //     this.closeModal()
-        // }
+    onSpinPressedAtModal(event) {
+        this.setState({spin : {text: event.target.value}} ) ;
+        console.log(this.state.spin.chars);
+
+        if(this.state.spin.chars <= 0 ){
+            NotificationManager.error("Spin is too short!");
+        } else if (this.state.spin.chars > 70) {
+            NotificationManager.error("Spin is too long!");
+        }
+        //TODO: send text to server
+        else {
+            this.closeModal()
+        }
     }
 
     showModal() {
@@ -107,7 +113,9 @@ class Timeline extends Component
                     <Form onSpin = {this.handleSpin} >
                         <Form.Label>Spin</Form.Label>
                         <Form.Control as = "textarea" placeholder="Your Spin here" rows="3" 
-                            onChange = {this.handleSpinChange}/>
+                            onChange = {this.handleSpinChange.bind(this)}/>
+                            <p>{this.state.spin.chars}/70 characters</p>
+                        
                     </Form>
                 <div className="modal-footer">
                     <Button onClick={this.onSpinPressedAtModal}>Spin</Button>

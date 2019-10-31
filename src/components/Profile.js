@@ -74,7 +74,7 @@ class Profile extends Component{
                   self.setState({ profilePic: chosenProfilePic });
 
                 }
-              self.setState({ bio: dataDict.bio, interests: dataDict.interests});
+              self.setState({ bio: dataDict.bio, interests: dataDict.tags_associated});
 
 
               }).catch(function(error){

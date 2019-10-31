@@ -8,6 +8,7 @@ import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
 import { NotificationManager } from 'react-notifications';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 
 // Styling the user feed.
@@ -27,6 +28,7 @@ class Timeline extends Component
         this.username = this.props.username;
         this.state = {
             spins : [],
+            interests : [],
             error : {
                 exist : false, 
                 message : "",
@@ -35,14 +37,19 @@ class Timeline extends Component
             showSpinModal : false,
             spin : {
                 text : "",
-                chars : null
+                chars : null,
+                interests : [],
             }
+
         };
 
         this.onSpinPressed = this.onSpinPressed.bind(this);
         this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
+        this.updateUserSpins = this.updateUserSpins.bind(this);
+        this.addInterestToSpin = this.addInterestToSpin.bind(this);
+
         console.log(this.username);
     }
 
@@ -71,28 +78,33 @@ class Timeline extends Component
             self.setState({error: {exist: true, message: err, status:"404"}});
         });
     }
-
-    handleSpinChange(event){
-        this.setState({spin: {chars: event.target.value.length}});
-
-    }
+    
 
     onSpinPressed() {
         console.log("Spin pressed.");
         this.showModal();
     }
 
+
     onSpinPressedAtModal(event) {
-        this.setState({spin : {text: event.target.value}} ) ;
-        console.log(this.state.spin.chars);
+        this.setState({spin : {text: event.target.value}} ) ;    
+        //TODO: set interest
 
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
-        } else if (this.state.spin.chars > 70) {
+        } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
+        } else if ( (this.state.spin.interests != undefined && this.state.spins <= 0)) {
+            NotificationManager.error("Spin must have an interest!");
         }
+
+        // let jsonBody = {
+        //     spin : this.spin,
+        //     user : this.username
+        // }
         //TODO: send text to server
         else {
+            //NotificationManager.success(`interests: ${this.state.spin.interests.length}`);
             this.closeModal()
         }
     }
@@ -106,7 +118,73 @@ class Timeline extends Component
         this.setState({showSpinModal : false})
     }
 
+    //when the spin text is changed, update the chars count
+    handleSpinChange(event){
+        this.setState({spin: {chars: event.target.value.length}});
+
+     }
+
+    addInterestToSpin(interest) { //this needs an action listener
+        let interestsList = this.state.spin.interests;
+        interestsList.push(interest);
+        this.setState({spin : {interests : interestsList}});
+    }
+
+    getUserInterests() {
+        let self = this;
+        fetch(`/api/users/${this.username}`, {
+            method: 'POST'
+        }).then(function(response){
+            if (response.status==200) {
+                response.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    console.log(data);
+                    let currentInterests = [];
+                    for (var i = 0; i < jsonData.tags_associated.length; i++) {
+                        currentInterests.push(jsonData.tags_associated[i]);
+                    }
+                    self.setState({interests : currentInterests});
+                })
+            }
+        })
+    }
+
+    updateUserSpins() {
+        //TODO
+    }
+
     renderSpinForm() {
+        
+        let spinInterests = [];
+        let disableInterestDropdown = false;
+        for(var i = 0; i < this.state.interests.length; i ++) {
+            spinInterests.push(<Dropdown.Item onClick={() => this.addInterestToSpin(this.state.spin.interests[i])}>{this.state.spin.interests[i]}</Dropdown.Item>);
+        }
+        if (spinInterests.length == 0) {
+            disableInterestDropdown = true;
+        }
+        
+        let dropdownInterests = (
+            <Dropdown>
+                <Dropdown.Toggle variant = "primary" id="dropdown-basic">
+                    Tags
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                    {spinInterests}
+                </Dropdown.Menu>
+            </Dropdown>
+        );
+        
+        let interestsDropdown = null;
+        if (disableInterestDropdown){
+            interestsDropdown = <h3>You need to add tags.</h3>
+        } else {
+            interestsDropdown = (<div>
+                {dropdownInterests}
+                {this.state.interests}
+            </div>)
+        }
 
         return (
             <div className="spin-form">
@@ -114,8 +192,8 @@ class Timeline extends Component
                         <Form.Label>Spin</Form.Label>
                         <Form.Control as = "textarea" placeholder="Your Spin here" rows="3" 
                             onChange = {this.handleSpinChange.bind(this)}/>
-                            <p>{this.state.spin.chars}/70 characters</p>
-                        
+                            <p>{this.state.spin.chars}/90 characters</p>
+                            {interestsDropdown}
                     </Form>
                 <div className="modal-footer">
                     <Button onClick={this.onSpinPressedAtModal}>Spin</Button>

@@ -11,12 +11,8 @@ import {NotificationManager} from 'react-notifications';
 import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
+import "./userfeed.css";
 
-// Styling the user feed.
-const pageStyle = {
-    display: "grid",
-    "grid-template-columns": "repeat(3, 1fr)"
-} 
 
 var OperationEnum = {
     FOLLOW : 1,
@@ -351,7 +347,7 @@ class UserFeed extends Component
          *  Left | Middle | Right
          */
         return (
-            <div className="user-feed-page" style={pageStyle}>
+            <div className="user-feed-page">
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                     {followButton}

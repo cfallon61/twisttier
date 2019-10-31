@@ -182,6 +182,7 @@ class Spin extends Component
             {
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
                 self.updateViewerTags();
+                window.location.reload();
             }
             else{
                 if(res.headers.has("error"))
@@ -220,6 +221,7 @@ class Spin extends Component
             {
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
                 self.updateViewerTags();
+                window.location.reload();
             }
             else{
                 if(res.headers.has("error"))

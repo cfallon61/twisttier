@@ -1,9 +1,18 @@
 import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import './spin.css';
 import PropTypes from 'prop-types';
 import {NotificationManager} from 'react-notifications';
 import { throwStatement } from '@babel/types';
+
+const tagContainerStyle = {
+    display: "grid",
+    "grid-template-columns" : "auto auto auto auto auto",
+    "align-content" : "center",
+    "max-width" : "100%",
+    "grid-size" : "auto"
+};
 
 /**
  * The spin component that displays username, message content and user timestamp.
@@ -14,7 +23,7 @@ class Spin extends Component
     {
         super(props);
         this.state = {
-            tags: {},
+            tags: this.props.tags,
             edited: false, 
             quoted: false,
             content: this.props.content,
@@ -118,8 +127,8 @@ class Spin extends Component
     updateWhetherViewerLikedTheSpin()
     {
         let self = this;
-        console.log(this.state.author);
-        fetch(`/api/posts/${this.state.author}`, {
+        console.log(this.author);
+        fetch(`/api/posts/${this.author}`, {
             method : 'POST'
         }).then(function(res){
             if(res.status !== 200)
@@ -175,10 +184,18 @@ class Spin extends Component
             }
         }
         let tagList = [];
-        for(var i = 0; i < this.state.tags.length; i++)
+        if(this.state.tags.length === 0)
         {
-            tagList.push(<Button style="height: 25%; width: 25%">{this.state.tags[i]}</Button>);
+            tagList.push(<h6>No associated tags found.</h6>);
         }
+        else
+        {
+            for(var i = 0; i < this.state.tags.length; i++)
+            {
+                tagList.push(<Button size="sm">{this.state.tags[i]}</Button>);
+            }
+        }
+
 
         return (
             <div className="spin-area">
@@ -201,6 +218,11 @@ class Spin extends Component
                     <p>Likes: {this.state.likes}</p>
                 </div>
                 {buttonToShow}
+                <div className="tags-container" style={tagContainerStyle}>
+                    <ButtonGroup className="mt-3">
+                    {tagList}
+                    </ButtonGroup>
+                </div>
             </div>
         );
     }
@@ -211,7 +233,8 @@ Spin.propTypes = {
     content: PropTypes.string.isRequired,
     timestamp: PropTypes.string.isRequired,
     spinID: PropTypes.number.isRequired,
-    userToView: PropTypes.string.isRequired
+    userToView: PropTypes.string.isRequired,
+    tags: PropTypes.array.isRequired
 }
 
 export default Spin;

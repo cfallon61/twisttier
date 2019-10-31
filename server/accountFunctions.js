@@ -374,6 +374,10 @@ async function updateFollowing(req, res, next) {
     res.setHeader('error', "unable to " + action + " " + toFollow);
     return next();
   }
+  else if (followUpdate === "Error: nothing changed") {
+    res.setHeader('error', "unable to " + action + " " + toFollow + "as it has already been done");
+    return next();
+  }
   else {
     console.log(followUpdate);
     res.json(JSON.stringify(followUpdate));

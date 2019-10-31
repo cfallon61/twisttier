@@ -461,7 +461,9 @@ async function addSpin(username, spin) {
       // trigger a function to delete the post id from the new post column after
       // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
       // actual
+      console.log("time");
       setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
+      console.log("out");
     }
 
     await client.query('COMMIT');
@@ -519,7 +521,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     await client.query('BEGIN');
 
     var args = [username];
-    var changedInfo = 0;
+    var changedInfo = false;
 
     // gets the users following list
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
@@ -541,15 +543,18 @@ async function followTopicUserPair(username, tofollow, tags) {
     if (tofollowIndex === -1) {
       var follow = {'username': tofollow, 'tags': tags};
       following.users.push(follow);
-      changedInfo = 1;
+      changedInfo = true;
       // console.log("HERE 1");
     }
 
     // if its all tags
-    else if (Array.isArray(tags) && tags.length === 0) {
-      following.users[tofollowIndex].tags = tags;
-      changedInfo = 1;
-      // console.log("HERE 2");
+    else if (tags.length === 0) {
+      if (following.users[tofollowIndex].tags.length === 0) {
+        changedInfo = true;
+      }
+      else {
+        following.users[tofollowIndex].tags = tags;
+      }
     }
 
     // if exists add non-duplicate tags into tag list
@@ -557,8 +562,7 @@ async function followTopicUserPair(username, tofollow, tags) {
       for (var i = 0; i < tags.length; i++) {
         if (!following.users[tofollowIndex].tags.includes(tags[i])) {
           following.users[tofollowIndex].tags.push(tags[i]);
-          // console.log("HERE 3");
-          changedInfo = 1;
+          changedInfo = true;
         }
       }
     }
@@ -592,11 +596,9 @@ async function followTopicUserPair(username, tofollow, tags) {
     await client.query('COMMIT');
     rows = res.rows;
 
-    console.log("changedinfo: ", changedInfo);
-    if (changedInfo === 0) {
-      return false;
+    if (!changedInfo) {
+      return "Error: nothing changed";
     }
-
   } 
   catch (e) {
     await client.query('ROLLBACK');

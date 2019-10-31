@@ -64,10 +64,11 @@ async function removeSpin(req, res, next) {
 
 
 async function esteemSpin(req, res, next) {
-  const esteem = req.params.esteem
+  const esteem = req.body
+  console.log(esteem);
   var liker = esteem.liker;
   var author = esteem.postAuthor;
-  var spinId = esteem.spinId;
+  var spinId = esteem.spinID;
   var action = esteem.action;
   // console.log(esteem);
   // console.log(liker, author, spinId, action);
@@ -84,6 +85,8 @@ async function esteemSpin(req, res, next) {
 
   // if the action was not able to be completed, set an error header and return next
   // else send the post and die
+  console.log(result);
+
   if (!result) {
     res.setHeader('error', 'unable to ' + action + ' post');
     return next();

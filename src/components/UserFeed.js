@@ -56,6 +56,8 @@ class UserFeed extends Component
         this.addInterestToUnfollowList = this.addInterestToUnfollowList.bind(this);
         this.changeOperationState = this.changeOperationState.bind(this);
         this.getViewingUser = this.getViewingUser.bind(this);
+
+        this.userToView = this.getViewingUser();
     }
 
     updateUserSpins(username)
@@ -127,11 +129,12 @@ class UserFeed extends Component
     {
 
         let loggedInUser = this.getViewingUser();
+        let chosenList = operation === "Follow" ? this.state.toFollowInterests : this.state.toUnfollowInterests;
         if(loggedInUser === null) return;
         let jsonBody = {
             action : operation.toLowerCase(),
             toFollow : this.username,
-            tags : this.state.toFollowInterests,
+            tags : chosenList,
             follower : loggedInUser
         };
         console.log(jsonBody);
@@ -212,9 +215,9 @@ class UserFeed extends Component
                     let jsonData = JSON.parse(data);
                     console.log(data);
                     let currentInterests = [];
-                    for(var i = 0; i < jsonData.interests.length; i++)
+                    for(var i = 0; i < jsonData.tags_associated.length; i++)
                     {
-                        currentInterests.push(jsonData.interests[i]);
+                        currentInterests.push(jsonData.tags_associated[i]);
                     }
                     self.setState({interests : currentInterests});
                 });
@@ -328,7 +331,7 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.data} spinID={spin.id} userToView={this.username}/>);
+                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.data} spinID={spin.id} userToView={this.userToView} tags={spin.tags}/>);
             }
         }
         else{

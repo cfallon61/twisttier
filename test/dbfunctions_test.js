@@ -291,7 +291,7 @@ describe('database functions test', function() {
 
       var res = await db.followTopicUserPair(user.username, tofollow.username, tofollow.tags);
       // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, "Error: nothing changed");
     });
 
     it('@adding follow topic for an existing username in database, needed for unfollow test', async () => {
@@ -359,7 +359,7 @@ describe('database functions test', function() {
       var res = await db.unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags);
 
       // assert
-      assert.deepStrictEqual(res, false);
+      assert.deepStrictEqual(res, "Error: nothing changed");
     });
 
     it('@testing where user is deleted completely, should return unfollowedUser', async () => {
@@ -398,7 +398,7 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, false);
     });
 
-    it('@not an actual test - undoring first follow test to properly check for duplicate', async () => {
+    it('@not an actual test - undoing first follow test to properly check for duplicate', async () => {
       user = {
         username: 'testingUser',
       };

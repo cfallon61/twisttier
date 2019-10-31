@@ -38,10 +38,10 @@ describe.skip('test spin middleware functions', async () => {
         {
           method: "POST",
           url: '/api/add_spin/f',
-          params: { username: 'f' },
+          params: { username: 'doeJohn' },
           body: {
-            spinBody: "yo screw you man",
-            tags: ['wtf', 'kill me'],
+            spinBody: "god is gone :( ma boi died",
+            tags: ['god', 'ma boi'],
             is_quote: false,
             quote_origin: undefined
           }

@@ -192,6 +192,8 @@ async function getUserInfo(req, res, next) {
       following: data.following,
       interests: data.interests,
       profile_pic: data.profile_pic,
+      tags_associated: data.tags_associated,
+      new_tag_posts: data.new_tag_posts
     };
     // console.log(responseObject);
     // TODO change this to not be a .json response
@@ -231,7 +233,7 @@ async function getPosts(req, res, next) {
   }
   // console.log(spins);
   res.json(JSON.stringify(spins));
-  return next();
+  // return next();
 
   // TODO error check here and make sure that it returns good data
 }
@@ -373,6 +375,7 @@ async function updateFollowing(req, res, next) {
     return next();
   }
   else {
+    console.log(followUpdate);
     res.json(JSON.stringify(followUpdate));
   }
 }

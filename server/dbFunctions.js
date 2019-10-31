@@ -163,7 +163,7 @@ async function deleteUser(username){
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    // console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.deleteUser: ${ e }`);
     // return e;
   } 
   finally {
@@ -223,7 +223,7 @@ async function updateUser(user) {
   }
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(e);
+    console.log(`An error occurred in db.updateUser: ${e}`);
   }
   finally {
     client.release();
@@ -232,6 +232,33 @@ async function updateUser(user) {
   // returns id of user if success otherwise false
   return (rows.length === 0 ? false : rows[0]);
 }
+
+// @brief: timer function which will clear any new posts from the
+//         user's new posts column
+// @param: username: the user's username so it can find the row. 
+// @return: none
+async function clearNewPostColumn(username) {
+  var client = await pool.connect();
+  var query;
+
+  try {
+    client.query("BEGIN");
+
+    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+
+    await client.query(query, [username]);
+
+    await client.query('COMMIT');
+  }
+  catch (e) {
+    console.log('clearNewPostColumn encountered an error: ' + `${e}`);
+    await client.query('ROLLBACK');
+  }
+  finally {
+    client.release();
+  }
+
+};
 
 // Function to update the last login time
 // return true on success, false on error
@@ -261,7 +288,7 @@ async function updateLoginTime(user){
   }
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(e);
+    console.log(`An error occurred in db.updateLoginTime: ${e}`);
   }
   finally {
     client.release();
@@ -295,11 +322,13 @@ async function getSpins(users) {
       // get the post id of the new topic thing idk 
       var newpostid = await pool.query(
         `SELECT username, new_tag_posts from ${USER_TABLE} 
-         WHERE username = $1`, [username]).rows[0];
+         WHERE username = $1`, [item.username]);
+
+      newpostid = newpostid.rows[0];
       
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      if (newpostid.username) 
+      if (newpostid.postid) 
       {
         newposts.push({ username: newpostid.username, postid: newpostid.id} );
       }
@@ -338,7 +367,7 @@ async function getSpins(users) {
     query += ' ORDER BY date DESC';
     
     console.log(query);
-    res = await client.query(query, tagList);
+    res = await pool.query(query, tagList);
     posts.regularposts = res.rows;
 
     query = '';
@@ -348,14 +377,20 @@ async function getSpins(users) {
       {
         var post = newposts[i];
         query += baseQuery + ` ${userSpinTableName(post.username)} 
-        WHERE id = ${post.postid} UNION ALL`;
+        WHERE id = ${post.postid}`;
+
+        // if last item in list do not append union
+        if (i < newposts.length - 1) {
+          query += ' UNION ALL';
+        }
       }
       query += ' ORDER BY date DESC';
+      console.log('newtagposts query =', query);
       posts.newtagposts = await pool.query(query).rows;
     }
   }
   catch (e) {
-    console.log('Error encounterd in getSpins:', e);  
+    console.log('Error encounterd in db.getSpins:', e);  
   }
   
   return posts;
@@ -368,10 +403,26 @@ async function getSpins(users) {
 async function addSpin(username, spin) {
   const client = await pool.connect();
   var rows = [];
+  var query;
 
   try {
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
+    var newtags = [];
+    // get the tags that the user currently posts about.
+    var query = `SELECT tags_associated FROM ${USER_TABLE} WHERE username=$1`
+    var args = [username];
+    var res = await client.query(query, args);
+
+    var tags_associated = res.rows[0].tags_associated;
+    // adds the tags in tags_associated which wasn't in it before
+    // finds and adds the new tags in newtags
+    for (var i = 0; i < spin.tags.length; i++) {
+      if (!tags_associated.includes(spin.tags[i])) {
+        tags_associated.push(spin.tags[i]);
+        newtags.push(spin.tags[i]);
+      }
+    }
 
     var args = [
       spin.content,
@@ -381,22 +432,42 @@ async function addSpin(username, spin) {
       spin.quotes,
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
-      spin.like_list
+      spin.like_list,
     ];
 
-
-    var query = `INSERT INTO ${tablename} 
+    
+    query = `INSERT INTO ${tablename} 
       (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
       VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
       RETURNING id`
     ;
 
     var res = await client.query(query, args);
-
     rows = res.rows;
+
+    var postid = res.rows[0].id;
+    // if there are any new tags, then add this post's id to the new post column
+    if (newtags.length > 0) {
+      args = [
+        tags_associated,
+        postid,
+        username,
+      ];
+      // add the post to the new tag posts column and set a timer function
+      query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2 
+                WHERE username = $3 RETURNING username`;
+      await client.query(query, args);
+      
+      // trigger a function to delete the post id from the new post column after
+      // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
+      // actual
+      setTimeout(clearNewPostColumn(username), NEW_POST_TIMEOUT);
+    }
+
     await client.query('COMMIT');
     
-  } catch(e) {
+  } 
+  catch(e) {
     await client.query('ROLLBACK');
     console.log(`Error caught by error handler: ${ e }`);
   }
@@ -426,7 +497,7 @@ async function deleteSpin(username, spin_id) {
   } 
   catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.deleteSpin: ${ e }`);
   }
   finally {
     client.release();
@@ -448,6 +519,7 @@ async function followTopicUserPair(username, tofollow, tags) {
     await client.query('BEGIN');
 
     var args = [username];
+    var changedInfo = 0;
 
     // gets the users following list
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
@@ -469,11 +541,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     if (tofollowIndex === -1) {
       var follow = {'username': tofollow, 'tags': tags};
       following.users.push(follow);
+      changedInfo = 1;
+      // console.log("HERE 1");
     }
 
-    //if its all tags
-    else if (Array.isArray(tags) && tags.length) {
+    // if its all tags
+    else if (Array.isArray(tags) && tags.length === 0) {
       following.users[tofollowIndex].tags = tags;
+      changedInfo = 1;
+      // console.log("HERE 2");
     }
 
     // if exists add non-duplicate tags into tag list
@@ -481,6 +557,8 @@ async function followTopicUserPair(username, tofollow, tags) {
       for (var i = 0; i < tags.length; i++) {
         if (!following.users[tofollowIndex].tags.includes(tags[i])) {
           following.users[tofollowIndex].tags.push(tags[i]);
+          // console.log("HERE 3");
+          changedInfo = 1;
         }
       }
     }
@@ -514,10 +592,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     await client.query('COMMIT');
     rows = res.rows;
 
+    console.log("changedinfo: ", changedInfo);
+    if (changedInfo === 0) {
+      return false;
+    }
+
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.followTopicUserPair: ${ e }`);
     // return e;
   } 
   finally {
@@ -549,6 +632,8 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     var res = await client.query(query,args);
     rows = res.rows;   
     var following = rows[0].following;
+    var changedInfo = 0;
+    
 
     args = [unfollowedUser];
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
@@ -568,17 +653,26 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     
     var empty = false;
     if (followingIndex > -1) {
+      // if tags is empty, it means that delete all tags
       if (tags.length === 0) {
         following.users.splice(followingIndex, 1);
         empty = true;
+        changedInfo = 1;
+
       }
       if (!empty) {
+        
+        // console.log("Tags before: ", following.users[followingIndex].tags);
         for (var i = 0; i < tags.length; i++) {
           var index = following.users[followingIndex].tags.indexOf(tags[i]);
           if (index > -1) {
             following.users[followingIndex].tags.splice(index, 1);
+            changedInfo = 1;
           }        
         }
+        // console.log("Tags after: ", following.users[followingIndex].tags);
+
+
         // if the removing tags makes it empty
         if (following.users[followingIndex].tags.length === 0) {
           following.users.splice(followingIndex, 1);
@@ -586,6 +680,14 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
         }
       }
     }
+
+    if (changedInfo === 0 || followingIndex === -1) {
+      console.log("NO CHANGE");
+      return false;
+    } 
+
+
+      
 
     // delete the followingUsername from list
     var unfollowingUserIndex = followers.indexOf(unfollowingUser);
@@ -612,7 +714,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   } 
   catch (e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.unfollowTopicUserPair: ${ e }`);
   } 
   finally {
     client.release();
@@ -665,7 +767,7 @@ async function likeSpin(user_liker, user_poster, spin) {
     }
   } catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.likespin: ${ e }`);
   }
   finally {
     client.release();
@@ -720,7 +822,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     }
   } catch(e) {
     await client.query('ROLLBACK');
-    console.log(`Error caught by error handler: ${ e }`);
+    console.log(`An error occurred in db.unlikeSpin: ${ e }`);
   }
   finally {
     client.release();
@@ -747,5 +849,6 @@ module.exports = {
   updateLoginTime,
   updateUser,
   deleteSpin,
-  unfollowTopicUserPair
+  unfollowTopicUserPair,
+  clearNewPostColumn
 };

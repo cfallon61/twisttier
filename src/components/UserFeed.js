@@ -7,14 +7,21 @@ import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown'
 import Modal from './Modal.js';
+import {NotificationManager} from 'react-notifications';
 import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
+import { body } from 'express-validator';
 
 // Styling the user feed.
 const pageStyle = {
     display: "grid",
     "grid-template-columns": "repeat(3, 1fr)"
 } 
+
+var OperationEnum = {
+    FOLLOW : 1,
+    UNFOLLOW : 2
+}
 
 /**
  * UserFeed is the profile of a selected user.
@@ -35,13 +42,20 @@ class UserFeed extends Component
             },
             showFollowModal : false,
             //This is for the follow modal to keep track of the items selected.
-            toFollowInterests : []
+            toFollowInterests : [],
+            toUnfollowInterests : [],
+            currentOperation : OperationEnum.FOLLOW
         }
 
         this.onFollowPressed = this.onFollowPressed.bind(this);
-        this.onFollowPressedAtModal = this.onFollowPressedAtModal.bind(this);
+        this.onActionPressedAtModal = this.onActionPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
+        this.updateTagData = this.updateTagData.bind(this);
+        this.addInterestToFollowList = this.addInterestToFollowList.bind(this);
+        this.addInterestToUnfollowList = this.addInterestToUnfollowList.bind(this);
+        this.changeOperationState = this.changeOperationState.bind(this);
+        this.getViewingUser = this.getViewingUser.bind(this);
     }
 
     updateUserSpins(username)
@@ -53,14 +67,14 @@ class UserFeed extends Component
             method: "POST",
             credentials: 'same-origin'
         }).then(function(res){
-            console.log(res);
+            // console.log(res);
             if(res.status === 200)
             {
                 //res.json also is a promise thus we attach a success callback
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
                     console.log(jsonData);
-                    self.setState({spins : dataDict});
+                    self.setState({spins : dataDict.regularposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
                 });
@@ -72,14 +86,22 @@ class UserFeed extends Component
             }
         }).catch(function(err){
             console.log(err);
-            this.setState({error: {exist: true, message: err, status:404}});
+            self.setState({error: {exist: true, message: err, status:404}});
         });
+    }
+
+    checkUserFollowings()
+    {
+        let user = this.getViewingUser();
+        if(user === null) return;
+
     }
 
     componentDidMount()
     {
         console.log(this.username);
         this.updateUserSpins(this.username);
+        this.updateTagData();
     }
 
     onFollowPressed()
@@ -88,9 +110,54 @@ class UserFeed extends Component
         this.showModal();
     }
 
-    onFollowPressedAtModal()
+    getViewingUser()
     {
-        //TODO
+        if(document.cookie !== "")
+        {
+            return document.cookie.split('=')[1];
+        }
+        else return null;
+    }
+
+    /**
+     * 
+     * @param {*} operation string that is either "Follow" or "Unfollow" 
+     */
+    onActionPressedAtModal(operation)
+    {
+
+        let loggedInUser = this.getViewingUser();
+        if(loggedInUser === null) return;
+        let jsonBody = {
+            action : operation.toLowerCase(),
+            toFollow : this.username,
+            tags : this.state.toFollowInterests,
+            follower : loggedInUser
+        };
+        console.log(jsonBody);
+        fetch("/api/updateFollowing", {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(jsonBody)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                NotificationManager.success(`${operation} successful!`);
+                this.closeModal();
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
     }
 
     showModal()
@@ -104,44 +171,87 @@ class UserFeed extends Component
         this.setState({showFollowModal : false});
     }
 
-    addInterestToList(interest)
+    changeOperationState(operation)
+    {
+        this.setState({currentOperation : operation});
+    }
+
+    onDropdownItemClicked(interest)
+    {
+        switch(this.state.currentOperation)
+        {
+            case OperationEnum.FOLLOW: this.addInterestToFollowList(interest); break;
+            case OperationEnum.UNFOLLOW: this.addInterestToUnfollowList(interest); break;
+            default: console.log("Error: unknown operation"); break;
+        }
+    }
+
+    addInterestToFollowList(interest)
     {
         let interestList = this.state.toFollowInterests;
         interestList.push(interest);
         this.setState({toFollowInterests : interestList});
     }
 
-    async getTagData()
+    addInterestToUnfollowList(interest)
     {
-        let data = null;
-        let response = await fetch(`api/users/${this.username}`, {
-            method : 'POST',
-            headers : {
-                'Content-Type' : 'application-json'
+        let unfollowList = this.state.toUnfollowInterests;
+        unfollowList.push(interest);
+        this.setState({toUnfollowInterests : unfollowList});
+    }
+
+    updateTagData()
+    {
+        let self = this;
+        fetch(`/api/users/${this.username}`, {
+            method : 'POST'
+        }).then(function(response){
+            if(response.status === 200)
+            {
+                response.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    console.log(data);
+                    let currentInterests = [];
+                    for(var i = 0; i < jsonData.interests.length; i++)
+                    {
+                        currentInterests.push(jsonData.interests[i]);
+                    }
+                    self.setState({interests : currentInterests});
+                });
             }
         });
-        if(response.status === 200)
-        {
-            data = await response.json();
-            console.log(data);
-            return data;
-        }
-        else{
-            return null;
-        }
-        
-       
+
     }
 
     renderFollowForm()
     {
-        let followTags = this.getTagData();
+        let currentOperationText = "Follow";
+        switch(this.state.currentOperation)
+        {
+            case OperationEnum.FOLLOW: currentOperationText = "Follow"; break;
+            case OperationEnum.UNFOLLOW: currentOperationText = "Unfollow"; break;
+        }
+        let stateDropdownView = <div>
+            <h6>Current operation: {currentOperationText}</h6>
+            <Dropdown>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+                Operation
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+                <Dropdown.Item onClick={() => this.changeOperationState(OperationEnum.FOLLOW)}>Follow</Dropdown.Item>
+                <Dropdown.Item onClick={() => this.changeOperationState(OperationEnum.UNFOLLOW)}>Unfollow</Dropdown.Item>
+            </Dropdown.Menu>
+            </Dropdown>
+        </div>;
+
         let followItems = [];
         let disableTagDropdown = false;
-        for(var i = 0; i < followTags.length; i++)
+        console.log(this.state.interests);
+        for(var i = 0; i < this.state.interests.length; i++)
         {
-            followItems.push(<Dropdown.Item>followTags[i]</Dropdown.Item>);
+            followItems.push(<Dropdown.Item onClick={() => this.onDropdownItemClicked(this.state.interests[i])}>{this.state.interests[i]}</Dropdown.Item>);
         }
+        console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;
@@ -160,14 +270,21 @@ class UserFeed extends Component
         );
 
         let addedInterestList = [];
-        for(var i = 0; i < this.state.toFollowInterests.length; i++)
+        let chosenList = null;
+        switch(this.state.currentOperation)
         {
-            addedInterestList.push(<p>{this.state.toFollowInterests.length}</p>);
+            case OperationEnum.FOLLOW: chosenList = this.state.toFollowInterests; break;
+            case OperationEnum.UNFOLLOW: chosenList = this.state.toUnfollowInterests; break;
+            default: console.log("Error: operation not defined."); break;
+        }
+        for(var i = 0; i < chosenList.length; i++)
+        {
+            addedInterestList.push(<p>{chosenList[i]}</p>);
         }
 
         let addedListView = (
             <div>
-            <h6>Interests you decided to follow:</h6>
+            <h6>Interests you decided to {currentOperationText.toLowerCase()}:</h6>
             {addedInterestList}
             </div>
         );
@@ -187,10 +304,11 @@ class UserFeed extends Component
         
         return (
             <div className="follow-form">
-                <h3>Which tags you want to follow from the user?</h3>
+                {stateDropdownView}
+                <h3>Which tags you want to {currentOperationText.toLowerCase()} from the user?</h3>
                 {dropdownListView}
                 <div className="modal-footer">
-                    <Button onClick={this.onFollowPressedAtModal}>Follow</Button>
+                    <Button onClick={() => this.onActionPressedAtModal(currentOperationText)}>{currentOperationText}</Button>
                     <Button onClick={this.closeModal}> Cancel </Button>
                 </div>
             </div>
@@ -222,7 +340,7 @@ class UserFeed extends Component
         //If cookie is not empty, an authenticated user entered the page.
         if(document.cookie !== "")
         {
-            followButton = <Button onClick={this.onFollowPressed}>Follow</Button>;
+            followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
         /**
          * The view organized by these parts:

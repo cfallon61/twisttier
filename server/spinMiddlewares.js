@@ -80,7 +80,7 @@ async function esteemSpin(req, res, next) {
   else if (action === 'unlike') {
     result = await db.unlikeSpin(liker, author, spinId);
   }
-  console.log(result);
+  // console.log(result);
 
   // if the action was not able to be completed, set an error header and return next
   // else send the post and die

@@ -43,3 +43,4 @@ curl -i -X POST 'http://localhost:8080/api/delete' \
 curl -i -X POST 'http://localhost:8080/api/search/s' \
 -H "content-type: multipart/form-data"
 
+psql -h ec2-107-22-211-248.compute-1.amazonaws.com -U kbuesxacagftwy -p 5432 -d d1fg6lc7ogq281 

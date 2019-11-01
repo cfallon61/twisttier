@@ -68,10 +68,10 @@ function userSpinTableName(username) {
  async function createUser(accountInfo) {
 
   // creates postgres client
-  const client = await pool.connect();
   var rows = [];
 
   try {
+    const client = await pool.connect();
 
     const hash = await bcrypt.hash(accountInfo.password, 10);
     accountInfo.passhash = hash;
@@ -138,10 +138,10 @@ function userSpinTableName(username) {
 // @param username: the user's username
 // @return deleted username on success, error on failure
 async function deleteUser(username){
-  const client = await pool.connect();
   var rows = [];
 
   try{
+    const client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     
@@ -184,10 +184,11 @@ async function updateUser(user) {
     var hash = await bcrypt.hash(user.password, 10);
   }
   // connect to database
-  var client = await pool.connect();
   var rows = [];
 
   try {
+    var client = await pool.connect();
+
     // begin transaction
     await client.query('BEGIN');
 
@@ -238,10 +239,11 @@ async function updateUser(user) {
 // @param: username: the user's username so it can find the row. 
 // @return: none
 async function clearNewPostColumn(username) {
-  var client = await pool.connect();
   var query;
 
   try {
+    var client = await pool.connect();
+
     client.query("BEGIN");
 
     query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
@@ -263,7 +265,6 @@ async function clearNewPostColumn(username) {
 // Function to update the last login time
 // return true on success, false on error
 async function updateLoginTime(user){
-  var client = await pool.connect();
   var rows;
   var query = `UPDATE ${USER_TABLE} SET last_login = NOW() WHERE`;
   var arg = '';
@@ -278,6 +279,8 @@ async function updateLoginTime(user){
   }
   console.log(query)
   try{
+    var client = await pool.connect();
+
     // console.log(user);
     await client.query('BEGIN');
     // const tablename = userSpinTableName(username);
@@ -306,14 +309,15 @@ async function getSpins(users) {
   var query = '';
   var tagList = []
 
-  console.log(users.users);
   var followed;
   var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
   try {
-    followed = JSON.parse(users.users);
+    var client = await pool.connect();
+    followed = JSON.parse(users);
+    console.log(followed);
     // SELECT new_tag_posts from USERS_TABLE where username 
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string
@@ -323,7 +327,7 @@ async function getSpins(users) {
     {
       var item = followed[index];
       // get the post id of the new topic thing idk 
-      var newpostid = await pool.query(
+      var newpostid = await client.query(
         `SELECT username, new_tag_posts from ${USER_TABLE} 
          WHERE username = $1`, [item.username]);
 
@@ -344,18 +348,26 @@ async function getSpins(users) {
         // supposed to search in the range of a list supplied
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
-        var where = ' WHERE @> $' + String(tagList.length);
+        var where = ' WHERE ';
        
-    
+        //  for each tag in the tag list, append it to a where statement
+      item.tags.forEach((tag, i) => {
+        console.log(tag);
+        where += '\'' + tag + '\'' + '=ANY(tags) ';
+        // if i is not the last index, append an or
+        if (i < item.tags.length - 1){
+          where += ' OR ';
+        }
+      });
         // append the conditions to the select query
-        // SELECT * FROM < user1_spins > WHERE tags @> <tags>
-        query += where;
+        // SELECT * FROM < user1_spins > WHERE <tag>=ANY(tags)
+        // query += where;
       }
 
       // if last item in list do not append union
       if (index < followed.length - 1)
       {
-        query += ' UNION ALL';
+        query += ' UNION ALL \n';
       }
     };
 
@@ -370,8 +382,9 @@ async function getSpins(users) {
     query += ' ORDER BY date DESC';
     
     console.log(query);
-    res = await pool.query(query, tagList);
+    res = await client.query(query);
     posts.regularposts = res.rows;
+    // console.log(posts);
 
     query = '';
     if (newposts.length > 0) 
@@ -389,11 +402,15 @@ async function getSpins(users) {
       }
       query += ' ORDER BY date DESC';
       console.log('newtagposts query =', query);
-      posts.newtagposts = await pool.query(query).rows;
+      posts.newtagposts = await client.query(query).rows;
     }
   }
   catch (e) {
     console.log('Error encounterd in db.getSpins:', e);  
+  }
+  finally 
+  {
+    client.release();
   }
   
   return posts;
@@ -404,11 +421,12 @@ async function getSpins(users) {
 // @param spin = spin to be added into the user's spin table
 // @return spin id if success, false if failure
 async function addSpin(username, spin) {
-  const client = await pool.connect();
   var rows = [];
   var query;
 
   try {
+    const client = await pool.connect();
+
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
     var newtags = [];
@@ -436,12 +454,13 @@ async function addSpin(username, spin) {
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
       spin.like_list,
+      username,
     ];
 
     
     query = `INSERT INTO ${tablename} 
-      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list) 
-      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[]) 
+      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list, username) 
+      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[], $9::VARCHAR(15)) 
       RETURNING id`
     ;
 
@@ -482,15 +501,16 @@ async function addSpin(username, spin) {
 
 // Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
-  const client = await pool.connect();
   var rows = [];
 
   try {
+    const client = await pool.connect();
+
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
     var query = 
-      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id`
+      `DELETE FROM ${tablename} WHERE id=$1 RETURNING id, username`
     ;
 
     var res = await client.query(query, [spin_id]);
@@ -505,7 +525,7 @@ async function deleteSpin(username, spin_id) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : rows[0].id);
+  return (rows.length === 0 ? false : rows[0]);
 }
 
 // adds the userToFollow,tags pair into the following list of user
@@ -622,10 +642,10 @@ async function followTopicUserPair(username, tofollow, tags) {
 //          false otherwise
 async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
-  const client = await pool.connect();
   var rows = [];
 
   try{
+    const client = await pool.connect();
     // begin database transaction
     await client.query('BEGIN');
     
@@ -724,10 +744,11 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 // @param spin: spin which is being liked
 // @return the spin which was liked on success and false on failure
 async function likeSpin(user_liker, user_poster, spin) {
-  const client = await pool.connect();
   var rows = [];
   console.log(user_liker, user_poster, spin);
   try {
+    const client = await pool.connect();
+
     var tablename = userSpinTableName(user_poster);
     
     await client.query('BEGIN');
@@ -775,10 +796,11 @@ async function likeSpin(user_liker, user_poster, spin) {
 // @param spin: spin which is being unliked
 // @return the spin which was unliked on success and false on failure
 async function unlikeSpin(user_liker, user_poster, spin) {
-  const client = await pool.connect();
   var rows = [];
 
   try {
+    const client = await pool.connect();
+
     var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');
     

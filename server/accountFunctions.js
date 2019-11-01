@@ -221,15 +221,13 @@ async function getPosts(req, res, next) {
     return next();
   }
   // idk why i do json.stringify here
-  var request = {
-    users: JSON.stringify([{
+  var request = JSON.stringify([{
       username: user.username,
       tags: []
-    }])
-  }
+    }]);
   var spins = await db.getSpins(request);
 
-  if (spins.length === 0) {
+  if (!spins || spins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
   }
   // console.log(spins);
@@ -253,8 +251,9 @@ async function getTimeline(req, res, next) {
     res.setHeader('error', 'user not found');
     return next();
   }
-  console.log(data);
-  var following = JSON.stringify(data.following);
+  // console.log(data);
+  // console.log(data.following.users);
+  var following = JSON.stringify(data.following.users);
   // console.log(following);
 
   var followedSpins = await db.getSpins(following);
@@ -263,16 +262,15 @@ async function getTimeline(req, res, next) {
   {
     followedSpins.newtagposts = [];
   }
-
-  if (followedSpins.length === 0) {
-    res.setHeader('alert', 'no spins found :(')
-  }
   // console.log(followedSpins);
+
+  if (!followedSpins || followedSpins.length === 0) {
+    res.setHeader('alert', 'no spins found :(')
+    // return next();
+  }
+  console.log(followedSpins.regularposts);
   res.json(JSON.stringify(followedSpins));
   // return next();
-
-  // TODO error check here and make sure that it returns good data
-
 }
 
 // updates user profile information from request

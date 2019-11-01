@@ -167,7 +167,7 @@ class UserFeed extends Component
 
     closeModal()
     {
-        this.setState({showFollowModal : false});
+        this.setState({showFollowModal : false, toFollowInterests : [], toUnfollowInterests : []});
     }
 
     changeOperationState(operation)
@@ -188,15 +188,21 @@ class UserFeed extends Component
     addInterestToFollowList(interest)
     {
         let interestList = this.state.toFollowInterests;
-        interestList.push(interest);
-        this.setState({toFollowInterests : interestList});
+        if(!interestList.includes(interest))
+        {
+            interestList.push(interest);
+            this.setState({toFollowInterests : interestList});
+        }
     }
 
     addInterestToUnfollowList(interest)
     {
         let unfollowList = this.state.toUnfollowInterests;
-        unfollowList.push(interest);
-        this.setState({toUnfollowInterests : unfollowList});
+        if(!unfollowList.includes(interest))
+        {
+            unfollowList.push(interest);
+            this.setState({toUnfollowInterests : unfollowList});
+        }
     }
 
     updateTagData()
@@ -243,13 +249,10 @@ class UserFeed extends Component
             </Dropdown>
         </div>;
 
-        let followItems = [];
+        let followItems = this.state.interests.map((tagName) => {
+            return <Dropdown.Item onClick={() => this.onDropdownItemClicked(tagName)}>{tagName}</Dropdown.Item>;
+        });
         let disableTagDropdown = false;
-        console.log(this.state.interests);
-        for(var i = 0; i < this.state.interests.length; i++)
-        {
-            followItems.push(<Dropdown.Item onClick={() => this.onDropdownItemClicked(this.state.interests[i])}>{this.state.interests[i]}</Dropdown.Item>);
-        }
         console.log(followItems);
         if(followItems.length === 0)
         {
@@ -268,7 +271,7 @@ class UserFeed extends Component
             </Dropdown>
         );
 
-        let addedInterestList = [];
+        
         let chosenList = null;
         switch(this.state.currentOperation)
         {
@@ -276,10 +279,9 @@ class UserFeed extends Component
             case OperationEnum.UNFOLLOW: chosenList = this.state.toUnfollowInterests; break;
             default: console.log("Error: operation not defined."); break;
         }
-        for(var i = 0; i < chosenList.length; i++)
-        {
-            addedInterestList.push(<p>{chosenList[i]}</p>);
-        }
+        let addedInterestList = chosenList.map((interest) => {
+            return <p>{interest}</p>;
+        });
 
         let addedListView = (
             <div>
@@ -327,7 +329,7 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.data} spinID={spin.id} userToView={this.userToView} tags={spin.tags}/>);
+                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.data} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
             }
         }
         else{

@@ -34,7 +34,6 @@ class Timeline extends Component
                 chars : null,
                 interests : [],
             }
-
         };
 
         this.onSpinPressed = this.onSpinPressed.bind(this);
@@ -49,6 +48,7 @@ class Timeline extends Component
 
     componentDidMount()
     {
+        this.getUserInterests();
         const self = this;
         fetch(`/api/timeline/${this.username}`, {
             method: "POST",
@@ -79,15 +79,16 @@ class Timeline extends Component
         this.showModal();
     }
 
-
     onSpinPressedAtModal(event) {
         this.setState({spin : {text: event.target.value}} ) ;    
         //TODO: set interest
 
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
+            return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
+            return;
         } else if ( (this.state.spin.interests != undefined && this.state.spins <= 0)) {
             NotificationManager.error("Spin must have an interest!");
         }
@@ -109,7 +110,7 @@ class Timeline extends Component
     }
 
     closeModal() {
-        this.setState({showSpinModal : false})
+        this.setState({showSpinModal : false, spin : {interests : []}})
     }
 
     //when the spin text is changed, update the chars count
@@ -120,8 +121,11 @@ class Timeline extends Component
 
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
-        interestsList.push(interest);
-        this.setState({spin : {interests : interestsList}});
+        if(!interestsList.includes(interest))
+        {
+            interestsList.push(interest);
+            this.setState({spin : {interests : interestsList}});
+        }
     }
 
     getUserInterests() {
@@ -149,12 +153,17 @@ class Timeline extends Component
 
     renderSpinForm() {
         
-        let spinInterests = [];
+        let spinInterests = this.state.interests.map((tagName) => {
+            return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+        });
+
+        let currentAddedInterestView = this.state.spin.interests.map((tagName) => {
+            return <h6>{tagName}</h6>;
+        });
+
         let disableInterestDropdown = false;
-        for(var i = 0; i < this.state.interests.length; i ++) {
-            spinInterests.push(<Dropdown.Item onClick={() => this.addInterestToSpin(this.state.spin.interests[i])}>{this.state.spin.interests[i]}</Dropdown.Item>);
-        }
-        if (spinInterests.length == 0) {
+        console.log(spinInterests);
+        if (spinInterests.length === 0) {
             disableInterestDropdown = true;
         }
         
@@ -176,7 +185,7 @@ class Timeline extends Component
         } else {
             interestsDropdown = (<div>
                 {dropdownInterests}
-                {this.state.interests}
+                {currentAddedInterestView}
             </div>)
         }
 
@@ -188,6 +197,7 @@ class Timeline extends Component
                             onChange = {this.handleSpinChange.bind(this)}/>
                             <p>{this.state.spin.chars}/90 characters</p>
                             {interestsDropdown}
+                            {this.state.spin.interests}
                     </Form>
                 <div className="modal-footer">
                     <Button onClick={this.onSpinPressedAtModal}>Spin</Button>
@@ -211,7 +221,7 @@ class Timeline extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} />);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
             }
         }
         else{

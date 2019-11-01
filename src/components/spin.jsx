@@ -32,10 +32,11 @@ class Spin extends Component
             content: this.props.content,
             timestamp: this.props.timestamp,
             quoteOrigin: "",
-            likes : 0,
+            likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
-            viewingUserTags : []
+            viewingUserTags : [],
+            likeList: this.props.likeList
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -238,38 +239,14 @@ class Spin extends Component
     //Returns a boolean indicating the user already liked the spin.
     updateWhetherViewerLikedTheSpin()
     {
-        let self = this;
-        console.log(this.author);
-        fetch(`/api/posts/${this.author}`, {
-            method : 'POST'
-        }).then(function(res){
-            if(res.status !== 200)
-            {
-                NotificationManager.error("Something went wrong while requesting from server.");
-                return;
-            }
-            else
-            {
-                res.json().then(function(data)
-                {
-                    let jsonData = JSON.parse(data);
-                    var regularposts = jsonData.regularposts;
-                    // console.log('jsonData = ', jsonData);
-                    console.log('regularposts =', regularposts);
-                    for(var i = 0; i < regularposts.length; i++)
-                    {
-                      var likeList = regularposts[i].like_list;
-                      console.log('likelist =', likeList);
-                        if(likeList[i] === self.props.userToView)
-                        {
-                            self.setState({showLike : false});
-                        }
-                    }
-                    self.setState({showLike : true});
-                });
-            
-            }
-        });
+        if(this.state.likeList.includes(this.userToView))
+        {
+            this.setState({showLike : false});
+        }
+        else
+        {
+            this.setState({showLike : true});
+        }
     }
 
     updateViewerTags()

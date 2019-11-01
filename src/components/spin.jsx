@@ -52,6 +52,8 @@ class Spin extends Component
         this.updateViewerTags = this.updateViewerTags.bind(this);
         this.updateWhetherViewerLikedTheSpin = this.updateWhetherViewerLikedTheSpin.bind(this);
         this.getUserTags = this.getUserTags.bind(this);
+        this.formatDate = this.formatDate.bind(this);
+        console.log("Timestamp: " + this.props.timestamp);
     }
 
     /**
@@ -306,6 +308,13 @@ class Spin extends Component
         }
     }
 
+    formatDate(timestamp)
+    {
+        let dateAndTime = timestamp.split('T');
+        let time = dateAndTime[1].substring(0, 5);
+        return dateAndTime[0] + " " + time;
+    }
+
     render()
     {
         let buttonToShow = null;
@@ -340,9 +349,6 @@ class Spin extends Component
                 });
             }
         }
-       
-
-
 
         return (
             <div className="spin-area">
@@ -358,7 +364,7 @@ class Spin extends Component
                 </div>
                 <div className="time-section">
                     <h6>
-                        {this.state.timestamp}
+                        {this.formatDate(this.state.timestamp)}
                     </h6>
                 </div>
                 <div className="other-info">

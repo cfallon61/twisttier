@@ -114,7 +114,6 @@ function cloudinaryUpload(req, res, next)
   if (!req.file) 
   {
     res.setHeader("error", 'unable to upload image for whatever reason');
-    req.file.path = '';
     return next();
   }
   // console.log('file provided:', req.file);

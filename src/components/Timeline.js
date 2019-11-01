@@ -60,7 +60,7 @@ class Timeline extends Component
             {
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    console.log(jsonData);
+                    self.setState({spins : dataDict.regularposts});
                 }).catch(function(error){
                     console.log(error);
                 });
@@ -133,10 +133,9 @@ class Timeline extends Component
         fetch(`/api/users/${this.username}`, {
             method: 'POST'
         }).then(function(response){
-            if (response.status==200) {
+            if (response.status===200) {
                 response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log(data);
                     let currentInterests = [];
                     for (var i = 0; i < jsonData.tags_associated.length; i++) {
                         currentInterests.push(jsonData.tags_associated[i]);
@@ -216,12 +215,14 @@ class Timeline extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed();
-        if(this.state.spins != undefined && this.state.spins.length > 0) 
+        if(this.state.spins !== undefined && this.state.spins.length > 0) 
         {
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
+                console.log(spin);
+                console.log(spin.data);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} userID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
             }
         }
         else{
@@ -243,10 +244,10 @@ class Timeline extends Component
                 <div className="user-feed-middle">
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
+                    {feed.render()}
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>
-                    {feed.render()}
                 </div>
             </div>
         );     

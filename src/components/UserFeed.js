@@ -291,7 +291,7 @@ class UserFeed extends Component
 
         if(disableTagDropdown)
         {
-            dropdownListView = <h4>The user don't follow any tags at the moment.</h4>;
+            dropdownListView = <h4>The user doesn't follow any tags at the moment.</h4>;
         }
         else
         {

@@ -3,6 +3,7 @@
 const credentials = require('./config.json');
 const dotenv = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const unique = require('array-unique');
 // import postgres lib
 const { Pool } = require("pg");
 // create new postgres client pool 
@@ -441,7 +442,7 @@ async function addSpin(username, spin) {
 
     var args = [
       spin.content,
-      spin.tags,
+      unique(spin.tags),
       spin.edited,
       spin.likes,
       spin.quotes,

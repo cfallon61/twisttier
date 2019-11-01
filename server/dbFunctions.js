@@ -69,9 +69,8 @@ function userSpinTableName(username) {
 
   // creates postgres client
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     const hash = await bcrypt.hash(accountInfo.password, 10);
     accountInfo.passhash = hash;
@@ -139,9 +138,8 @@ function userSpinTableName(username) {
 // @return deleted username on success, error on failure
 async function deleteUser(username){
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try{
-    client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     
@@ -185,9 +183,8 @@ async function updateUser(user) {
   }
   // connect to database
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     // begin transaction
     await client.query('BEGIN');
@@ -240,9 +237,8 @@ async function updateUser(user) {
 // @return: none
 async function clearNewPostColumn(username) {
   var query;
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     client.query("BEGIN");
 
@@ -278,9 +274,8 @@ async function updateLoginTime(user){
     arg = user.username;
   }
   console.log(query)
-  var client;
+  var client = await pool.connect();
   try{
-    client = await pool.connect();
 
     // console.log(user);
     await client.query('BEGIN');
@@ -314,9 +309,8 @@ async function getSpins(users) {
   var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
-  var cliett;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
     followed = JSON.parse(users);
     console.log(followed);
     // SELECT new_tag_posts from USERS_TABLE where username 
@@ -424,9 +418,8 @@ async function getSpins(users) {
 async function addSpin(username, spin) {
   var rows = [];
   var query;
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
@@ -503,9 +496,8 @@ async function addSpin(username, spin) {
 // Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
@@ -535,7 +527,7 @@ async function deleteSpin(username, spin_id) {
 // @param tags: tag list to add with tofollow in following list
 // @return username of user on success or false on failure
 async function followTopicUserPair(username, tofollow, tags) {
-  const client = await pool.connect();
+  var client = await pool.connect();
   var rows = [];
 
   try{
@@ -644,9 +636,8 @@ async function followTopicUserPair(username, tofollow, tags) {
 async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try{
-    client = await pool.connect();
     // begin database transaction
     await client.query('BEGIN');
     
@@ -747,9 +738,8 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
   console.log(user_liker, user_poster, spin);
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     var tablename = userSpinTableName(user_poster);
     
@@ -799,9 +789,8 @@ async function likeSpin(user_liker, user_poster, spin) {
 // @return the spin which was unliked on success and false on failure
 async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
-  var client;
+  var client = await pool.connect();
   try {
-    client = await pool.connect();
 
     var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');

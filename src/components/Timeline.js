@@ -222,7 +222,7 @@ class Timeline extends Component
                 var spin = this.state.spins[i];
                 console.log(spin);
                 console.log(spin.data);
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} userID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
             }
         }
         else{

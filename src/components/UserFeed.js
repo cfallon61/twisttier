@@ -330,7 +330,8 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
+                console.log('spin =', spin);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
             }
         }
         else{

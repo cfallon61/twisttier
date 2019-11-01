@@ -112,7 +112,7 @@ class Timeline extends Component
                 is_quote: false,
                 quote_oritin: {
                     username: this.username,
-                    spinId: 'x'
+                    spinID: 'x'
                 }
             };
             fetch(`/api/add_spin/${this.username}`, {

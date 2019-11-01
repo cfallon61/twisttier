@@ -250,11 +250,16 @@ class Spin extends Component
             }
             else
             {
-                res.json().then(function(data){
+                res.json().then(function(data)
+                {
                     let jsonData = JSON.parse(data);
-                    let likeList = jsonData.like_list;
-                    for(var i = 0; i < likeList.length; i++)
+                    var regularposts = jsonData.regularposts;
+                    // console.log('jsonData = ', jsonData);
+                    console.log('regularposts =', regularposts);
+                    for(var i = 0; i < regularposts.length; i++)
                     {
+                      var likeList = regularposts[i].like_list;
+                      console.log('likelist =', likeList);
                         if(likeList[i] === self.props.userToView)
                         {
                             self.setState({showLike : false});

@@ -64,8 +64,6 @@ class Timeline extends Component
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
                     self.setState({spins : dataDict.regularposts});
-                }).catch(function(error){
-                    console.log(error);
                 });
             }
             else{
@@ -269,7 +267,7 @@ class Timeline extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} />);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} userID = {spin.id} userToView={this.username} tags={spin.tags} likes= {spin.likes} likeList = {spin.like_list}/>);
             }
         }
         else{

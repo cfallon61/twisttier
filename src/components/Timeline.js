@@ -121,8 +121,11 @@ class Timeline extends Component
 
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
-        interestsList.push(interest);
-        this.setState({spin : {interests : interestsList}});
+        if(!interestsList.includes(interest))
+        {
+            interestsList.push(interest);
+            this.setState({spin : {interests : interestsList}});
+        }
     }
 
     getUserInterests() {

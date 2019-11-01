@@ -167,7 +167,7 @@ class UserFeed extends Component
 
     closeModal()
     {
-        this.setState({showFollowModal : false});
+        this.setState({showFollowModal : false, toFollowInterests : [], toUnfollowInterests : []});
     }
 
     changeOperationState(operation)

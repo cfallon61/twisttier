@@ -82,7 +82,7 @@ class Timeline extends Component
 
     handleTag(event){
         event.preventDefault();
-        NotificationManager.success(`${this.state.tag}`);
+        //NotificationManager.success(`${this.state.tag}`);
                 //this.getUserInterests(); refresh dropdown
 
         //TODO: send this 
@@ -156,11 +156,6 @@ class Timeline extends Component
                 })
             }
         })
-    }
-
-    updateUserTags() {
-        NotificationManager.success(`${this.state.tag}`)
-        //TODO
     }
 
     updateUserSpins() {
@@ -237,7 +232,7 @@ class Timeline extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.timestamp} userID = {spin.id} userToView={this.username} tags={spin.tags} />);
             }
         }
         else{

@@ -128,7 +128,7 @@ function otherupload (req, res, next)
   uploader.upload(file).then((result) => {
     // if (err) console.log('error occurred at other upload:', err);
     // console.log('result =',result);
-    req.file.path = result.url;
+    req.file.path = result.secure_url;
     // const image = result.url;
     console.log(req.file);
     return next();

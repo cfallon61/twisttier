@@ -21,6 +21,7 @@ class Timeline extends Component
         super(props);
         this.username = this.props.username;
         this.state = {
+            tag : "",
             spins : [],
             interests : [],
             error : {
@@ -43,6 +44,8 @@ class Timeline extends Component
         this.showModal = this.showModal.bind(this);
         this.updateUserSpins = this.updateUserSpins.bind(this);
         this.addInterestToSpin = this.addInterestToSpin.bind(this);
+
+        this.handleTag = this.handleTag.bind(this);
 
         console.log(this.username);
     }
@@ -73,6 +76,17 @@ class Timeline extends Component
         });
     }
     
+    handleTagChange(event) {
+        this.setState({tag : event.target.value});
+    }
+
+    handleTag(event){
+        event.preventDefault();
+        NotificationManager.success(`${this.state.tag}`);
+                //this.getUserInterests(); refresh dropdown
+
+        //TODO: send this 
+    }
 
     onSpinPressed() {
         console.log("Spin pressed.");
@@ -80,8 +94,8 @@ class Timeline extends Component
     }
 
 
-    onSpinPressedAtModal(event) {
-        this.setState({spin : {text: event.target.value}} ) ;    
+    onSpinPressedAtModal(event) {  
+        NotificationManager.success(`${this.state.spin.text}`); 
         //TODO: set interest
 
         if(this.state.spin.chars <= 0 ){
@@ -114,7 +128,8 @@ class Timeline extends Component
 
     //when the spin text is changed, update the chars count
     handleSpinChange(event){
-        this.setState({spin: {chars: event.target.value.length}});
+        this.setState({spin: {chars: event.target.value.length}}); 
+        this.setState({spin: {text : event.target.value}});
 
      }
 
@@ -143,7 +158,13 @@ class Timeline extends Component
         })
     }
 
+    updateUserTags() {
+        NotificationManager.success(`${this.state.tag}`)
+        //TODO
+    }
+
     updateUserSpins() {
+        NotificationManager.success(`${this.state.spin.text}`);
         //TODO
     }
 
@@ -188,6 +209,11 @@ class Timeline extends Component
                             onChange = {this.handleSpinChange.bind(this)}/>
                             <p>{this.state.spin.chars}/90 characters</p>
                             {interestsDropdown}
+                       
+                    </Form>
+                    <Form onSubmit = {this.handleTag} >
+                    <Form.Control width = "40%" placeholder = "add tag" onChange = {this.handleTagChange.bind(this)}/>
+                        <Button variant = "primary" type = "submit">add tag</Button>
                     </Form>
                 <div className="modal-footer">
                     <Button onClick={this.onSpinPressedAtModal}>Spin</Button>

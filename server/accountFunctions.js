@@ -253,8 +253,8 @@ async function getTimeline(req, res, next) {
     res.setHeader('error', 'user not found');
     return next();
   }
-
-  var following = data.following;
+  console.log(data);
+  var following = JSON.stringify(data.following);
   // console.log(following);
 
   var followedSpins = await db.getSpins(following);

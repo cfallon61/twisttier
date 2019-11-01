@@ -305,12 +305,15 @@ async function getSpins(users) {
   const baseQuery = `SELECT * FROM `;
   var query = '';
   var tagList = []
-  var followed = JSON.parse(users.users);
+
+  console.log(users.users);
+  var followed;
   var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
 
   try {
+    followed = JSON.parse(users.users);
     // SELECT new_tag_posts from USERS_TABLE where username 
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string

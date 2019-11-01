@@ -249,11 +249,6 @@ class Spin extends Component
         }
     }
 
-    updateLikeCount()
-    {
-
-    }
-
     updateViewerTags()
     {
         //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.

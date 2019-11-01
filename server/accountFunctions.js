@@ -267,7 +267,7 @@ async function getTimeline(req, res, next) {
     res.setHeader('alert', 'no spins found :(')
     // return next();
   }
-  console.log(followedSpins.regularposts);
+  // console.log(followedSpins.regularposts);
   res.json(JSON.stringify(followedSpins));
   // return next();
 }

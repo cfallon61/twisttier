@@ -98,8 +98,6 @@ class Timeline extends Component
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
             return;
-        } else if ( (this.state.spin.interests !== undefined && this.state.spin.interests.length <= 0)) {
-            NotificationManager.error("Spin must have an interest!");
         }
 
         //TODO: send text to server

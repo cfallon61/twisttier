@@ -126,6 +126,7 @@ class UserFeed extends Component
 
         let loggedInUser = this.getViewingUser();
         let chosenList = operation === "Follow" ? this.state.toFollowInterests : this.state.toUnfollowInterests;
+        let self = this;
         if(loggedInUser === null) return;
         let jsonBody = {
             action : operation.toLowerCase(),
@@ -144,7 +145,7 @@ class UserFeed extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`${operation} successful!`);
-                this.closeModal();
+                self.closeModal();
             }
             else{
                 if(res.headers.has("error"))

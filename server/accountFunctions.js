@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const extFuncs = require('./helpers.js');
 const path = require('path');
 const express = require('express');
-const reservedTag = require('./config.json').reservedTag;
 
 
 

@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const datauri = require('datauri');
+
 
 const { check, validationResult } = require('express-validator');
 
@@ -14,6 +16,19 @@ const index = path.join(__dirname, '../build/index.html');
 const helpers = require('./helpers.js');
 const helmet = require('helmet');
 
+const { config, uploader } = require('cloudinary');
+
+const uri = new datauri();
+
+const cloudinaryConfig = (req, res, next) => 
+{
+  config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API,
+    api_secret: process.env.CLOUD_SECRET,
+  });
+  next();
+}
 
 const init = require('./config.json');
 const root = path.join(__dirname, "../build");
@@ -28,7 +43,7 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
-
+app.use(cloudinaryConfig);
 
 
 function getExtension(filename) {
@@ -36,6 +51,9 @@ function getExtension(filename) {
   var ext =  filename.substring(index);
   return ext.toLowerCase();
 }
+
+const dataUri = req => uri.format(path.extname(req.file.originalname).toString(), req.file.buffer);
+
 
 // setup multer with upload desination for images
 const storage = multer.diskStorage({
@@ -49,13 +67,14 @@ const storage = multer.diskStorage({
       
       var tempName = Date.now().toString() + "_" + file.originalname;
       var filepath = path.join(images, tempName);
+      console.log('filepath =', filepath);
       // console.log(filepath);
       // super hacky way of doing the file name handling
       while (fs.existsSync(filepath)) {
         filepath = path.join(images, tempName);
         tempName = Date.now().toString() + "_" + file.originalname;
       }
-      // console.log('filename =', tempName, 'file =', file);
+      console.log('filename =', tempName, 'file =', file);
 
       cb(null, tempName);
     }
@@ -68,12 +87,10 @@ const storage = multer.diskStorage({
 
 // configure other multer params
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
 
   fileFilter: function(req, file, next) {
     console.log('filtering files');
-    // console.log('file=', file);
-    // console.log(file.originalname);
     try {
       var ext = getExtension(file.originalname);
       // console.log(ext);
@@ -82,12 +99,7 @@ const upload = multer({
         console.log('failed to upload image');
         return next(null, false);
       }
-      
-      console.log("image uploaded supposedly to " + file.path);
-      if (!file.path) {
-        console.log('in spite of what the above message says, the actual file path does not exist.');
-        return next(null, false);
-      }
+   
       return next(null, true);
     }
     catch (e) {
@@ -107,6 +119,26 @@ var server = app.listen(port, (err) => {
   console.log('Server started on port', port);
 });
 
+function otherupload (req, res, next)
+{
+ 
+  // console.log('file provided:', req.file);
+  const file = dataUri(req).content;
+  // console.log(file);
+  uploader.upload(file).then((result) => {
+    // if (err) console.log('error occurred at other upload:', err);
+    // console.log('result =',result);
+    req.file.path = result.url;
+    // const image = result.url;
+    console.log(req.file);
+    return next();
+  }).catch((err) => {
+    res.setHeader('error', 'unable to upload image');
+    console.log('error occurred at other upload:', err);
+    return next();
+  });
+
+}
 
 // TODO ADD SESSION CACHING
 // handle user creation
@@ -118,7 +150,7 @@ var server = app.listen(port, (err) => {
 // ],
 app.post('/create_user',
   
-  helpers.notLoggedIn, upload, users.postCreateUser, (req, res) => {
+  helpers.notLoggedIn, upload, otherupload, users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
       console.log(req.body);
     if (res.getHeader('error') != undefined) {
@@ -141,14 +173,14 @@ app.post('/create_user',
 //              a json with the user information
 // @param res: response to client
 //             will return 406, Not acceptable to the client
-app.post('/uploadProfileImage', upload, (req, res, next) => {
+app.post('/uploadProfileImage',  upload, otherupload, (req, res, next) => {
   //placeholder @TODO implement database mapping
-  console.log(req.file);
-  if (!req.file) {
+  // console.log(req.file);
+  if (!req.file || res.getHeader('error') != undefined) {
     res.status(418).send('idk wtf is wrong');
   }
   else {
-    res.status(200).send("good job you uploaded a picture");
+    res.status(200).send("good job you uploaded a picture " + JSON.stringify(req.file.path));
   }
 });
 
@@ -251,7 +283,7 @@ app.post('/api/updateFollowing', helpers.loggedIn, users.updateFollowing, (req, 
 // helpers.loggedIn,
 // [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
   // check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), ],
-app.post('/api/update/:username', upload,
+app.post('/api/update/:username', upload, otherupload, 
         
          users.updateProfileInfo, (req, res) => {
     

@@ -3,8 +3,6 @@ const session = require('client-sessions');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer');
-const datauri = require('datauri');
 
 
 const { check, validationResult } = require('express-validator');
@@ -16,19 +14,7 @@ const index = path.join(__dirname, '../build/index.html');
 const helpers = require('./helpers.js');
 const helmet = require('helmet');
 
-const { config, uploader } = require('cloudinary');
 
-const uri = new datauri();
-
-const cloudinaryConfig = (req, res, next) => 
-{
-  config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API,
-    api_secret: process.env.CLOUD_SECRET,
-  });
-  next();
-}
 
 const init = require('./config.json');
 const root = path.join(__dirname, "../build");
@@ -43,102 +29,15 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
-app.use(cloudinaryConfig);
+app.use(helpers.cloudinaryConfig);
 
-
-function getExtension(filename) {
-  const index = filename.lastIndexOf(".");
-  var ext =  filename.substring(index);
-  return ext.toLowerCase();
-}
-
-const dataUri = req => uri.format(path.extname(req.file.originalname).toString(), req.file.buffer);
-
-
-// setup multer with upload desination for images
-const storage = multer.diskStorage({
-
-  destination: './profileImages',
-
-  // handle filename creation
-  filename: function(req, file, cb) {
-
-    try {
-      
-      var tempName = Date.now().toString() + "_" + file.originalname;
-      var filepath = path.join(images, tempName);
-      console.log('filepath =', filepath);
-      // console.log(filepath);
-      // super hacky way of doing the file name handling
-      while (fs.existsSync(filepath)) {
-        filepath = path.join(images, tempName);
-        tempName = Date.now().toString() + "_" + file.originalname;
-      }
-      console.log('filename =', tempName, 'file =', file);
-
-      cb(null, tempName);
-    }
-    catch (e) {
-      console.log('Multer.storage encountered an error:', e);
-      return cb(null, undefined);
-    }
-  }
-});
-
-// configure other multer params
-const upload = multer({
-  storage: multer.memoryStorage(),
-
-  fileFilter: function(req, file, next) {
-    console.log('filtering files');
-    try {
-      var ext = getExtension(file.originalname);
-      // console.log(ext);
-      // var ext = path.extname(file.originalname).toLocaleLowerCase()
-      if (ext != '.png' && ext != '.jpg' && ext != '.jpeg') {
-        console.log('failed to upload image');
-        return next(null, false);
-      }
-   
-      return next(null, true);
-    }
-    catch (e) {
-      console.log('Multer.upload encountered an error:', e);
-      return next(null, false);
-    }
-  },
-
-  limits: {
-    fileSize: 1024 * 1024 * 1024 * 5
-  } // 5 MB
-
-}).single('profileImage');
 
 var server = app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
 });
 
-function otherupload (req, res, next)
-{
- 
-  // console.log('file provided:', req.file);
-  const file = dataUri(req).content;
-  // console.log(file);
-  uploader.upload(file).then((result) => {
-    // if (err) console.log('error occurred at other upload:', err);
-    // console.log('result =',result);
-    req.file.path = result.secure_url;
-    // const image = result.url;
-    console.log(req.file);
-    return next();
-  }).catch((err) => {
-    res.setHeader('error', 'unable to upload image');
-    console.log('error occurred at other upload:', err);
-    return next();
-  });
 
-}
 
 // TODO ADD SESSION CACHING
 // handle user creation
@@ -150,7 +49,7 @@ function otherupload (req, res, next)
 // ],
 app.post('/create_user',
   
-  helpers.notLoggedIn, upload, otherupload, users.postCreateUser, (req, res) => {
+  helpers.notLoggedIn, helpers.multerUpload, helpers.cloudinaryUpload, users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
       console.log(req.body);
     if (res.getHeader('error') != undefined) {
@@ -173,7 +72,7 @@ app.post('/create_user',
 //              a json with the user information
 // @param res: response to client
 //             will return 406, Not acceptable to the client
-app.post('/uploadProfileImage',  upload, otherupload, (req, res, next) => {
+app.post('/uploadProfileImage',  helpers.multerUpload, helpers.cloudinaryUpload, (req, res, next) => {
   //placeholder @TODO implement database mapping
   // console.log(req.file);
   if (!req.file || res.getHeader('error') != undefined) {
@@ -283,7 +182,7 @@ app.post('/api/updateFollowing', helpers.loggedIn, users.updateFollowing, (req, 
 // helpers.loggedIn,
 // [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
   // check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), ],
-app.post('/api/update/:username', upload, otherupload, 
+app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload, 
         
          users.updateProfileInfo, (req, res) => {
     

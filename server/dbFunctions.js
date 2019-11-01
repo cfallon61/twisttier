@@ -74,7 +74,6 @@ function userSpinTableName(username) {
   var rows = [];
   var client = await pool.connect();
   try {
-
     const hash = await bcrypt.hash(accountInfo.password, 10);
     accountInfo.passhash = hash;
 

@@ -1,6 +1,10 @@
 const {check, validationResult} = require('express-validator');
 const express = require('express');
 const fs = require('fs');
+const { config, uploader } = require('cloudinary');
+const datauri = require('datauri');
+const multer = require('multer');
+const path = require('path');
 
 
 // @brief generic function for checking if a request has invalid input.
@@ -18,18 +22,133 @@ function check_errors(req, res) {
   return false;
 }
 
+function getExtension(filename) {
+  const index = filename.lastIndexOf(".");
+  var ext =  filename.substring(index);
+  return ext.toLowerCase();
+}
+
+
+const uri = new datauri();
+
+const cloudinaryConfig = (req, res, next) => 
+{
+  config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API,
+    api_secret: process.env.CLOUD_SECRET,
+  });
+  next();
+}
+const dataUri = req => uri.format(path.extname(req.file.originalname).toString(), req.file.buffer);
+
+
+// setup multer with upload desination for images
+const storage = multer.diskStorage({
+
+  destination: './profileImages',
+
+  // handle filename creation
+  filename: function(req, file, cb) {
+
+    try {
+      
+      var tempName = Date.now().toString() + "_" + file.originalname;
+      var filepath = path.join(images, tempName);
+      console.log('filepath =', filepath);
+      // console.log(filepath);
+      // super hacky way of doing the file name handling
+      while (fs.existsSync(filepath)) {
+        filepath = path.join(images, tempName);
+        tempName = Date.now().toString() + "_" + file.originalname;
+      }
+      console.log('filename =', tempName, 'file =', file);
+
+      cb(null, tempName);
+    }
+    catch (e) {
+      console.log('Multer.storage encountered an error:', e);
+      return cb(null, undefined);
+    }
+  }
+});
+
+// configure other multer params
+const multerUpload = multer({
+  storage: multer.memoryStorage(),
+
+  fileFilter: function(req, file, next) {
+    console.log('filtering files');
+    if (!file) return next(null, false);
+    try {
+      console.log(file);
+      var ext = getExtension(file.originalname);
+      // console.log(ext);
+      // var ext = path.extname(file.originalname).toLocaleLowerCase()
+      if (ext != '.png' && ext != '.jpg' && ext != '.jpeg' && ext != '.gif') {
+        console.log("unable to upload profile image: " + ext + " is an invalid filetype");
+        req.error = "unable to upload profile image: " + ext + " is an invalid filetype"
+        return next(null, false);
+      }
+   
+      return next(null, true);
+    }
+    catch (e) {
+      console.log('Multer.upload encountered an error:', e);
+      return next(null, false);
+    }
+  },
+
+  limits: {
+    fileSize: 1024 * 1024 * 1024 * 5
+  } // 5 MB
+
+}).single('profileImage');
+
+function cloudinaryUpload(req, res, next)
+{
+  if (req.error)
+  {
+    res.setHeader('error', req.error);
+  }
+  if (!req.file) 
+  {
+    res.setHeader("error", 'unable to upload image for whatever reason');
+    req.file.path = '';
+    return next();
+  }
+  // console.log('file provided:', req.file);
+  const file = dataUri(req).content;
+  // console.log(file);
+  uploader.upload(file).then((result) => {
+    // if (err) console.log('error occurred at other upload:', err);
+    // console.log('result =',result);
+    req.file.path = result.secure_url;
+    // const image = result.url;
+    console.log(req.file);
+    return next();
+  }).catch((err) => {
+    res.setHeader('error', 'unable to upload image');
+    console.log('error occurred at other upload:', err);
+    return next();
+  });
+
+}
 
 // @brief Function for finding and deleting an old profile image
 // @return: true on success, false on fail
 function delete_profile_img(imgpath) {
-  var ret = false;
-  if (fs.existsSync(imgpath)) {
-    fs.unlink(imgpath, (err) => { 
-      if (err) console.log(err);
-    });
-    ret = true;
-  }
-  return ret;
+  uploader.destroy((imgpath), (err, res) =>
+  {
+    if (err)
+    {
+      console.log(err);
+      return false;
+    }
+    console.log('result of destroying ', imgpath, res);
+    return true;
+  });
+  
 }
 
 
@@ -90,4 +209,8 @@ module.exports = {
   createSession,
   loggedIn,
   delete_profile_img,
+  cloudinaryUpload,
+  multerUpload,
+  cloudinaryConfig,
+
 }

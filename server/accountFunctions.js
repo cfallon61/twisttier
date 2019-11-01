@@ -43,7 +43,7 @@ async function postCreateUser(req, res, next) {
     // if the image gets uploaded but the username already exists, then we want to
     // delete the image that got uploaded so we don't just rack up tons of files
     // and get DDoSed
-    res.setHeader('error', 'user exists');
+    res.setHeader('error', accountInfo.username + ' user exists');
     extFuncs.delete_profile_img(accountInfo.profile_pic);
     return next(); // return the rows
   }
@@ -410,8 +410,6 @@ async function search(req, res, next)
   {
     res.json(JSON.stringify(results));
   }
-
-
 }
 
 

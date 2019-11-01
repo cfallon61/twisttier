@@ -542,6 +542,7 @@ async function followTopicUserPair(username, tofollow, tags) {
 
     var res = await client.query(query,args);
     rows = res.rows;
+    console.log(rows);
     
     var following = rows[0].following;
 
@@ -587,6 +588,8 @@ async function followTopicUserPair(username, tofollow, tags) {
     
     var res = await client.query(query,args);
     rows = res.rows;
+    console.log(rows);
+
 
     var followers = rows[0].followers;
     
@@ -618,11 +621,12 @@ async function followTopicUserPair(username, tofollow, tags) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.followTopicUserPair: ${ e }`);
     // return e;
+    return false;
   } 
   finally {
     client.release();
   }
-  
+  console.log('returning from db.followuser', rows);
   return (rows.length === 0 ? false : rows[0].username);
 };
 

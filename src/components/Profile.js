@@ -53,8 +53,8 @@ class Profile extends Component{
                 //If link is not empty
                 if(dataDict.profile_pic !== "")
                 {
-                  console.log("/" + dataDict.profile_pic);
-                  fetch("/" + dataDict.profile_pic).then(function(res)
+                  console.log(dataDict.profile_pic);
+                  fetch(dataDict.profile_pic).then(function(res)
                   {
                     console.log('received ', res, 'from server');
                     if(res.status === 200)

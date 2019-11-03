@@ -21,7 +21,7 @@ async function postCreateUser(req, res, next) {
   // if there is a file then add it to the thing
   console.log(req.file);
   console.log(req.file);
-  if (req.file != undefined) {
+  if (req.file != undefined && req.file.path != undefined) {
     profile_pic_path = req.file.path;
   }
   console.log('profile picture located at', profile_pic_path);
@@ -32,7 +32,7 @@ async function postCreateUser(req, res, next) {
     name: req.body.name,
     username: req.body.username,
     bio: req.body.bio,
-    profile_pic: profile_pic_path,
+    profile_pic: profile_pic_path
   };
 
   // check if the user exists already

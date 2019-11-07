@@ -192,21 +192,13 @@ describe('database functions test', function() {
     
     it('user exists: should return username', async () => {
       user = {
-        username: 'testingUser',
-        password: 'passwordsr4losers',
-        email: 'kaizer@von.heimer',
-        bio: 'i hate my life', 
-        name: 'testing, delete if bad'
+        username: 'hmmmhmmm'
       };
      
       var res = await db.deleteUser(user.username);
-      
-      // assert
-      assert.notDeepStrictEqual(res, false);
-
-      var res = await db.deleteUser(user);
+      assert.deepStrictEqual(res, user.username);
     });
-  });
+  })
 
   describe.skip('#followTopicUserPair',  () => {
     
@@ -328,11 +320,7 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, false);
     });
 
-<<<<<<< HEAD
     it.skip('@not an actual test - undoring first follow test to properly check for duplicate', async () => {
-=======
-    it('@not an actual test - undoing first follow test to properly check for duplicate', async () => {
->>>>>>> 27c9067eb9009ff34a37c1f5317125c33a887dcf
       user = {
         username: 'testingUser',
       };

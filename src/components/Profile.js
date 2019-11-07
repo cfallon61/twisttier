@@ -22,6 +22,7 @@ class Profile extends Component{
             profilePicLink : "",
             profilePic : '',
             username : this.props.username,
+            following: [],
             bio : "",
             interests : [],
         };
@@ -52,8 +53,8 @@ class Profile extends Component{
                 //If link is not empty
                 if(dataDict.profile_pic !== "")
                 {
-                  console.log("/" + dataDict.profile_pic);
-                  fetch("/" + dataDict.profile_pic).then(function(res)
+                  console.log(dataDict.profile_pic);
+                  fetch(dataDict.profile_pic).then(function(res)
                   {
                     console.log('received ', res, 'from server');
                     if(res.status === 200)
@@ -74,7 +75,7 @@ class Profile extends Component{
                   self.setState({ profilePic: chosenProfilePic });
 
                 }
-              self.setState({ bio: dataDict.bio, interests: dataDict.interests});
+              self.setState({ bio: dataDict.bio, interests: dataDict.interests, following: dataDict.following.users});
 
 
               }).catch(function(error){
@@ -100,7 +101,9 @@ class Profile extends Component{
     render()
     {
         let tagViews = [];
-        console.log(this.state.interests);
+        var followinglist = [];
+        console.log('interests =', this.state.interests);
+        console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;
@@ -112,6 +115,18 @@ class Profile extends Component{
         else
         {
             tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
+        }
+        if (this.state.following.length > 0)
+        {
+          var following = this.state.following;
+          for (var i = 0; i < following.length; i++) 
+          {
+            followinglist.push(<h6 className="follow-entry">{following[i].username}</h6>);
+          }
+        }
+        else 
+        {
+          followinglist.push(<h6 className="tag-entry">This user doesn't follow anyone.</h6>);
         }
         return (
             <div className="profile-container">
@@ -125,6 +140,12 @@ class Profile extends Component{
                     <div className="tag-list">
                         {tagViews}
                     </div>
+                </div>
+                <div className="who_i_follow">
+                  <h4>Who I follow</h4>
+                  <div className='followingList'>
+                    {followinglist}
+                  </div>
                 </div>
             </div>
         );

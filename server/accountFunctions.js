@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const extFuncs = require('./helpers.js');
 const path = require('path');
 const express = require('express');
-const reservedTag = require('./config.json').reservedTag;
 
 
 
@@ -17,12 +16,12 @@ async function postCreateUser(req, res, next) {
     // return next();
   }
 
-  
-  var profile_pic_path = null;
+
+  var profile_pic_path = '';
   // if there is a file then add it to the thing
   console.log(req.file);
   console.log(req.file);
-  if (req.file.path) {
+  if (req.file != undefined && req.file.path != undefined) {
     profile_pic_path = req.file.path;
   }
   console.log('profile picture located at', profile_pic_path);
@@ -32,36 +31,36 @@ async function postCreateUser(req, res, next) {
     password: req.body.password,
     name: req.body.name,
     username: req.body.username,
-    bio: req.body.bio,    
-    profile_pic: profile_pic_path,
+    bio: req.body.bio,
+    profile_pic: profile_pic_path
   };
-  
+
   // check if the user exists already
   var existing = await db.userExists(accountInfo);
   if (existing != false) {
     console.log(accountInfo.username + ' already exists')
     // because of the way that this works, it will upload a profile image first.
-    // if the image gets uploaded but the username already exists, then we want to 
+    // if the image gets uploaded but the username already exists, then we want to
     // delete the image that got uploaded so we don't just rack up tons of files
     // and get DDoSed
-    res.setHeader('error', 'user exists');
+    res.setHeader('error', accountInfo.username + ' user exists');
     extFuncs.delete_profile_img(accountInfo.profile_pic);
     return next(); // return the rows
   }
 
   var userCreated = await db.createUser(accountInfo);
- 
+
   // userCreated is the empty rows or false, return error
   if (!userCreated.username) {
     // console.log(userCreated);
     res.setHeader('error', userCreated);
-  } 
+  }
   else {
     res.userdata = userCreated;
     res.setHeader('username', userCreated.username);
   }
   return next();
-} 
+}
 
 // @desc: function used for logging in (idk why its not called login but whatever)
 // @return: none
@@ -82,6 +81,7 @@ async function authorize(req, res, next) {
   // console.log(user);
 
   var userData = await db.userExists(user);
+  //console.log(userData);
 
   if (userData === false) {
     console.log('invalid username');
@@ -101,7 +101,7 @@ async function authorize(req, res, next) {
   if (!match) {
     console.log('invalid password');
     res.setHeader('error', 'Incorrect Password');
-  } 
+  }
   else {
     if (typeof user.username === 'undefined' || user.username === "") {
       //1st index is the username
@@ -156,11 +156,11 @@ async function deleteAccount(req, res, next) {
     if (deleteSuccess) {
       extFuncs.delete_profile_img(userData.profile_pic);
       return next();
-    } 
+    }
     else {
       res.setHeader('error', 'deletion failed');
     }
-  } 
+  }
   else {
     res.setHeader('error', 'deletion failed: bad password');
   }
@@ -179,7 +179,7 @@ async function getUserInfo(req, res, next) {
   var data = await db.userExists(user);
   if (!data) {
     res.setHeader('error', 'user not found');
-  } 
+  }
   else {
     // protect certain information such as password
     var responseObject = {
@@ -268,7 +268,7 @@ async function getTimeline(req, res, next) {
     res.setHeader('alert', 'no spins found :(')
     // return next();
   }
-  console.log(followedSpins.regularposts);
+  // console.log(followedSpins.regularposts);
   res.json(JSON.stringify(followedSpins));
   // return next();
 }
@@ -280,7 +280,7 @@ async function updateProfileInfo(req, res, next) {
     // return next();
   }
   var imgsrc = null;
-  
+
   if (req.file.path) {
     imgsrc = req.file.path;
   }
@@ -309,7 +309,7 @@ async function updateProfileInfo(req, res, next) {
   if (!user.profile_pic) {
     user.profile_pic = userData.profile_pic;
   }
-  // if one is provided, set a parameter in the request object to point to the old 
+  // if one is provided, set a parameter in the request object to point to the old
   // profile picture path and then delete that image
   else {
     req.imgsrc = userData.profile_pic;
@@ -323,7 +323,7 @@ async function updateProfileInfo(req, res, next) {
   if (userData === false) {
     // if use use header, we need to return next
     res.setHeader('error', 'user not found');
-  } 
+  }
   else {
     res.setHeader('username', userData.username);
     res.userdata = userdata;
@@ -333,16 +333,17 @@ async function updateProfileInfo(req, res, next) {
 
 }
 
-// updates following and followers of two relevant users depending on 
+// updates following and followers of two relevant users depending on
 // whether the action is follow or unfollow
 async function updateFollowing(req, res, next) {
+  console.log('updating following for', req.body.follower);
   const action = req.body.action;
   const toFollow = req.body.toFollow;
   const tags = req.body.tags;
   const follower = req.body.follower;
   var followUpdate;
   var user = { username: toFollow };
-  
+
   // don't allow for following or unfollowing of yourself.
   // console.log("testing: ", follower);
   // console.log("tofollow: ", toFollow);
@@ -366,7 +367,7 @@ async function updateFollowing(req, res, next) {
   }
   else {
     res.setHeader('error', "invalid action");
-    return next(); 
+    return next();
   }
 
   if (!followUpdate) {
@@ -409,8 +410,6 @@ async function search(req, res, next)
   {
     res.json(JSON.stringify(results));
   }
-
-
 }
 
 

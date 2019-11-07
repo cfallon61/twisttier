@@ -3,12 +3,13 @@
 const credentials = require('./config.json');
 const dotenv = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const unique = require('array-unique');
 // import postgres lib
 const { Pool } = require("pg");
-// create new postgres client pool 
+// create new postgres client pool
 const pool = new Pool(credentials.database);
 
-const USER_TABLE = process.env.USER_TABLE;
+const USER_TABLE = process.env.USER_TABLE || 'USERS';
 const SPIN_TEMPLATE = process.env.SPIN_TEMPLATE;
 const TEST = (process.env.TEST === "true");
 // 5 minutes for testing or 24 hours for deployed environment
@@ -20,7 +21,7 @@ const reservedTag = require('./config.json').reservedTag;
 // parameter user is object of form {email: [email], username: [username]}
 // @return: object of all user's data
 var userExists = async function (user) {
-  
+
   var params = [];
   // console.log(user);
   var query = `SELECT * FROM ${USER_TABLE} `;
@@ -40,9 +41,11 @@ var userExists = async function (user) {
     console.log("what the fuck")
     return false;
   }
+  console.log(query, params);
+  console.log('before query')
   var res = await pool.query(query, params);
 
-  // response is a json 
+  // response is a json
   // need to get rows, which is a list
   // console.log(res);
   var rows = res.rows;
@@ -57,7 +60,7 @@ var userExists = async function (user) {
 }
 
 // forms the name of the table of individual users
-function userSpinTableName(username) { 
+function userSpinTableName(username) {
   var name = username + "_spins";
   return (TEST ? name + "_test" : name);
 };
@@ -69,10 +72,8 @@ function userSpinTableName(username) {
 
   // creates postgres client
   var rows = [];
-
+  var client = await pool.connect();
   try {
-    const client = await pool.connect();
-
     const hash = await bcrypt.hash(accountInfo.password, 10);
     accountInfo.passhash = hash;
 
@@ -80,7 +81,7 @@ function userSpinTableName(username) {
     var tablename = userSpinTableName(accountInfo.username);
 
     var args = [tablename, SPIN_TEMPLATE];
-    
+
     // begins transaction
     await client.query('BEGIN');
 
@@ -106,10 +107,10 @@ function userSpinTableName(username) {
       []
     ];
 
-    query = `INSERT INTO ${USER_TABLE} (email, 
-      username, passhash, create_date, last_login, bio, 
-      name, followers, following, interests, accessibility_features, profile_pic, tags_associated) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON, $12::TEXT, $13::VARCHAR(19)[]) 
+    query = `INSERT INTO ${USER_TABLE} (email,
+      username, passhash, create_date, last_login, bio,
+      name, followers, following, interests, accessibility_features, profile_pic, tags_associated)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::VARCHAR(15)[], $9::JSON, $10::VARCHAR(20)[], $11::JSON, $12::TEXT, $13::VARCHAR(19)[])
       RETURNING username, profile_pic, last_login`;
 
     res = await client.query(query, args);
@@ -118,12 +119,12 @@ function userSpinTableName(username) {
     await client.query('COMMIT');
 
     rows = res.rows;
-  } 
+  }
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.createUser: ${e}`);
     // return e;
-  } 
+  }
   finally {
     client.release();
   }
@@ -139,12 +140,11 @@ function userSpinTableName(username) {
 // @return deleted username on success, error on failure
 async function deleteUser(username){
   var rows = [];
-
+  var client = await pool.connect();
   try{
-    const client = await pool.connect();
 
     var tablename = userSpinTableName(username);
-    
+
     await client.query('BEGIN');
 
     // delete spin table
@@ -157,59 +157,58 @@ async function deleteUser(username){
     // query = `SELECT * FROM ${USER_TABLE} WHERE username=$1`;
     var res = await client.query(query, [username]);
     await client.query('COMMIT');
-    
+
     rows = res.rows;
-    
-  } 
+
+  }
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.deleteUser: ${ e }`);
     // return e;
-  } 
+  }
   finally {
     client.release();
   }
   // console.log("Rows: ", rows);
   // console.log(rows.length === 0 ? false : rows[0].username);
   return (rows.length === 0 ? false : rows[0].username);
-  
+
 };
 
 // function to update user info (used by edit account)
 // returns username, last_login, and profile_pic link of user on success and false on failure
 async function updateUser(user) {
-  
+
   // extract the info to be inserted
   if (user.password != undefined) {
     var hash = await bcrypt.hash(user.password, 10);
   }
   // connect to database
   var rows = [];
-
+  var client = await pool.connect();
   try {
-    var client = await pool.connect();
 
     // begin transaction
     await client.query('BEGIN');
 
     var args = [
       user.username,
-      hash, 
-      user.bio, 
-      user.name, 
+      hash,
+      user.bio,
+      user.name,
       user.interests,
       user.accessibility_features,
       user.profile_pic
     ];
 
-    var query = `UPDATE ${USER_TABLE} SET passhash = $2, bio = $3, name = $4, interests = $5, 
-      accessibility_features = $6, profile_pic = $7 WHERE username = $1 
+    var query = `UPDATE ${USER_TABLE} SET passhash = $2, bio = $3, name = $4, interests = $5,
+      accessibility_features = $6, profile_pic = $7 WHERE username = $1
       RETURNING username, profile_pic, last_login`
     ;
 
     if (user.password === undefined) {
       args.splice(1,1);
-      query = `UPDATE ${USER_TABLE} 
+      query = `UPDATE ${USER_TABLE}
         SET bio = $2, name = $3, interests = $4, accessibility_features = $5, profile_pic = $6
         WHERE username = $1 RETURNING username, profile_pic, last_login`
       ;
@@ -218,7 +217,7 @@ async function updateUser(user) {
     var res = await client.query(query, args);
     rows = res.rows;
     // console.log("ROWS: ", rows);
-    
+
     // end transaction
     await client.query('COMMIT');
   }
@@ -229,20 +228,19 @@ async function updateUser(user) {
   finally {
     client.release();
   }
-  
+
   // returns id of user if success otherwise false
   return (rows.length === 0 ? false : rows[0]);
 }
 
 // @brief: timer function which will clear any new posts from the
 //         user's new posts column
-// @param: username: the user's username so it can find the row. 
+// @param: username: the user's username so it can find the row.
 // @return: none
 async function clearNewPostColumn(username) {
   var query;
-
+  var client = await pool.connect();
   try {
-    var client = await pool.connect();
 
     client.query("BEGIN");
 
@@ -278,8 +276,8 @@ async function updateLoginTime(user){
     arg = user.username;
   }
   console.log(query)
+  var client = await pool.connect();
   try{
-    var client = await pool.connect();
 
     // console.log(user);
     await client.query('BEGIN');
@@ -313,33 +311,32 @@ async function getSpins(users) {
   var posts = {newtagposts: [], regularposts:[]};
   var res = [];
   var newposts = []; // list of objects : {username: <username>, postid: <postid>}
-
+  var client = await pool.connect();
   try {
-    var client = await pool.connect();
     followed = JSON.parse(users);
     console.log(followed);
-    // SELECT new_tag_posts from USERS_TABLE where username 
+    // SELECT new_tag_posts from USERS_TABLE where username
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string
-    // and also search for tags associated with the supplied followed users list 
+    // and also search for tags associated with the supplied followed users list
     // in the followed user's posts
     for (var index = 0; index < followed.length; index++)
     {
       var item = followed[index];
-      // get the post id of the new topic thing idk 
+      // get the post id of the new topic thing idk
       var newpostid = await client.query(
-        `SELECT username, new_tag_posts from ${USER_TABLE} 
+        `SELECT username, new_tag_posts from ${USER_TABLE}
          WHERE username = $1`, [item.username]);
 
       newpostid = newpostid.rows[0];
-      
+
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      if (newpostid.postid) 
+      if (newpostid.postid)
       {
         newposts.push({ username: newpostid.username, postid: newpostid.id} );
       }
-      // select * from <username_spins>  
+      // select * from <username_spins>
       query += baseQuery + userSpinTableName(item.username);
 
       // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
@@ -349,7 +346,7 @@ async function getSpins(users) {
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
         var where = ' WHERE ';
-       
+
         //  for each tag in the tag list, append it to a where statement
       item.tags.forEach((tag, i) => {
         console.log(tag);
@@ -371,7 +368,7 @@ async function getSpins(users) {
       }
     };
 
-    
+
     // final string:
     // SELECT * FROM <user1_spins> WHERE tags @> <tags>
     // UNION ALL
@@ -380,19 +377,19 @@ async function getSpins(users) {
     // ...
     // ORDER BY date DESC;
     query += ' ORDER BY date DESC';
-    
+
     console.log(query);
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
 
     query = '';
-    if (newposts.length > 0) 
+    if (newposts.length > 0)
     {
-      for (var i = 0; i < newposts.length; i++) 
+      for (var i = 0; i < newposts.length; i++)
       {
         var post = newposts[i];
-        query += baseQuery + ` ${userSpinTableName(post.username)} 
+        query += baseQuery + ` ${userSpinTableName(post.username)}
         WHERE id = ${post.postid}`;
 
         // if last item in list do not append union
@@ -406,13 +403,13 @@ async function getSpins(users) {
     }
   }
   catch (e) {
-    console.log('Error encounterd in db.getSpins:', e);  
+    console.log('Error encounterd in db.getSpins:', e);
   }
-  finally 
+  finally
   {
     client.release();
   }
-  
+
   return posts;
 };
 
@@ -423,9 +420,8 @@ async function getSpins(users) {
 async function addSpin(username, spin) {
   var rows = [];
   var query;
-
+  var client = await pool.connect();
   try {
-    const client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
@@ -447,7 +443,7 @@ async function addSpin(username, spin) {
 
     var args = [
       spin.content,
-      spin.tags,
+      unique(spin.tags),
       spin.edited,
       spin.likes,
       spin.quotes,
@@ -457,10 +453,10 @@ async function addSpin(username, spin) {
       username,
     ];
 
-    
-    query = `INSERT INTO ${tablename} 
-      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list, username) 
-      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[], $9::VARCHAR(15)) 
+
+    query = `INSERT INTO ${tablename}
+      (content, tags, date, edited, likes, quotes, is_quote, quote_origin, like_list, username)
+      VALUES ($1, $2::VARCHAR(19)[], NOW(), $3, $4, $5, $6, $7::JSON, $8::text[], $9::VARCHAR(15))
       RETURNING id`
     ;
 
@@ -476,19 +472,19 @@ async function addSpin(username, spin) {
         username,
       ];
       // add the post to the new tag posts column and set a timer function
-      query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2 
+      query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2
                 WHERE username = $3 RETURNING username`;
       await client.query(query, args);
-      
+
       // trigger a function to delete the post id from the new post column after
-      // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for 
+      // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for
       // actual
       setTimeout(() => { clearNewPostColumn(username); }, NEW_POST_TIMEOUT);
     }
 
     await client.query('COMMIT');
-    
-  } 
+
+  }
   catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.addSpin: ${ e }`);
@@ -502,22 +498,21 @@ async function addSpin(username, spin) {
 // Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
   var rows = [];
-
+  var client = await pool.connect();
   try {
-    const client = await pool.connect();
 
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
-    var query = 
+    var query =
       `DELETE FROM ${tablename} WHERE id=$1 RETURNING id, username`
     ;
 
     var res = await client.query(query, [spin_id]);
     rows = res.rows;
     await client.query('COMMIT');
-    
-  } 
+
+  }
   catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.deleteSpin: ${ e }`);
@@ -538,7 +533,7 @@ async function followTopicUserPair(username, tofollow, tags) {
   var rows = [];
 
   try{
-    
+
     await client.query('BEGIN');
 
     var args = [username];
@@ -549,7 +544,8 @@ async function followTopicUserPair(username, tofollow, tags) {
 
     var res = await client.query(query,args);
     rows = res.rows;
-    
+    console.log(rows);
+
     var following = rows[0].following;
 
     var tofollowIndex = -1;
@@ -559,7 +555,7 @@ async function followTopicUserPair(username, tofollow, tags) {
         break;
       }
     }
-    
+
     // if not exists add new user
     if (tofollowIndex === -1) {
       var follow = {'username': tofollow, 'tags': tags};
@@ -591,12 +587,14 @@ async function followTopicUserPair(username, tofollow, tags) {
     args = [tofollow];
 
     var query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
-    
+
     var res = await client.query(query,args);
     rows = res.rows;
+    console.log(rows);
+
 
     var followers = rows[0].followers;
-    
+
     if(!followers.includes(username)) {
       followers.push(username);
     }
@@ -620,16 +618,17 @@ async function followTopicUserPair(username, tofollow, tags) {
     if (!changedInfo) {
       return "Error: nothing changed";
     }
-  } 
+  }
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.followTopicUserPair: ${ e }`);
     // return e;
-  } 
+    return false;
+  }
   finally {
     client.release();
   }
-  
+  console.log('returning from db.followuser', rows);
   return (rows.length === 0 ? false : rows[0].username);
 };
 
@@ -644,23 +643,21 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
   var rows = [];
   var client = await pool.connect();
-
   try{
-    // var client = await pool.connect();
     // begin database transaction
     await client.query('BEGIN');
-    
+
     var args = [unfollowingUser];
     var query = `SELECT following FROM ${USER_TABLE} WHERE username = $1`;
-    
+
     var res = await client.query(query,args);
-    rows = res.rows;   
+    rows = res.rows;
     var following = rows[0].following;
     var changedInfo = false;
-    
+
     args = [unfollowedUser];
     query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
-    
+
     res = await client.query(query,args);
     var followers = res.rows[0].followers;
 
@@ -672,9 +669,9 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
         break;
       }
     }
-    
+
     var empty = false;
-    if (followingIndex > -1) 
+    if (followingIndex > -1)
     {
       // if tags is empty, it means that delete all tags
       if (tags.length === 0) {
@@ -689,7 +686,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
           if (index > -1) {
             following.users[followingIndex].tags.splice(index, 1);
             changedInfo = true;
-          }        
+          }
         }
         // if the removing tags makes it empty
         if (following.users[followingIndex].tags.length === 0) {
@@ -704,14 +701,14 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     if (unfollowingUserIndex > -1 && empty) {
       followers.splice(unfollowingUserIndex, 1);
     }
-    
+
     // send the new list of tags to database
     query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
     args = [unfollowingUser, following]
 
     var res = await client.query(query, args);
-    
+
     query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
     args = [unfollowedUser, followers];
@@ -721,19 +718,19 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
     if (!changedInfo) {
       return "Error: nothing changed";
     }
-    
+
     // end the database transaction
     await client.query('COMMIT');
     rows = res.rows;
-  } 
+  }
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.unfollowTopicUserPair: ${ e }`);
-  } 
+  }
   finally {
     client.release();
   }
-  
+
   return (rows.length === 0 ? false : rows[0].username);
 };
 
@@ -747,13 +744,13 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 async function likeSpin(user_liker, user_poster, spin) {
   var rows = [];
   console.log(user_liker, user_poster, spin);
+  var client = await pool.connect();
   try {
-    const client = await pool.connect();
 
     var tablename = userSpinTableName(user_poster);
-    
+
     await client.query('BEGIN');
-   
+
     var args = [spin];
     var query = `SELECT like_list FROM ${tablename} WHERE id = $1`;
 
@@ -766,7 +763,7 @@ async function likeSpin(user_liker, user_poster, spin) {
       console.log(user_liker + " has already liked the spin")
       await client.query('ROLLBACK');
       return false;
-    } 
+    }
     else {
 
       like_list.push(user_liker);
@@ -774,7 +771,7 @@ async function likeSpin(user_liker, user_poster, spin) {
       query = `UPDATE ${tablename} SET like_list = $1, likes = likes + 1 WHERE id = $2 RETURNING *`;
 
       res = await client.query(query, args);
-      
+
       rows = res.rows;
       // console.log(rows);
       await client.query('COMMIT');
@@ -798,15 +795,14 @@ async function likeSpin(user_liker, user_poster, spin) {
 // @return the spin which was unliked on success and false on failure
 async function unlikeSpin(user_liker, user_poster, spin) {
   var rows = [];
-
+  var client = await pool.connect();
   try {
-    const client = await pool.connect();
 
     var tablename = userSpinTableName(user_poster);
     await client.query('BEGIN');
-    
+
     var args = [spin];
-    var query = `SELECT like_list FROM ${tablename} 
+    var query = `SELECT like_list FROM ${tablename}
     WHERE id = $1`;
 
     var res = await client.query(query, args);
@@ -819,9 +815,9 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     if (index > -1) {
 
       like_list.splice(index, 1);
-      
+
       args = [like_list, spin];
-      query = `UPDATE ${tablename} SET like_list = $1, likes = likes - 1 
+      query = `UPDATE ${tablename} SET like_list = $1, likes = likes - 1
       WHERE id = $2 RETURNING *`;
 
       res = await client.query(query, args);
@@ -829,7 +825,7 @@ async function unlikeSpin(user_liker, user_poster, spin) {
       rows = res.rows;
 
       await client.query('COMMIT');
-    } 
+    }
     else {
       console.log(user_liker + " has not liked the spin")
       await client.query("ROLLBACK");
@@ -853,19 +849,19 @@ pool.on('error', (err, client) => {
 
 
 // @brief: Function to perform a lookup of a given user.
-// @return: False if the user is not found, 
-async function searchForUser(userdata) 
+// @return: False if the user is not found,
+async function searchForUser(userdata)
 {
   var query = `SELECT username, profile_pic, tags_associated
    FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
   var results = [];
-  try 
+  try
   {
     results = await pool.query(query, ['\%' + userdata + '\%']);
     console.log('users matching given criteria =', results.rows);
     return (results.rows.length > 0 ? results.rows : false);
   }
-  catch (e) 
+  catch (e)
   {
     console.log("Error encountered in db.searchForUser: ", e);
     return false;

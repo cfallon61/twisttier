@@ -126,6 +126,7 @@ class UserFeed extends Component
 
         let loggedInUser = this.getViewingUser();
         let chosenList = operation === "Follow" ? this.state.toFollowInterests : this.state.toUnfollowInterests;
+        let self = this;
         if(loggedInUser === null) return;
         let jsonBody = {
             action : operation.toLowerCase(),
@@ -144,7 +145,7 @@ class UserFeed extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`${operation} successful!`);
-                this.closeModal();
+                self.closeModal();
             }
             else{
                 if(res.headers.has("error"))
@@ -329,7 +330,8 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={this.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
+                console.log('spin =', spin);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
             }
         }
         else{

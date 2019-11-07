@@ -161,7 +161,7 @@ class Timeline extends Component
         });
 
         let disableInterestDropdown = false;
-        console.log(spinInterests);
+        // console.log(spinInterests);
         if (spinInterests.length === 0) {
             disableInterestDropdown = true;
         }
@@ -220,8 +220,8 @@ class Timeline extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                console.log(spin);
-                console.log(spin.data);
+                // console.log(spin);
+                // console.log(spin.data);
                 feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID = {spin.id} userToView={this.username} tags={spin.tags} likes={spin.likes} likeList={spin.like_list} />);
             }
         }

@@ -534,7 +534,7 @@ async function deleteSpin(username, spin_id) {
 // @param tags: tag list to add with tofollow in following list
 // @return username of user on success or false on failure
 async function followTopicUserPair(username, tofollow, tags) {
-  const client = await pool.connect();
+  var client = await pool.connect();
   var rows = [];
 
   try{
@@ -643,9 +643,10 @@ async function followTopicUserPair(username, tofollow, tags) {
 async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
 
   var rows = [];
+  var client = await pool.connect();
 
   try{
-    const client = await pool.connect();
+    // var client = await pool.connect();
     // begin database transaction
     await client.query('BEGIN');
     

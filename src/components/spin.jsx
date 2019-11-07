@@ -5,6 +5,7 @@ import './spin.css';
 import PropTypes from 'prop-types';
 import {NotificationManager} from 'react-notifications';
 import { throwStatement } from '@babel/types';
+import { Dropdown, DropdownButton, MenuItem } from 'react-bootstrap';
 
 const tagContainerStyle = {
     display: "grid",
@@ -53,7 +54,7 @@ class Spin extends Component
         this.updateWhetherViewerLikedTheSpin = this.updateWhetherViewerLikedTheSpin.bind(this);
         this.getUserTags = this.getUserTags.bind(this);
         this.formatDate = this.formatDate.bind(this);
-        console.log("Timestamp: " + this.props.timestamp);
+        // console.log("Timestamp: " + this.props.timestamp);
     }
 
     /**
@@ -61,14 +62,14 @@ class Spin extends Component
      */
     getUserTags(followingList, author)
     {
-        console.log(followingList);
-        console.log(author);
-        if(followingList == undefined || followingList.users.length === 0) 
+        // console.log(followingList);
+        // console.log(author);
+        if(followingList === undefined || followingList.users.length === 0) 
         {
             console.log("Return empty");
             return [];//Empty list
         }
-        console.log(followingList.users.length);
+        // console.log(followingList.users.length);
         for(var i = 0; i < followingList.users.length; i++)
         {
             if(followingList.users[i].username === author)
@@ -76,7 +77,7 @@ class Spin extends Component
                 return followingList.users[i].tags;
             }
         }
-        console.log("Return empty from end.");
+        // console.log("Return empty from end.");
         return [];//Empty list
     }
     
@@ -140,7 +141,9 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
+                console.log("Unlike OK response");
                 res.json().then(function(data){
+                    console.log("Unlike sent data.");
                     let jsonData = JSON.parse(data);
                     NotificationManager.success('Unlike successful.');
                     self.setState({likes : jsonData.likes, showLike : true});
@@ -164,7 +167,7 @@ class Spin extends Component
     followTag(tagName)
     {
         let tagList = [];
-        console.log(tagName);
+        // console.log(tagName);
         tagList.push(tagName);
         let jsonBody = {
             action : 'follow',
@@ -172,7 +175,7 @@ class Spin extends Component
             tags : tagList,
             follower : this.userToView
         };
-        console.log(jsonBody);
+        // console.log(jsonBody);
         let self = this;
         fetch("/api/updateFollowing", {
             method : "POST",
@@ -203,7 +206,7 @@ class Spin extends Component
     unfollowTag(tagName)
     {
         let tagList = [];
-        console.log(tagName);
+        // console.log(tagName);
         tagList.push(tagName);
         let jsonBody = {
             action : 'unfollow',
@@ -211,7 +214,7 @@ class Spin extends Component
             tags : tagList,
             follower : this.userToView
         };
-        console.log(jsonBody);
+        // console.log(jsonBody);
         let self = this;
         fetch("/api/updateFollowing", {
             method : "POST",
@@ -255,7 +258,7 @@ class Spin extends Component
     {
         //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log(`/api/users/${self.userToView}`);
+        // console.log(`/api/users/${self.userToView}`);
         fetch(`/api/users/${self.userToView}`, {
             method : 'POST',
             headers: {
@@ -271,10 +274,10 @@ class Spin extends Component
             {
                 const dataDict = JSON.parse(jsonData);
                 let followingList = dataDict.following;
-                console.log(followingList);
-                console.log(self.author);
+                // console.log(followingList);
+                // console.log(self.author);
                 let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
-                console.log(followedTagsFromAuthor);
+                // console.log(followedTagsFromAuthor);
                 self.setState({ viewingUserTags: followedTagsFromAuthor});
               })
           }
@@ -315,10 +318,51 @@ class Spin extends Component
         return dateAndTime[0] + " " + time;
     }
 
+    decideAvailableActionsButton(){
+        
+        // if the post is the user's own post, return options of share, edit, and delete
+        if (this.author === this.userToView) {
+            return(
+                <DropdownButton
+                    title='Actions'
+                    variant='secondary'
+                    size = "sm"
+                    // id={`dropdown-variants-${variant}`}
+                    // key='Info'
+                >
+                    <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
+                    <Dropdown.Item eventKey="2">Edit</Dropdown.Item>
+                    <Dropdown.Item eventKey="3"> Delete </Dropdown.Item>
+                
+                </DropdownButton>
+            )
+        }
+
+        // if the post is someone else's only return ooption of share
+        return(
+            <DropdownButton
+                title='Actions'
+                variant='secondary'
+                size = "sm"
+                // id={`dropdown-variants-${variant}`}
+                // key='Info'
+            >
+                <Dropdown.Item eventKey="1">Share</Dropdown.Item>
+            </DropdownButton>
+        )
+        
+        
+        
+    }
+
     render()
-    {
+    {   
+        // console.log("Author: ", this.author);
+        // console.log("UserToView: ", this.userToView);
         let buttonToShow = null;
+        let actionsButton = null;
         let tagList = [];
+        
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
@@ -336,8 +380,9 @@ class Spin extends Component
             }
             else
             {
-                console.log(this.state.viewingUserTags);
+                // console.log(this.state.viewingUserTags);
                 tagList = this.state.tags.map( (tagName) => {
+                    
                     if(this.state.viewingUserTags.includes(tagName))
                     {
                         return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
@@ -348,14 +393,27 @@ class Spin extends Component
                     }
                 });
             }
+
+            // decide what actions should be visible to the user
+            actionsButton = this.decideAvailableActionsButton();
+
+
         }
 
         return (
             <div className="spin-area">
                 <div className="username-section">
-                    <h5>
-                        {this.props.username}
-                    </h5>
+                    <div>
+                        <h5>
+                            {this.props.username}
+                            <span class = "actionsButton">
+                                {actionsButton}
+                            </span>
+                        </h5>
+                        
+                    </div>
+                    
+                        
                 </div>
                 <div className="spin-content">
                     <p>

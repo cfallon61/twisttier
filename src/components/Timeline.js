@@ -88,6 +88,14 @@ class Timeline extends Component
         this.showModal();
     }
 
+    showModal() {
+        console.log("Showing spin modal...");
+        this.setState({showSpinModal : true})
+    }
+
+    closeModal() {
+        this.setState({showSpinModal : false})
+    }
 
     onSpinPressedAtModal(event) {  
         //TODO: set interest
@@ -139,14 +147,7 @@ class Timeline extends Component
         }
     }
 
-    showModal() {
-        console.log("Showing spin modal...");
-        this.setState({showSpinModal : true})
-    }
-
-    closeModal() {
-        this.setState({showSpinModal : false})
-    }
+    
 
     //when the spin text is changed, update the chars count
     handleSpinChange(event){
@@ -186,7 +187,7 @@ class Timeline extends Component
     }
 
     renderSpinForm() {
-        console.log(this.state.spin.interests);
+        // console.log(this.state.spin.interests);
         let spinInterests = this.state.interests.map((tagName) => {
             return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
         });
@@ -284,10 +285,14 @@ class Timeline extends Component
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                 </div>
+                
                 <div className="user-feed-middle">
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
                     {feed.render()}
+                    <Modal show={this.state.showSpinModal}>
+                        {this.renderSpinForm()}
+                    </Modal>
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>

@@ -5,7 +5,9 @@ import './spin.css';
 import PropTypes from 'prop-types';
 import {NotificationManager} from 'react-notifications';
 import { throwStatement } from '@babel/types';
-import { Dropdown, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 
 const tagContainerStyle = {
     display: "grid",
@@ -54,6 +56,8 @@ class Spin extends Component
         this.updateWhetherViewerLikedTheSpin = this.updateWhetherViewerLikedTheSpin.bind(this);
         this.getUserTags = this.getUserTags.bind(this);
         this.formatDate = this.formatDate.bind(this);
+
+        this.deleteSpin = this.deleteSpin.bind(this);
         // console.log("Timestamp: " + this.props.timestamp);
     }
 
@@ -318,9 +322,64 @@ class Spin extends Component
         return dateAndTime[0] + " " + time;
     }
 
+    deleteSpin() {
+        console.log("Deleting spin");
+        let deleteSpinID = this.spinID;
+        let spinToBeDeleted = {"spinId" : deleteSpinID};
+
+        // console.log("SpinID: ", spinToBeDeleted);
+
+        // TODO:call the server function and refresh the page
+        // let self = this;
+        // fetch("/api/deleteSping", {
+
+        //     method : "POST",
+        //     headers : {
+        //         "Content-Type" : "application/json"
+        //     },
+        //     body : JSON.stringify(spinToBeDeleted)
+
+        // }).then(function(res){
+        //     if(res.status === 200)
+        //     {
+        //         // NotificationManager.success(`You delted the spin`);
+        //         window.location.reload();
+        //     }
+        //     else{
+        //         if(res.headers.has("error"))
+        //         {
+        //             NotificationManager.error(res.headers.get('error'));
+        //         }
+        //         else
+        //         {
+        //             NotificationManager.error("Server didn't return OK response.");
+        //         }
+        //     }
+        // });
+    }
+
+    askForConfirmation = () => {
+        confirmAlert({
+          title: 'Confirm to Delete',
+          message: 'Are you sure you want to delete this post?',
+          buttons: [
+            {
+              label: 'Yes',
+              onClick: () => this.deleteSpin()
+            },
+            {
+              label: 'No',
+              onClick: () => {console.log("user chose not to delete spin")}
+            }
+          ]
+        })
+    };
+
     decideAvailableActionsButton(){
         
+        
         // if the post is the user's own post, return options of share, edit, and delete
+        // console.log("This: ", this);
         if (this.author === this.userToView) {
             return(
                 <DropdownButton
@@ -332,7 +391,9 @@ class Spin extends Component
                 >
                     <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
                     <Dropdown.Item eventKey="2">Edit</Dropdown.Item>
-                    <Dropdown.Item eventKey="3"> Delete </Dropdown.Item>
+                    <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
+                        Delete 
+                    </Dropdown.Item>
                 
                 </DropdownButton>
             )

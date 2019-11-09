@@ -2,12 +2,21 @@ import React, {Component} from 'react';
 import "./profile.css";
 import {NotificationManager} from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
+import Modal from "./Modal";
+import Button from "react-bootstrap/Button";
 
 const imgScale = {
     "height" : "100%",
     "width" : "100%"
 }
 
+/**
+ * The profile component.
+ * Has three seperated parts:
+ *  -Basic user information
+ *  -Following and Follower List
+ *  -Interest List
+ */
 class Profile extends Component{
 
     constructor(props)
@@ -23,9 +32,17 @@ class Profile extends Component{
             profilePic : '',
             username : this.props.username,
             following: [],
+            followers: [],
+            followerListShow : false, 
+            followingListShow : false,
             bio : "",
             interests : [],
         };
+
+        this.renderFollowersFollowingList = this.renderFollowersFollowingList.bind(this);
+        this.showUserList = this.showUserList.bind(this);
+        this.openFollowerModal = this.openFollowerModal.bind(this);
+        this.openFollowingModal = this.openFollowingModal.bind(this);
     }
 
     componentDidMount()
@@ -98,6 +115,47 @@ class Profile extends Component{
         ;
     }
 
+    /**
+     * Returns the list of anchor tags with the link of the user's profiles given a list of usernames. 
+     * @param {*} userList List of usernames.
+     */
+    showUserList(userList)
+    {
+      return userList.map((username) => {
+        let userLink = `/profile/${username}`;
+        return <a href={userLink}>{username}</a>;
+      });
+    }
+
+    openFollowerModal()
+    {
+      this.setState({followerListShow : true});
+    }
+
+    openFollowingModal()
+    {
+      this.setState({followingListShow : true});
+    }
+
+    renderFollowersFollowingList()
+    {
+      let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Following</Button>;
+      let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Followers</Button>;
+
+      return (
+        <div className="follow-info-container">
+          <div className="follower-list">
+            {followerListButton}
+      <Modal show={this.followerListShow}>{this.showUserList(this.state.followers)}</Modal>
+          </div>
+          <div className='following-list'>
+            {followingListButton}
+            <Modal show={this.followingListShow}>{this.showUserList(this.state.following)}</Modal>
+          </div>
+        </div>
+      );
+    }
+
     render()
     {
         let tagViews = [];
@@ -116,18 +174,7 @@ class Profile extends Component{
         {
             tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
         }
-        if (this.state.following.length > 0)
-        {
-          var following = this.state.following;
-          for (var i = 0; i < following.length; i++) 
-          {
-            followinglist.push(<h6 className="follow-entry">{following[i].username}</h6>);
-          }
-        }
-        else 
-        {
-          followinglist.push(<h6 className="tag-entry">This user doesn't follow anyone.</h6>);
-        }
+
         return (
             <div className="profile-container">
                 <div className="profile-info">
@@ -141,12 +188,7 @@ class Profile extends Component{
                         {tagViews}
                     </div>
                 </div>
-                <div className="who_i_follow">
-                  <h4>Who I follow</h4>
-                  <div className='followingList'>
-                    {followinglist}
-                  </div>
-                </div>
+                {this.renderFollowersFollowingList()}
             </div>
         );
     }

@@ -34,3 +34,8 @@
     display: grid;
     grid-template-columns: 1fr
 }
+
+.follow-info-container{
+    display: grid;
+    grid-auto-columns: 1fr 1fr;
+}

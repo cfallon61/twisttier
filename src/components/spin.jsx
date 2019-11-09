@@ -8,6 +8,8 @@ import { throwStatement } from '@babel/types';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
+import Modal from './Modal.js';
+import Form from 'react-bootstrap/Form';
 
 const tagContainerStyle = {
     display: "grid",
@@ -39,7 +41,12 @@ class Spin extends Component
             spinID : this.props.spinID,
             showLike : true,
             viewingUserTags : [],
-            likeList: this.props.likeList
+            likeList: this.props.likeList,
+
+            // for handling the edit form modal
+            showEditer : false,
+            initialEditorValue : this.props.content,
+            newTagText : ""
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -49,6 +56,7 @@ class Spin extends Component
         this.userToView = this.props.userToView;
         this.author = this.props.username;
         this.spinID = this.props.spinID;
+        this.interestsOfUser = this.props.userInterests;
 
         //this.followTag = this.followTag.bind(this);
         //this.unfollowTag = this.unfollowTag.bind(this);
@@ -57,8 +65,19 @@ class Spin extends Component
         this.getUserTags = this.getUserTags.bind(this);
         this.formatDate = this.formatDate.bind(this);
 
+        // functions to delete spin
         this.deleteSpin = this.deleteSpin.bind(this);
-        // console.log("Timestamp: " + this.props.timestamp);
+        
+        // functions for edit modal
+        this.showEditModal = this.showEditModal.bind(this);
+        this.closeEditModal = this.closeEditModal.bind(this);
+        this.renderEditForm = this.renderEditForm.bind(this);
+        this.handleTextChange = this.handleTextChange.bind(this);
+        this.handleInterestAddition = this.handleInterestAddition.bind(this);
+        this.handleInterestDeletion = this.handleInterestDeletion.bind(this);
+        this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
+        this.handNewTagAddition = this.handleNewTagAddition.bind(this);
+        this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
     }
 
     /**
@@ -375,6 +394,8 @@ class Spin extends Component
         })
     };
 
+    
+
     decideAvailableActionsButton(){
         
         
@@ -390,7 +411,7 @@ class Spin extends Component
                     // key='Info'
                 >
                     <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
-                    <Dropdown.Item eventKey="2">Edit</Dropdown.Item>
+                    <Dropdown.Item eventKey="2" onClick = {this.showEditModal}>Edit</Dropdown.Item>
                     <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
                         Delete 
                     </Dropdown.Item>
@@ -416,8 +437,167 @@ class Spin extends Component
         
     }
 
+    // show the edit post modal
+    showEditModal() {
+        this.setState({showEditer : true})
+    }
+
+    // closes the edit post modal
+    closeEditModal() {
+        this.setState({showEditer : false})
+    }
+
+    // handles change of text for edit spin
+    handleTextChange(event){
+        this.setState({initialEditorValue : event.target.value}); 
+    }
+
+    // handles change of interest for edit spin
+    handleInterestAddition(newTag) { 
+        let tagList = this.state.tags;
+
+        tagList.push(newTag);
+
+        this.setState({tags : tagList});
+
+
+    }
+
+    // handles deletion of tag from the post
+    handleInterestDeletion(oldTag) {
+        let tagList = this.state.tags;
+
+        // find index of the tag
+        let indexOfTag = tagList.indexOf(oldTag);
+        
+        // delete the tag
+        if (indexOfTag != -1) {
+            tagList.splice(indexOfTag, 1);
+        }
+
+        // reset the state
+        this.setState({tags: tagList});
+    }
+
+    // handles the change of text of new tag to be added
+    handleNewTagTextChange(event) {
+        this.setState({newTagText : event.target.value}); 
+    }
+
+    // handles the addition of a complete new tag
+    // NOTE: different format of function used because this format does 
+    // create a "this" of itself and so, "this" can be used normally
+    // to avoid confusion
+    handleNewTagAddition = (event) => {
+        event.preventDefault();
+        this.handleInterestAddition(this.state.newTagText);
+
+        // reset the newTagText
+        this.setState({newTagText : ""})
+    }
+
+    // sends the edited post to server and refreshes the front end
+    // TODO: handle server response
+    handleEditPostSubmission(){
+        console.log("Submitting the editted post");
+    }
+
+    // creates the components of the edit modal
+    renderEditForm() {
+        // console.log("Content: ", this.state.content);
+        // console.log("Tags: ", this.state.tags);
+        // console.log("spinid: ", this.state.spinID);
+        // console.log("User interests", this.props.userInterests);
+
+        let spinContent = this.state.content;
+
+        let userInterestsCopy = this.interestsOfUser;
+
+
+        console.log("user interests after: ", userInterestsCopy);
+        
+
+        // return all the tags the user has posted with before
+        let spinInterests = userInterestsCopy.map((tagName) => {
+
+            if (!this.state.tags.includes(tagName)){
+                return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
+                        {tagName}
+                    </Dropdown.Item>;
+            }
+        });
+
+        // create a dropdown using those interests
+        let userInterestsDropdown = (
+            <DropdownButton
+                title='Suggested Tags'
+                variant='primary'
+            >
+                {spinInterests}
+            </DropdownButton>
+        );
+
+        // show all the tags that are already associated with the spin in a dropdown
+        let initialTags = this.state.tags;
+
+        let initialTagsDrop = initialTags.map((tagName) => {
+            return  <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
+                        {tagName}
+                    </Dropdown.Item>;
+        });
+
+        // create a dropdown using those interests
+        let addedTagsDropdown = (
+            <DropdownButton
+                title='Tags'
+                variant='secondary'
+            >
+                {initialTagsDrop}
+            </DropdownButton>
+        );
+
+        return (
+            <div className="spin-form">
+                    <Form >
+                        <Form.Label>Edit Spin</Form.Label>
+                        <Form.Control 
+                            as = "textarea" 
+                            value= {this.state.initialEditorValue}
+                            rows="3" 
+                            onChange = {this.handleTextChange}
+                        />
+                            <p>{this.state.initialEditorValue.length}/90 characters</p>
+                        
+                        {userInterestsDropdown}
+                        {addedTagsDropdown}
+                    </Form>
+
+                    <Form onSubmit = {this.handleNewTagAddition}>
+                        <Form.Control 
+                            width = "40%" 
+                            placeholder = "Add a new tag" 
+                            onChange = {this.handleNewTagTextChange}
+                            value = {this.state.newTagText}
+                        />
+                        
+                        <Button variant = "primary" type = "submit">Add tag</Button>
+                    </Form>
+                
+                
+                <div className="modal-footer">
+                    <Button onClick = {this.handleEditPostSubmission}>Edit</Button>
+                    <Button onClick={this.closeEditModal}>Cancel</Button>
+                </div>
+            </div>
+
+        );
+    }
+
+    
+
     render()
     {   
+        // console.log("Editor bool: ", this.state.showEditer);
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
         let buttonToShow = null;
@@ -463,6 +643,7 @@ class Spin extends Component
 
         return (
             <div className="spin-area">
+                
                 <div className="username-section">
                     <div>
                         <h5>
@@ -493,6 +674,10 @@ class Spin extends Component
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagList}
                 </div>
+                <Modal show = {this.state.showEditer}>
+                    {this.renderEditForm()}
+                </Modal>
+                
             </div>
         );
     }

@@ -41,7 +41,6 @@ class Timeline extends Component
         this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
-        this.updateUserSpins = this.updateUserSpins.bind(this);
         this.addInterestToSpin = this.addInterestToSpin.bind(this);
         this.handleSpinChange = this.handleSpinChange.bind(this);
         this.handleTag = this.handleTag.bind(this);
@@ -99,7 +98,7 @@ class Timeline extends Component
 
     onSpinPressedAtModal(event) {  
         //TODO: set interest
-
+        console.log("user interests: ", this.state.interests);
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
             return;
@@ -179,11 +178,6 @@ class Timeline extends Component
                 })
             }
         })
-    }
-
-    updateUserSpins() {
-        NotificationManager.success(`${this.state.spin.text}`);
-        //TODO
     }
 
     renderSpinForm() {
@@ -266,7 +260,12 @@ class Timeline extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID = {spin.id} userToView={this.username} tags={spin.tags} likes= {spin.likes} likeList = {spin.like_list}/>);
+                feed.addSpin(<Spin username={spin.username} content={spin.content} 
+                    timestamp={spin.date} spinID = {spin.id} 
+                    userToView={this.username} tags={spin.tags} 
+                    likes= {spin.likes} likeList = {spin.like_list}
+                    userInterests = {this.state.interests}    
+                />);
             }
         }
         else{
@@ -290,9 +289,6 @@ class Timeline extends Component
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
                     {feed.render()}
-                    <Modal show={this.state.showSpinModal}>
-                        {this.renderSpinForm()}
-                    </Modal>
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>

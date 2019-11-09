@@ -504,57 +504,75 @@ class Spin extends Component
 
     // creates the components of the edit modal
     renderEditForm() {
-        // console.log("Content: ", this.state.content);
-        // console.log("Tags: ", this.state.tags);
-        // console.log("spinid: ", this.state.spinID);
-        // console.log("User interests", this.props.userInterests);
-
         let spinContent = this.state.content;
-
         let userInterestsCopy = this.interestsOfUser;
-
 
         console.log("user interests after: ", userInterestsCopy);
         
-
+        let spinInterests = [];
         // return all the tags the user has posted with before
-        let spinInterests = userInterestsCopy.map((tagName) => {
+        if(userInterestsCopy !== undefined)
+        {
+            spinInterests = userInterestsCopy.map((tagName) => {
 
-            if (!this.state.tags.includes(tagName)){
-                return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
-                        {tagName}
-                    </Dropdown.Item>;
-            }
-        });
+                if (!this.state.tags.includes(tagName)){
+                    return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
+                            {tagName}
+                        </Dropdown.Item>;
+                }
+            });
+        }
 
-        // create a dropdown using those interests
-        let userInterestsDropdown = (
-            <DropdownButton
-                title='Suggested Tags'
-                variant='primary'
-            >
-                {spinInterests}
-            </DropdownButton>
-        );
+        let userInterestsDropdown = null;
+        // create a dropdown using those interests. If list is empty, then the view will only consist of text.
+        if(spinInterests.length === 0)
+        {
+            userInterestsDropdown = <h3>This user don't have any interests.</h3>
+        }
+        else
+        {
+            userInterestsDropdown = (
+                <DropdownButton
+                    title='Suggested Tags'
+                    variant='primary'
+                >
+                    {spinInterests}
+                </DropdownButton>
+            );
+        }
 
         // show all the tags that are already associated with the spin in a dropdown
         let initialTags = this.state.tags;
 
-        let initialTagsDrop = initialTags.map((tagName) => {
-            return  <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
-                        {tagName}
-                    </Dropdown.Item>;
-        });
+        let initialTagsDropdown = [];
 
-        // create a dropdown using those interests
-        let addedTagsDropdown = (
-            <DropdownButton
-                title='Tags'
-                variant='secondary'
-            >
-                {initialTagsDrop}
-            </DropdownButton>
-        );
+        if(initialTags !== undefined)
+        {
+            initialTagsDropdown = initialTags.map((tagName) => {
+                return  <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
+                            {tagName}
+                        </Dropdown.Item>;
+            });
+        }
+
+        let addedTagsDropdown = null;
+        if(initialTagsDropdown.length === 0)
+        {
+            addedTagsDropdown = <h3>This spin doesn't associate with any tags.</h3>
+        }
+        else
+        {
+            // create a dropdown using those interests
+            addedTagsDropdown = (
+                <DropdownButton
+                    title='Tags'
+                    variant='secondary'
+                >
+                    {initialTagsDropdown}
+                </DropdownButton>
+            );
+        }
+
 
         return (
             <div className="spin-form">

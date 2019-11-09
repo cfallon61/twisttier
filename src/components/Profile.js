@@ -43,6 +43,8 @@ class Profile extends Component{
         this.showUserList = this.showUserList.bind(this);
         this.openFollowerModal = this.openFollowerModal.bind(this);
         this.openFollowingModal = this.openFollowingModal.bind(this);
+        this.closeFollowerModal = this.closeFollowerModal.bind(this);
+        this.closeFollowingModal = this.closeFollowingModal.bind(this);
     }
 
     componentDidMount()
@@ -121,10 +123,22 @@ class Profile extends Component{
      */
     showUserList(userList)
     {
-      return userList.map((username) => {
-        let userLink = `/profile/${username}`;
-        return <a href={userLink}>{username}</a>;
+      console.log(userList);
+      //The user list has entries (username, tags).
+      let userListView = userList.map((entry) => {
+        let userLink = `/profile/${entry.username}`;
+        let tagView = entry.tags.map((tag) => {
+          return <p>{tag}</p>;
+        });
+        return (
+          <div>
+          <a href={userLink}><h4>{entry.username}</h4></a>
+            {tagView}
+          </div>
+        );
       });
+      console.log(userListView);
+      return userListView;
     }
 
     openFollowerModal()
@@ -137,20 +151,38 @@ class Profile extends Component{
       this.setState({followingListShow : true});
     }
 
+    closeFollowerModal()
+    {
+      this.setState({followerListShow : false});
+    }
+
+    closeFollowingModal()
+    {
+      this.setState({followingListShow : false});
+    }
+
     renderFollowersFollowingList()
     {
       let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Following</Button>;
       let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Followers</Button>;
 
+      console.log(this.showUserList(this.state.following));
+
       return (
         <div className="follow-info-container">
           <div className="follower-list">
             {followerListButton}
-      <Modal show={this.followerListShow}>{this.showUserList(this.state.followers)}</Modal>
+            <Modal show={this.state.followerListShow}>
+              {this.showUserList(this.state.followers)}
+              <Button onClick={this.closeFollowerModal}>Close</Button>
+            </Modal>
           </div>
           <div className='following-list'>
             {followingListButton}
-            <Modal show={this.followingListShow}>{this.showUserList(this.state.following)}</Modal>
+            <Modal show={this.state.followingListShow}>
+                {this.showUserList(this.state.following)}
+                <Button onClick={this.closeFollowingModal}>Close</Button>
+            </Modal>
           </div>
         </div>
       );

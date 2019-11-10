@@ -37,7 +37,12 @@ class Profile extends Component{
             followingListShow : false,
             bio : "",
             interests : [],
+            //This is state to keep track whether the mouse cursor is on top of a username.
+            //usernameHover : false
         };
+
+        //This will contain the hovered users followed or following tags.
+        this.currentHoverView = null;
 
         this.renderFollowersFollowingList = this.renderFollowersFollowingList.bind(this);
         this.showUserList = this.showUserList.bind(this);
@@ -126,15 +131,8 @@ class Profile extends Component{
       console.log(userList);
       //The user list has entries (username, tags).
       let userListView = userList.map((entry) => {
-        let userLink = `/profile/${entry.username}`;
-        let tagView = entry.tags.map((tag) => {
-          return <p>{tag}</p>;
-        });
         return (
-          <div>
-          <a href={userLink}><h4>{entry.username}</h4></a>
-            {tagView}
-          </div>
+          <UsernameListEntry entry={entry}/> 
         );
       });
       console.log(userListView);
@@ -165,8 +163,6 @@ class Profile extends Component{
     {
       let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Following</Button>;
       let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Followers</Button>;
-
-      console.log(this.showUserList(this.state.following));
 
       return (
         <div className="follow-info-container">
@@ -236,5 +232,81 @@ class Profile extends Component{
         this.setState({tags : updatedList});
     }
 }
+
+/*Helper components for profile.*/
+
+/**
+ * Username entry in the follower-following list.
+ * Props:
+ * entry : A map entry that has the structure: (username, tags). 
+ */
+class UsernameListEntry extends Component
+{
+  constructor(props)
+  {
+    super(props);
+    this.state = {
+      hover : false
+    };
+    this.username = this.props.entry.username;
+    this.tags = this.props.entry.tags;
+  }
+
+  render()
+  {
+    let userLink = `/profile/${this.username}`;
+    //Building a string in form of "tag1, tag2, tag3 ..., tagn".
+    let tagList = [];
+    for(let i = 0; i < this.tags.length; i++)
+    {
+      if(i == this.tags.length - 1)
+      {
+        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        {
+          tagList.push(this.tags[i]);
+        }
+
+      }
+      else
+      {
+        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        {
+          tagList.push(this.tags[i] + ',');
+        }
+      }
+    }
+
+    let tagView = tagList.join("");
+
+    let hoverView = null;
+    if(this.state.hover)
+    {
+      if(tagView.length === 0)
+      {
+        hoverView = (
+          <div className="hover-tag-view">
+              <h6>Every tag</h6>  
+          </div>
+          );
+      }
+      else
+      {
+        hoverView = (
+          <div className="hover-tag-view">
+                {tagView}
+          </div>
+          );
+      }
+    }
+    /*OnMouseEnter and OnMouseLeave are events to catch hovering. When the username is hovered, we want to show the list of tags being followed or following.*/ 
+    return (
+      <div className="user-list-view">
+      <a href={userLink} onMouseEnter={() => this.setState({hover : true})} onMouseLeave={() => this.setState({hover : false})}> 
+        <h4>{this.username}</h4></a>
+        {hoverView}
+      </div>
+    );
+  }
+} 
 
 export default Profile;

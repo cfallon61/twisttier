@@ -67,6 +67,7 @@ class Spin extends Component
 
         // functions to delete spin
         this.deleteSpin = this.deleteSpin.bind(this);
+        this.showDelayedNotification = this.showDelayedNotification.bind(this);
         
         // functions for edit modal
         this.showEditModal = this.showEditModal.bind(this);
@@ -104,6 +105,7 @@ class Spin extends Component
         return [];//Empty list
     }
     
+    // likes spin 
     likeSpin()
     {
         let esteemBody = {
@@ -144,6 +146,7 @@ class Spin extends Component
         });
     }
 
+    // unlikes spin
     unlikeSpin()
     {
         let esteemBody = {
@@ -187,6 +190,7 @@ class Spin extends Component
         });
     }
 
+    // follows tags of spins
     followTag(tagName)
     {
         let tagList = [];
@@ -226,6 +230,7 @@ class Spin extends Component
         });
     }
 
+    // unfollows tags of spin
     unfollowTag(tagName)
     {
         let tagList = [];
@@ -264,6 +269,7 @@ class Spin extends Component
             }
         });
     }
+
     //Returns a boolean indicating the user already liked the spin.
     updateWhetherViewerLikedTheSpin()
     {
@@ -320,6 +326,7 @@ class Spin extends Component
         ;
     }
 
+    // checks whether viewer is logged in or nor
     viewerIsAuthenticated()
     {
         return document.cookie !== "";
@@ -334,6 +341,8 @@ class Spin extends Component
         }
     }
 
+
+    // formats the date
     formatDate(timestamp)
     {
         let dateAndTime = timestamp.split('T');
@@ -341,42 +350,60 @@ class Spin extends Component
         return dateAndTime[0] + " " + time;
     }
 
+    // show delayed notification
+    showDelayedNotification() {
+
+        
+
+    }
+
+    // deletes the spin
     deleteSpin() {
         console.log("Deleting spin");
         let deleteSpinID = this.spinID;
+        let spinAuthor = this.author;
         let spinToBeDeleted = {"spinId" : deleteSpinID};
 
-        // console.log("SpinID: ", spinToBeDeleted);
+        console.log("SpinID: ", spinToBeDeleted);
+        console.log("username: ", this.author);
 
         // TODO:call the server function and refresh the page
-        // let self = this;
-        // fetch("/api/deleteSping", {
+        let self = this;
+        fetch("/api/deleteSpin/" + spinAuthor, {
 
-        //     method : "POST",
-        //     headers : {
-        //         "Content-Type" : "application/json"
-        //     },
-        //     body : JSON.stringify(spinToBeDeleted)
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(spinToBeDeleted)
 
-        // }).then(function(res){
-        //     if(res.status === 200)
-        //     {
-        //         // NotificationManager.success(`You delted the spin`);
-        //         window.location.reload();
-        //     }
-        //     else{
-        //         if(res.headers.has("error"))
-        //         {
-        //             NotificationManager.error(res.headers.get('error'));
-        //         }
-        //         else
-        //         {
-        //             NotificationManager.error("Server didn't return OK response.");
-        //         }
-        //     }
-        // });
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                // console.log("status:", res.status);
+                NotificationManager.success("Spin has been deleted");
+                
+                // show the notification and then delete
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 1000)
+                
+                // console.log("Spin deleted");
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
     }
 
+    // asks for Confirmation for delete spin
     askForConfirmation = () => {
         confirmAlert({
           title: 'Confirm to Delete',
@@ -395,7 +422,7 @@ class Spin extends Component
     };
 
     
-
+    // decide the actions that would be available for a viewing user
     decideAvailableActionsButton(){
         
         

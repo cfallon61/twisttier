@@ -500,7 +500,6 @@ async function deleteSpin(username, spin_id) {
   var rows = [];
   var client = await pool.connect();
   try {
-
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 

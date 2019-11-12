@@ -67,7 +67,6 @@ class Spin extends Component
 
         // functions to delete spin
         this.deleteSpin = this.deleteSpin.bind(this);
-        this.showDelayedNotification = this.showDelayedNotification.bind(this);
         
         // functions for edit modal
         this.showEditModal = this.showEditModal.bind(this);
@@ -350,12 +349,6 @@ class Spin extends Component
         return dateAndTime[0] + " " + time;
     }
 
-    // show delayed notification
-    showDelayedNotification() {
-
-        
-
-    }
 
     // deletes the spin
     deleteSpin() {

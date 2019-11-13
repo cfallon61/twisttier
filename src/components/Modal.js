@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-  
+
 const modalStyle = {
   backgroundColor: 'black',
   borderRadius: 5,
@@ -25,7 +25,7 @@ const backdropStyle = {
   right: 0,
   backgroundColor: 'rgba(0,0,0,0.3)',
   padding: 50
-};  
+};
 
 /**
  * Modal component for opening up dialogs.
@@ -36,13 +36,13 @@ class Modal extends Component
 {
     render()
     {
-        console.log(this.props.children);
-        if(!this.props.show) 
+        // console.log(this.props.children);
+        if(!this.props.show)
         {
             return null;
         }
-        
-        console.log("Rendering modal");
+
+        // console.log("Rendering modal");
         return (
             <div className="backdrop" style={backdropStyle}>
               <div className="custom-modal" style={modalStyle}>

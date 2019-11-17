@@ -32,7 +32,7 @@ class Spin extends Component
         super(props);
         this.state = {
             tags: this.props.tags,
-            edited: false, 
+            edited: false,
             quoted: false,
             content: this.props.content,
             timestamp: this.props.timestamp,
@@ -71,7 +71,7 @@ class Spin extends Component
 
         // functions to delete spin
         this.deleteSpin = this.deleteSpin.bind(this);
-        
+
         // functions for edit modal
         this.showEditModal = this.showEditModal.bind(this);
         this.closeEditModal = this.closeEditModal.bind(this);
@@ -91,7 +91,7 @@ class Spin extends Component
     {
         // console.log(followingList);
         // console.log(author);
-        if(followingList === undefined || followingList.users.length === 0) 
+        if(followingList === undefined || followingList.users.length === 0)
         {
             console.log("Return empty");
             return [];//Empty list
@@ -119,7 +119,7 @@ class Spin extends Component
         };
 
         let self = this;
-        console.log("Liking spin");
+        // console.log("Liking spin");
         fetch("/api/spins/esteem", {
             method : 'POST',
             headers : {
@@ -160,7 +160,7 @@ class Spin extends Component
         };
 
         let self = this;
-        console.log("Unliking spin");
+        // console.log("Unliking spin");
         fetch("/api/spins/esteem", {
             method : 'POST',
             headers : {
@@ -421,8 +421,8 @@ class Spin extends Component
     
     // decide the actions that would be available for a viewing user
     decideAvailableActionsButton(){
-        
-        
+
+
         // if the post is the user's own post, return options of share, edit, and delete
         // console.log("This: ", this);
         if (this.author === this.userToView) {
@@ -437,9 +437,9 @@ class Spin extends Component
                     <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
                     <Dropdown.Item eventKey="2" onClick = {this.showEditModal}>Edit</Dropdown.Item>
                     <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
-                        Delete 
+                        Delete
                     </Dropdown.Item>
-                
+
                 </DropdownButton>
             )
         }
@@ -456,9 +456,9 @@ class Spin extends Component
                 <Dropdown.Item eventKey="1">Share</Dropdown.Item>
             </DropdownButton>
         )
-        
-        
-        
+
+
+
     }
     
 
@@ -492,7 +492,7 @@ class Spin extends Component
 
         // find index of the tag
         let indexOfTag = tagList.indexOf(oldTag);
-        
+
         // delete the tag
         if (indexOfTag != -1) {
             tagList.splice(indexOfTag, 1);
@@ -505,11 +505,11 @@ class Spin extends Component
 
     // handles the change of text of new tag to be added
     handleNewTagTextChange(event) {
-        this.setState({newTagText : event.target.value}); 
+        this.setState({newTagText : event.target.value});
     }
 
     // handles the addition of a complete new tag
-    // NOTE: different format of function used because this format does 
+    // NOTE: different format of function used because this format does
     // create a "this" of itself and so, "this" can be used normally
     // to avoid confusion
     handleNewTagAddition = (event) => {
@@ -652,17 +652,17 @@ class Spin extends Component
                     </Form>
 
                     <Form onSubmit = {this.handleNewTagAddition}>
-                        <Form.Control 
-                            width = "40%" 
-                            placeholder = "Add a new tag" 
+                        <Form.Control
+                            width = "40%"
+                            placeholder = "Add a new tag"
                             onChange = {this.handleNewTagTextChange}
                             value = {this.state.newTagText}
                         />
-                        
+
                         <Button variant = "primary" type = "submit">Add tag</Button>
                     </Form>
-                
-                
+
+
                 <div className="modal-footer">
                     <Button onClick = {this.handleEditPostSubmission}>Edit</Button>
                     <Button onClick={this.closeEditModal}>Cancel</Button>
@@ -679,7 +679,7 @@ class Spin extends Component
         let buttonToShow = null;
         let actionsButton = null;
         let tagList = [];
-        
+
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
@@ -699,7 +699,7 @@ class Spin extends Component
             {
                 // console.log(this.state.viewingUserTags);
                 tagList = this.state.tags.map( (tagName) => {
-                    
+
                     if(this.state.viewingUserTags.includes(tagName))
                     {
                         return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
@@ -719,7 +719,7 @@ class Spin extends Component
 
         return (
             <div className="spin-area">
-                
+
                 <div className="username-section">
                     <div>
                         <h5>
@@ -728,10 +728,10 @@ class Spin extends Component
                                 {actionsButton}
                             </span>
                         </h5>
-                        
+
                     </div>
-                    
-                        
+
+
                 </div>
                 <div className="spin-content">
                     <p>
@@ -753,7 +753,7 @@ class Spin extends Component
                 <Modal show = {this.state.showEditer}>
                     {this.renderEditForm()}
                 </Modal>
-                
+
             </div>
         );
     }

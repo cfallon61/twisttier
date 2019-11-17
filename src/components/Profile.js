@@ -26,14 +26,14 @@ class Profile extends Component{
         this.defaultProfileView = (<div>
                                 <img src={defaultPic} alt={this.username} style={imgScale}/>
                             </div>);
-       
+
         this.state = {
             profilePicLink : "",
             profilePic : '',
             username : this.props.username,
             following: [],
             followers: [],
-            followerListShow : false, 
+            followerListShow : false,
             followingListShow : false,
             bio : "",
             interests : [],
@@ -56,7 +56,7 @@ class Profile extends Component{
     {
         //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log(`/api/users/${self.username}`);
+        // console.log(`/api/users/${self.username}`);
         fetch(`/api/users/${self.username}`, {
             method : 'POST',
             headers: {
@@ -77,10 +77,10 @@ class Profile extends Component{
                 //If link is not empty
                 if(dataDict.profile_pic !== "")
                 {
-                  console.log(dataDict.profile_pic);
+                  // console.log(dataDict.profile_pic);
                   fetch(dataDict.profile_pic).then(function(res)
                   {
-                    console.log('received ', res, 'from server');
+                    // console.log('received ', res, 'from server');
                     if(res.status === 200)
                     {
                       self.state.profilePicLink = res.url;
@@ -89,12 +89,12 @@ class Profile extends Component{
                       chosenProfilePic = (<div>
                         <img src={self.state.profilePicLink} alt={self.state.username} style={imgScale}/>
                           </div>);
-                      
+
                     }
                     self.setState({ profilePic: chosenProfilePic });
                   });
                 }
-                else 
+                else
                 {
                   self.setState({ profilePic: chosenProfilePic });
 
@@ -123,7 +123,7 @@ class Profile extends Component{
     }
 
     /**
-     * Returns the list of anchor tags with the link of the user's profiles given a list of usernames. 
+     * Returns the list of anchor tags with the link of the user's profiles given a list of usernames.
      * @param {*} userList List of usernames.
      */
     showUserList(userList)
@@ -132,7 +132,7 @@ class Profile extends Component{
       //The user list has entries (username, tags).
       let userListView = userList.map((entry) => {
         return (
-          <UsernameListEntry entry={entry}/> 
+          <UsernameListEntry entry={entry}/>
         );
       });
       // console.log(userListView);
@@ -238,7 +238,7 @@ class Profile extends Component{
 /**
  * Username entry in the follower-following list.
  * Props:
- * entry : A map entry that has the structure: (username, tags). 
+ * entry : A map entry that has the structure: (username, tags).
  */
 class UsernameListEntry extends Component
 {
@@ -285,7 +285,7 @@ class UsernameListEntry extends Component
       {
         hoverView = (
           <div className="hover-tag-view">
-              <h6>Every tag</h6>  
+              <h6>Every tag</h6>
           </div>
           );
       }
@@ -298,15 +298,15 @@ class UsernameListEntry extends Component
           );
       }
     }
-    /*OnMouseEnter and OnMouseLeave are events to catch hovering. When the username is hovered, we want to show the list of tags being followed or following.*/ 
+    /*OnMouseEnter and OnMouseLeave are events to catch hovering. When the username is hovered, we want to show the list of tags being followed or following.*/
     return (
       <div className="user-list-view">
-      <a href={userLink} onMouseEnter={() => this.setState({hover : true})} onMouseLeave={() => this.setState({hover : false})}> 
+      <a href={userLink} onMouseEnter={() => this.setState({hover : true})} onMouseLeave={() => this.setState({hover : false})}>
         <h4>{this.username}</h4></a>
         {hoverView}
       </div>
     );
   }
-} 
+}
 
 export default Profile;

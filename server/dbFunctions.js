@@ -41,8 +41,8 @@ var userExists = async function (user) {
     console.log("what the fuck")
     return false;
   }
-  console.log(query, params);
-  console.log('before query')
+  // console.log(query, params);
+  // console.log('before query')
   var res = await pool.query(query, params);
 
   // response is a json
@@ -275,7 +275,7 @@ async function updateLoginTime(user){
     query += ` USERNAME = $1 RETURNING username`;
     arg = user.username;
   }
-  console.log(query)
+  // console.log(query)
   var client = await pool.connect();
   try{
 
@@ -378,7 +378,7 @@ async function getSpins(users) {
     // ORDER BY date DESC;
     query += ' ORDER BY date DESC';
 
-    console.log(query);
+    // console.log(query);
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
@@ -852,7 +852,7 @@ pool.on('error', (err, client) => {
 // @return: False if the user is not found,
 async function searchForUser(userdata)
 {
-  var query = `SELECT username, profile_pic, tags_associated
+  var query = `SELECT username, profile_pic, tags_associated, bio
    FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
   var results = [];
   try

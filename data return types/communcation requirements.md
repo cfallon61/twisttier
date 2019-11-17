@@ -17,12 +17,14 @@ __NOTE__ This functionality is not yet implemented. This is a preliminary specif
           {
             username: 'seriously1',
             profile_pic: 'profileImages/1571946143009_IMG_20180804_121544677_copy.jpg',
-            tags_associated: []
+            tags_associated: [],
+            bio: ""
           },
           {
             username: 'sidv',
             profile_pic: 'profileImages\\1572393972370_pic.jpg',
-            tags_associated: []
+            tags_associated: [],
+            bio: ""
           },
         ]
         ```

@@ -34,3 +34,30 @@
     display: grid;
     grid-template-columns: 1fr
 }
+
+.follow-info-container{
+    display: grid;
+    grid-auto-columns: 1fr 1fr;
+}
+
+.user-list-view {
+    border: solid;
+    background-color: bisque;
+    color: black;
+}
+
+.user-list-view a {
+    text-decoration: none;
+    color: black;
+}
+
+.hover-tag-view {
+    position: absolute;
+    background-color: yellow;
+    color: black;
+    z-index: 5;
+}
+
+.user-list-view:hover{
+    background-color: burlywood;
+}

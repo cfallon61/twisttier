@@ -2,12 +2,21 @@ import React, {Component} from 'react';
 import "./profile.css";
 import {NotificationManager} from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
+import Modal from "./Modal";
+import Button from "react-bootstrap/Button";
 
 const imgScale = {
     "height" : "100%",
     "width" : "100%"
 }
 
+/**
+ * The profile component.
+ * Has three seperated parts:
+ *  -Basic user information
+ *  -Following and Follower List
+ *  -Interest List
+ */
 class Profile extends Component{
 
     constructor(props)
@@ -17,22 +26,37 @@ class Profile extends Component{
         this.defaultProfileView = (<div>
                                 <img src={defaultPic} alt={this.username} style={imgScale}/>
                             </div>);
-       
+
         this.state = {
             profilePicLink : "",
             profilePic : '',
             username : this.props.username,
             following: [],
+            followers: [],
+            followerListShow : false,
+            followingListShow : false,
             bio : "",
             interests : [],
+            //This is state to keep track whether the mouse cursor is on top of a username.
+            //usernameHover : false
         };
+
+        //This will contain the hovered users followed or following tags.
+        this.currentHoverView = null;
+
+        this.renderFollowersFollowingList = this.renderFollowersFollowingList.bind(this);
+        this.showUserList = this.showUserList.bind(this);
+        this.openFollowerModal = this.openFollowerModal.bind(this);
+        this.openFollowingModal = this.openFollowingModal.bind(this);
+        this.closeFollowerModal = this.closeFollowerModal.bind(this);
+        this.closeFollowingModal = this.closeFollowingModal.bind(this);
     }
 
     componentDidMount()
     {
         //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log(`/api/users/${self.username}`);
+        // console.log(`/api/users/${self.username}`);
         fetch(`/api/users/${self.username}`, {
             method : 'POST',
             headers: {
@@ -48,15 +72,15 @@ class Profile extends Component{
             {
                 const dataDict = JSON.parse(jsonData);
 
-                console.log(jsonData);
+                // console.log("This is the json data: ", jsonData);
                 let chosenProfilePic = self.defaultProfileView;
                 //If link is not empty
                 if(dataDict.profile_pic !== "")
                 {
-                  console.log(dataDict.profile_pic);
+                  // console.log(dataDict.profile_pic);
                   fetch(dataDict.profile_pic).then(function(res)
                   {
-                    console.log('received ', res, 'from server');
+                    // console.log('received ', res, 'from server');
                     if(res.status === 200)
                     {
                       self.state.profilePicLink = res.url;
@@ -65,12 +89,12 @@ class Profile extends Component{
                       chosenProfilePic = (<div>
                         <img src={self.state.profilePicLink} alt={self.state.username} style={imgScale}/>
                           </div>);
-                      
+
                     }
                     self.setState({ profilePic: chosenProfilePic });
                   });
                 }
-                else 
+                else
                 {
                   self.setState({ profilePic: chosenProfilePic });
 
@@ -98,12 +122,74 @@ class Profile extends Component{
         ;
     }
 
+    /**
+     * Returns the list of anchor tags with the link of the user's profiles given a list of usernames.
+     * @param {*} userList List of usernames.
+     */
+    showUserList(userList)
+    {
+      // console.log(userList);
+      //The user list has entries (username, tags).
+      let userListView = userList.map((entry) => {
+        return (
+          <UsernameListEntry entry={entry}/>
+        );
+      });
+      // console.log(userListView);
+      return userListView;
+    }
+
+    openFollowerModal()
+    {
+      this.setState({followerListShow : true});
+    }
+
+    openFollowingModal()
+    {
+      this.setState({followingListShow : true});
+    }
+
+    closeFollowerModal()
+    {
+      this.setState({followerListShow : false});
+    }
+
+    closeFollowingModal()
+    {
+      this.setState({followingListShow : false});
+    }
+
+    renderFollowersFollowingList()
+    {
+      let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Following</Button>;
+      let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Followers</Button>;
+
+      return (
+        <div className="follow-info-container">
+          <div className="follower-list">
+            {followerListButton}
+            <Modal show={this.state.followerListShow}>
+              {this.showUserList(this.state.followers)}
+              <Button onClick={this.closeFollowerModal}>Close</Button>
+            </Modal>
+          </div>
+          <div className='following-list'>
+            {followingListButton}
+            <Modal show={this.state.followingListShow}>
+                {this.showUserList(this.state.following)}
+                <Button onClick={this.closeFollowingModal}>Close</Button>
+            </Modal>
+          </div>
+        </div>
+      );
+    }
+
     render()
     {
         let tagViews = [];
         var followinglist = [];
-        console.log('interests =', this.state.interests);
-        console.log('following =', this.state.following);
+        // console.log('interests =', this.state.interests);
+        // console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;
@@ -116,18 +202,7 @@ class Profile extends Component{
         {
             tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
         }
-        if (this.state.following.length > 0)
-        {
-          var following = this.state.following;
-          for (var i = 0; i < following.length; i++) 
-          {
-            followinglist.push(<h6 className="follow-entry">{following[i].username}</h6>);
-          }
-        }
-        else 
-        {
-          followinglist.push(<h6 className="tag-entry">This user doesn't follow anyone.</h6>);
-        }
+
         return (
             <div className="profile-container">
                 <div className="profile-info">
@@ -141,12 +216,7 @@ class Profile extends Component{
                         {tagViews}
                     </div>
                 </div>
-                <div className="who_i_follow">
-                  <h4>Who I follow</h4>
-                  <div className='followingList'>
-                    {followinglist}
-                  </div>
-                </div>
+                {this.renderFollowersFollowingList()}
             </div>
         );
     }
@@ -161,6 +231,82 @@ class Profile extends Component{
         let updatedList = this.state.tags.push(tag);
         this.setState({tags : updatedList});
     }
+}
+
+/*Helper components for profile.*/
+
+/**
+ * Username entry in the follower-following list.
+ * Props:
+ * entry : A map entry that has the structure: (username, tags).
+ */
+class UsernameListEntry extends Component
+{
+  constructor(props)
+  {
+    super(props);
+    this.state = {
+      hover : false
+    };
+    this.username = this.props.entry.username;
+    this.tags = this.props.entry.tags;
+  }
+
+  render()
+  {
+    let userLink = `/profile/${this.username}`;
+    //Building a string in form of "tag1, tag2, tag3 ..., tagn".
+    let tagList = [];
+    for(let i = 0; i < this.tags.length; i++)
+    {
+      if(i == this.tags.length - 1)
+      {
+        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        {
+          tagList.push(this.tags[i]);
+        }
+
+      }
+      else
+      {
+        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        {
+          tagList.push(this.tags[i] + ',');
+        }
+      }
+    }
+
+    let tagView = tagList.join("");
+
+    let hoverView = null;
+    if(this.state.hover)
+    {
+      if(tagView.length === 0)
+      {
+        hoverView = (
+          <div className="hover-tag-view">
+              <h6>Every tag</h6>
+          </div>
+          );
+      }
+      else
+      {
+        hoverView = (
+          <div className="hover-tag-view">
+                {tagView}
+          </div>
+          );
+      }
+    }
+    /*OnMouseEnter and OnMouseLeave are events to catch hovering. When the username is hovered, we want to show the list of tags being followed or following.*/
+    return (
+      <div className="user-list-view">
+      <a href={userLink} onMouseEnter={() => this.setState({hover : true})} onMouseLeave={() => this.setState({hover : false})}>
+        <h4>{this.username}</h4></a>
+        {hoverView}
+      </div>
+    );
+  }
 }
 
 export default Profile;

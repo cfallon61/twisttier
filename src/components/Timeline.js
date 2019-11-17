@@ -25,7 +25,7 @@ class Timeline extends Component
             spins : [],
             interests : [],
             error : {
-                exist : false, 
+                exist : false,
                 message : "",
                 status : ""
             },
@@ -41,12 +41,11 @@ class Timeline extends Component
         this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.showModal = this.showModal.bind(this);
-        this.updateUserSpins = this.updateUserSpins.bind(this);
         this.addInterestToSpin = this.addInterestToSpin.bind(this);
         this.handleSpinChange = this.handleSpinChange.bind(this);
         this.handleTag = this.handleTag.bind(this);
 
-        console.log(this.username);
+        // console.log(this.username);
     }
 
     componentDidMount()
@@ -73,7 +72,7 @@ class Timeline extends Component
             self.setState({error: {exist: true, message: err, status:"404"}});
         });
     }
-    
+
     handleTagChange(event) {
         this.setState({tag : event.target.value});
     }
@@ -88,10 +87,18 @@ class Timeline extends Component
         this.showModal();
     }
 
+    showModal() {
+        console.log("Showing spin modal...");
+        this.setState({showSpinModal : true})
+    }
 
-    onSpinPressedAtModal(event) {  
+    closeModal() {
+        this.setState({showSpinModal : false})
+    }
+
+    onSpinPressedAtModal(event) {
         //TODO: set interest
-
+        console.log("user interests: ", this.state.interests);
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
             return;
@@ -123,7 +130,7 @@ class Timeline extends Component
                 if(res.status === 200)
                 {
                     NotificationManager.success("Spun!");
-                    
+
                     //res.headers['error']
                 }
                 else
@@ -139,18 +146,11 @@ class Timeline extends Component
         }
     }
 
-    showModal() {
-        console.log("Showing spin modal...");
-        this.setState({showSpinModal : true})
-    }
 
-    closeModal() {
-        this.setState({showSpinModal : false})
-    }
 
     //when the spin text is changed, update the chars count
     handleSpinChange(event){
-        this.setState({spin: {chars: event.target.value.length, text: event.target.value, interests : this.state.spin.interests}}); 
+        this.setState({spin: {chars: event.target.value.length, text: event.target.value, interests : this.state.spin.interests}});
      }
 
     addInterestToSpin(interest) { //this needs an action listener
@@ -180,13 +180,8 @@ class Timeline extends Component
         })
     }
 
-    updateUserSpins() {
-        NotificationManager.success(`${this.state.spin.text}`);
-        //TODO
-    }
-
     renderSpinForm() {
-        console.log(this.state.spin.interests);
+        // console.log(this.state.spin.interests);
         let spinInterests = this.state.interests.map((tagName) => {
             return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
         });
@@ -198,11 +193,11 @@ class Timeline extends Component
         }
 
         let disableInterestDropdown = false;
-        console.log(spinInterests);
+        // console.log(spinInterests);
         if (spinInterests.length === 0) {
             disableInterestDropdown = true;
         }
-        
+
         let dropdownInterests = (
             <Dropdown>
                 <Dropdown.Toggle variant = "primary" id="dropdown-basic">
@@ -214,7 +209,7 @@ class Timeline extends Component
                 </Dropdown.Menu>
             </Dropdown>
         );
-        
+
         let interestsDropdown = null;
         if (disableInterestDropdown){
             interestsDropdown = <h3>You need to add tags.</h3>
@@ -229,14 +224,14 @@ class Timeline extends Component
             <div className="spin-form">
                     <Form onSpin = {this.handleSpin} >
                         <Form.Label>Spin</Form.Label>
-                        <Form.Control as = "textarea" placeholder="Your Spin here" rows="3" 
+                        <Form.Control as = "textarea" placeholder="Your Spin here" rows="3"
                             onChange = {this.handleSpinChange}/>
                             <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
                     {this.state.spin.interests}
                     <Form>
-                        
+
                     </Form>
 
                     <Form onSubmit = {this.handleTag} >
@@ -260,12 +255,17 @@ class Timeline extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed();
-        if(this.state.spins !== undefined && this.state.spins.length > 0) 
+        if(this.state.spins !== undefined && this.state.spins.length > 0)
         {
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} userID = {spin.id} userToView={this.username} tags={spin.tags} likes= {spin.likes} likeList = {spin.like_list}/>);
+                feed.addSpin(<Spin username={spin.username} content={spin.content}
+                    timestamp={spin.date} spinID = {spin.id}
+                    userToView={this.username} tags={spin.tags}
+                    likes= {spin.likes} likeList = {spin.like_list}
+                    userInterests = {this.state.interests}
+                />);
             }
         }
         else{
@@ -273,7 +273,7 @@ class Timeline extends Component
         }
 
         let spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
-        
+
         /**
          * The view organized by these parts:
          *          Page
@@ -284,6 +284,7 @@ class Timeline extends Component
                 <div className="user-feed-left">
                     <Profile username={this.username}/>
                 </div>
+
                 <div className="user-feed-middle">
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
@@ -293,9 +294,9 @@ class Timeline extends Component
                     </Modal>
                 </div>
             </div>
-        );     
+        );
 
     }
-} 
+}
 
 export default Timeline;

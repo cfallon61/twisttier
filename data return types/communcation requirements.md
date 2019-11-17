@@ -2,16 +2,16 @@
 # Profile Interface
 
 ## Searching for a user's profile TODO
-__NOTE__ This functionality is not yet implemented. This is a preliminary specification only. 
-* __NOTE__ This functionality can be performed while a user is not logged in, and should be displayed on the main page, timeline, and all subsequent pages. 
+__NOTE__ This functionality is not yet implemented. This is a preliminary specification only.
+* __NOTE__ This functionality can be performed while a user is not logged in, and should be displayed on the main page, timeline, and all subsequent pages.
 
 1. Client will `POST /api/search/:user` where `user` is a url parameter of the search string i.e. `?user=<arbitrary username or arbitrary name>`
-2. Server will check that `user` is not empty. 
-    * If the field is empty, server will reply with `406` and header `error: query cannot be empty` will be returned. 
+2. Server will check that `user` is not empty.
+    * If the field is empty, server will reply with `406` and header `error: query cannot be empty` will be returned.
 2. Server will perform a lookup, returning all results in the form of a JSON where the `username` or `name` fields are like the value provided by `:user` as given by the below example response:
 
     * Client Request: `POST /api/search/s`
-    * Response: 
+    * Response:
         ```
         [
           {
@@ -28,11 +28,11 @@ __NOTE__ This functionality is not yet implemented. This is a preliminary specif
           },
         ]
         ```
-3. If the user is not found, server will respond with `404` and set header `error: no users found matching that search parameter`. 
-4. Client will be responsible for creating and displaying live links to the users' profiles which the server returns. 
+3. If the user is not found, server will respond with `404` and set header `error: no users found matching that search parameter`.
+4. Client will be responsible for creating and displaying live links to the users' profiles which the server returns.
 
 ## Querying User Login Status
-* This is an endpoint strictly for querying whether a user is logged in. 
+* This is an endpoint strictly for querying whether a user is logged in.
 Client will `POST /api/login_status`
 Server will return the following:
     * __User is logged in:__ A cookie `username=<username>` will be set, as well as a response header `loggedIn: true`
@@ -51,7 +51,7 @@ body: {
   username: <username (not to exceed 15 characters)>
 }
 ```
-* Additionally, a profile image will be sent via `multipart/form-data`. The fieldname must be `profileImage=<img src>` where `<img src>` is the file from the upload field. 
+* Additionally, a profile image will be sent via `multipart/form-data`. The fieldname must be `profileImage=<img src>` where `<img src>` is the file from the upload field.
 
 ### Server response
 
@@ -64,7 +64,7 @@ userdata: {
 }
 ```
 ```
-cookies: { 
+cookies: {
   uid : <some arbitary hash value>
   username: <username>
 }
@@ -83,7 +83,7 @@ cookies: {
 
 ## Logging In
 
-1. Client will `GET /login` 
+1. Client will `GET /login`
 2. Server will verify that user is not logged in already
     * If user is logged in already, redirect to timeline
 3. User will input information into login fields
@@ -114,7 +114,7 @@ userdata : {
 
 ## Getting a user's profile
 
-1. Client will `POST /api/user/` with the username as a URL parameter ex `username=steve`
+1. Client will `POST /api/users/` with the username as a URL parameter ex `username=steve`
     * If an error occurs, an 'error' header will be set and 406 will be returned
 3. Server will reply with JSON of user's information
  __NOTE:__ Profile image will be returned via a serverside filepath. Client will be responsible for `GET`ting this file accordingly.
@@ -138,7 +138,7 @@ body: {
 2. Server will check that user is logged in
 3. Assuming user is logged in, server will respond in the following ways:
   * __Errors:__ If an error occurs, header 'error' will be set with some arbitrary error message
-  * __Success:__ If the updating is successful, header 'username' will be set with the username of the person updated, and a JSON of the following user information will be returned: 
+  * __Success:__ If the updating is successful, header 'username' will be set with the username of the person updated, and a JSON of the following user information will be returned:
   ```
     userdata: {
       username: <username>,
@@ -173,18 +173,18 @@ body: {
 
 ## New Tags Posted
 
-This is less of a communication specification and more of a procedural specification for how this functionality will work. 
+This is less of a communication specification and more of a procedural specification for how this functionality will work.
 The rough outline for this process is as follows:
 
 1. A user will create a new post with a tag which they are previously unassociated with (a new column must be added to the database to support this).
 2. The `addSpin` functionality will check the tags of this post and see if they already exist.
 3. If the post is not in the tags_associated list, the post ID will be placed into a `new_tag_posts` column which will expire in 24 hours. The `getSpins / getTimeline` functions will query this column and factor it into the returned object.
 4. When the `getSpins / getTimeline` functions find a post in this column, they will populate an additional field in the response json, `newtagposts`. Please see ["Getting a User's Timeline"](#getting-a-users-timeline) for a description of the response object.
-5. The client should then show a dialog prompting if the user would like to follow those tags, and then form a correct follow request. 
+5. The client should then show a dialog prompting if the user would like to follow those tags, and then form a correct follow request.
 
 
 ## Following/Unfollowing A User [: Topic]
-1. Client will `POST /api/updateFollowing` where params are the following body Parameters: 
+1. Client will `POST /api/updateFollowing` where params are the following body Parameters:
 ```
 body: {
   toFollow: <username of the user to follow or unfollow>,
@@ -193,10 +193,10 @@ body: {
   action: <"follow" or "unfollow">
 }
 Note: When a user is to be unfollowed completely, the front end will send all
-the tags of the user and the backend will use the same unfollow function 
+the tags of the user and the backend will use the same unfollow function
 to remove all tags.
 ```
-2. Server will verify that user is logged in, that both accounts exist, and the following circumstances: 
+2. Server will verify that user is logged in, that both accounts exist, and the following circumstances:
 * __Following Errors:__
     * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
     * __Generic follow error:__ header `error: cannot follow <toFollow>`
@@ -204,14 +204,14 @@ to remove all tags.
     * __`toFollow` does not exist:__ header `error: <toFollow> does not exist` will be set
     * __Generic unfollow error:__ header `error: cannot unfollow <toFollow>`
 * __Generic Errors:__
-    * __Invalid action:__ if `action` is neither `follow` or `unfollow`, header `error: invalid action` will be set. 
+    * __Invalid action:__ if `action` is neither `follow` or `unfollow`, header `error: invalid action` will be set.
 3. Server will return the following information upon successful following / unfollowing:
 * ```
   params: {
     action: <action performed (either 'follow' or 'unfollow')>,
     follower: <username of the person following or unfollowing>,
     toFollow: <username of the person being followed or unfollowed>,
-    tags: <tags which were followed or unfollowed> 
+    tags: <tags which were followed or unfollowed>
   }
   ```
 4. Server will reply with `418: I'm a teapot` if errors are detected.
@@ -250,9 +250,9 @@ __NOTE:__ When getting th elogged in individual's timeline, if there are posts m
 
 ## Liking / Unliking a spin
 
-1. Client will `POST /api/spins/esteem` with the following parameters as an `esteem` object as a body parameter request: 
+1. Client will `POST /api/spins/esteem` with the following parameters as an `esteem` object as a body parameter request:
 ```
-body: 
+body:
 {
   esteem: {
     postAuthor: <author's username>,
@@ -284,7 +284,7 @@ __Note__ Please refer to [this section](#new-tags-posted) for information on how
     quote_origin: {
       username: <username of original author>,
       spinId: <id of original quote> //(front end will have a list of the post IDs available to it so this is possible)]
-  }; 
+  };
   ```
 
 2. Server will validate user session
@@ -301,11 +301,10 @@ __NOTE:__ Only 1 post may be deleted at a time. No plans to implement bulk remov
 ```
 body: {
   spinId: <id>
-} 
+}
 ```
-2. Server will validate the user session. 
-3. If the user session is valid, the username will be gathered from the `clientSession.uid` cookie in the request object. 
+2. Server will validate the user session.
+3. If the user session is valid, the username will be gathered from the `clientSession.uid` cookie in the request object.
 4. Server will attempt to remove the post from the user's post table
     * __Errors:__ If an error occurs, server will set response header `error: unable to delete spin` and return `418: I'm a teapot`
     * __Success:__ if the post is added successfully, server will set response header `spinId: [id]` and return the index.
-

@@ -19,13 +19,18 @@ class UserSettings extends Component {
     this.state = {
       username: "",
       password: "",
-      bio: ""
+      bio: "",
+      name: "",
+      profile_pic: "",
+      interests: [],
+      accessibility_features: ""
     };
 
     this.handleEditBio = this.handleEditBio.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
   }
 
 
@@ -40,16 +45,17 @@ class UserSettings extends Component {
 
   handleSubmit(event)
   {
-    // var formdata = new FormData();
-    // if(this.state.password != "")
-    //   formdata.append('password', this.state.password);
-    // if(this.state.bio != "")
-    //   formdata.append('bio', this.state.bio);
-
+    event.preventDefault();
     let body = {
-      password : this.state.password,
-      bio: this.state.bio
+      "password" : this.state.password,
+      "bio": this.state.bio,
+      "name": this.state.name,
+      "interests":this.state.interests,
+      "accessibility_features": this.state.accessibility_features,
+      "profile_pic": this.state.profile_pic
     };
+    console.log("body", body)
+    console.log("user", this.state.username)
 
     fetch(`/api/update/${this.state.username}`, {
         method : 'POST',
@@ -59,14 +65,17 @@ class UserSettings extends Component {
         body: JSON.stringify(body)
     }).then(function(res)
     {
-      // console.log(res);
+      console.log(res);
       if(res.status === 406)
       {
         NotificationManager.error("Check fields");
         return;
       }
       NotificationManager.success("Saved changes");
-    });
+    }).catch(function(error){
+      console.log(error);
+    }
+    );
   }
 
 
@@ -75,44 +84,35 @@ class UserSettings extends Component {
   getUserInfo() {
 
     var username = document.cookie.split('=')[1];
-    console.log("USERNAME=", username);
-    this.setState({username: username});
+    let d_bio ="";
+    let d_name = "";
+    let d_interests = "";
+    let d_profilepic ="";
+    let self = this;
+    // console.log("USERNAME=", username);
+    fetch(`/api/users/${username}`, {
+      method: 'POST',
+      headers: {
+          'Content-Type' : 'application/json'
+      }
+    }).then(function(res){
+
+      if(res.status === 200)
+      {
+        res.json().then(function(data){
+            let dataDict = JSON.parse(data);
+            console.log(dataDict);
+            d_profilepic = dataDict.profile_pic;
+            d_bio = dataDict.bio;
+            d_name = dataDict.name;
+            d_interests = dataDict.interests;
+            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
+
+        });
+      }
+    });
 
 
-    //
-    // fetch(`/api/users/${username}`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   redirect: "follow"
-    //   //body
-    // })
-    //   .then(function(res) {
-    //     //Response
-    //     console.log("response", res);
-    //     if(res.status === 200)
-    //     {
-    //       // res.json().then(function(jsonData){
-    //       //     const dataDict = JSON.parse(jsonData);
-    //       //     console.log(jsonData);
-    //       // })
-    //       alert('yes')
-    //
-    //     }
-    //     if (res.status === 406) {
-    //       alert("butt cheeks clapped");
-    //       return;
-    //     }
-    //   })
-    //   .catch(function(err) {
-    //     alert(err);
-    //   });
-    //
-
-
-
-    //put values of res into the states
   }
   componentDidMount()
   {
@@ -143,17 +143,18 @@ class UserSettings extends Component {
           <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
           <Row>
             <Form onSubmit={this.handleSubmit}>
-                <Form.Group controlId="formNewBio">
+                <Form.Group>
                     <Form.Label>Bio</Form.Label>
                     <Form.Control type="text" placeholder="Bio" onChange={this.handleEditBio}/>
                 </Form.Group>
 
-                <Form.Group controlId="formNewPasswrd">
+                <Form.Group>
                     <Form.Label>Password</Form.Label>
                     <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
                 </Form.Group>
-
-                <Button variant="primary" type="submit">Save Changes</Button>
+                <Form.Group>
+                  <Button variant="primary" type="submit">Save Changes</Button>
+                </Form.Group>
             </Form>
           </Row>
           </div>

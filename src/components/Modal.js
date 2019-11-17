@@ -36,13 +36,13 @@ class Modal extends Component
 {
     render()
     {
-        console.log(this.props.children);
+        // console.log(this.props.children);
         if(!this.props.show) 
         {
             return null;
         }
         
-        console.log("Rendering modal");
+        // console.log("Rendering modal");
         return (
             <div className="backdrop" style={backdropStyle}>
               <div className="custom-modal" style={modalStyle}>

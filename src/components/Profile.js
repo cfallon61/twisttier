@@ -72,7 +72,7 @@ class Profile extends Component{
             {
                 const dataDict = JSON.parse(jsonData);
 
-                console.log("This is the json data: ", jsonData);
+                // console.log("This is the json data: ", jsonData);
                 let chosenProfilePic = self.defaultProfileView;
                 //If link is not empty
                 if(dataDict.profile_pic !== "")
@@ -128,14 +128,14 @@ class Profile extends Component{
      */
     showUserList(userList)
     {
-      console.log(userList);
+      // console.log(userList);
       //The user list has entries (username, tags).
       let userListView = userList.map((entry) => {
         return (
           <UsernameListEntry entry={entry}/> 
         );
       });
-      console.log(userListView);
+      // console.log(userListView);
       return userListView;
     }
 
@@ -188,8 +188,8 @@ class Profile extends Component{
     {
         let tagViews = [];
         var followinglist = [];
-        console.log('interests =', this.state.interests);
-        console.log('following =', this.state.following);
+        // console.log('interests =', this.state.interests);
+        // console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;

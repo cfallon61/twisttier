@@ -44,9 +44,11 @@ class Spin extends Component
             likeList: this.props.likeList,
 
             // for handling the edit form modal
+            
             showEditer : false,
             initialEditorValue : this.props.content,
-            newTagText : ""
+            newTagText : "",
+            
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -57,6 +59,8 @@ class Spin extends Component
         this.author = this.props.username;
         this.spinID = this.props.spinID;
         this.interestsOfUser = this.props.userInterests;
+
+        
 
         //this.followTag = this.followTag.bind(this);
         //this.unfollowTag = this.unfollowTag.bind(this);
@@ -357,8 +361,8 @@ class Spin extends Component
         let spinAuthor = this.author;
         let spinToBeDeleted = {"spinId" : deleteSpinID};
 
-        console.log("SpinID: ", spinToBeDeleted);
-        console.log("username: ", this.author);
+        // console.log("SpinID: ", spinToBeDeleted);
+        // console.log("username: ", this.author);
 
         // TODO:call the server function and refresh the page
         let self = this;
@@ -456,35 +460,34 @@ class Spin extends Component
         
         
     }
-
-    // show the edit post modal
-    showEditModal() {
-        this.setState({showEditer : true})
-    }
-
-    // closes the edit post modal
-    closeEditModal() {
-        this.setState({showEditer : false})
-    }
+    
 
     // handles change of text for edit spin
     handleTextChange(event){
-        this.setState({initialEditorValue : event.target.value}); 
+        if (event.target.value.length <= 90) {
+            this.setState({
+                content : event.target.value
+            }); 
+        }
+        
     }
 
     // handles change of interest for edit spin
     handleInterestAddition(newTag) { 
+
         let tagList = this.state.tags;
 
         tagList.push(newTag);
 
-        this.setState({tags : tagList});
-
+        this.setState({
+            tags : tagList
+        });
 
     }
 
     // handles deletion of tag from the post
     handleInterestDeletion(oldTag) {
+
         let tagList = this.state.tags;
 
         // find index of the tag
@@ -494,9 +497,10 @@ class Spin extends Component
         if (indexOfTag != -1) {
             tagList.splice(indexOfTag, 1);
         }
-
         // reset the state
-        this.setState({tags: tagList});
+        this.setState({
+            tags : tagList
+        });
     }
 
     // handles the change of text of new tag to be added
@@ -516,20 +520,55 @@ class Spin extends Component
         this.setState({newTagText : ""})
     }
 
+    // show the edit post modal
+    showEditModal() {
+        this.setState({showEditer : true})
+        // console.log("Initial values:", this.state.initialValues);
+    }
+
+    // closes the edit post modal
+    closeEditModal() {
+        this.setState({            
+            // close the modal
+            showEditer : false
+        })
+        window.location.reload();
+    }
+    
     // sends the edited post to server and refreshes the front end
     // TODO: handle server response
     handleEditPostSubmission(){
-        console.log("Submitting the editted post");
+       
+        let spinBody = {
+        tags: this.state.tags,
+        edited: true, 
+        quoted: this.state.quoted,
+        content: this.state.content,
+        timestamp: this.state.timestamp,
+        quoteOrigin: this.state.quoteOrigin,
+        likes : this.state.likes,
+        spinID : this.state.spinID,
+        showLike : this.state.showLike,
+        viewingUserTags : this.state.viewingUserTags,
+        likeList: this.state.likeList,
+       }
+
+        this.setState({
+            // close the modal
+            showEditer : false
+        })
+
+        // send the data to server, refresh the location
     }
 
     // creates the components of the edit modal
     renderEditForm() {
-        let spinContent = this.state.content;
         let userInterestsCopy = this.interestsOfUser;
 
-        console.log("user interests after: ", userInterestsCopy);
+        // console.log("user interests after: ", userInterestsCopy);
         
         let spinInterests = [];
+        
         // return all the tags the user has posted with before
         if(userInterestsCopy !== undefined)
         {
@@ -544,6 +583,7 @@ class Spin extends Component
         }
 
         let userInterestsDropdown = null;
+        
         // create a dropdown using those interests. If list is empty, then the view will only consist of text.
         if(spinInterests.length === 0)
         {
@@ -576,6 +616,7 @@ class Spin extends Component
         }
 
         let addedTagsDropdown = null;
+        
         if(initialTagsDropdown.length === 0)
         {
             addedTagsDropdown = <h3>This spin doesn't associate with any tags.</h3>
@@ -600,11 +641,11 @@ class Spin extends Component
                         <Form.Label>Edit Spin</Form.Label>
                         <Form.Control 
                             as = "textarea" 
-                            value= {this.state.initialEditorValue}
+                            value= {this.state.content}
                             rows="3" 
                             onChange = {this.handleTextChange}
                         />
-                            <p>{this.state.initialEditorValue.length}/90 characters</p>
+                            <p>{this.state.content.length}/90 characters</p>
                         
                         {userInterestsDropdown}
                         {addedTagsDropdown}
@@ -632,12 +673,9 @@ class Spin extends Component
     }
 
     
-
     render()
     {   
-        // console.log("Editor bool: ", this.state.showEditer);
-        // console.log("Author: ", this.author);
-        // console.log("UserToView: ", this.userToView);
+
         let buttonToShow = null;
         let actionsButton = null;
         let tagList = [];

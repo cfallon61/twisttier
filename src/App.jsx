@@ -13,6 +13,7 @@ import Error from './components/Error.js';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import Timeline from './components/Timeline.js';
+import SearchUser from "./components/SearchUser.js";
 
 class App extends Component {
 
@@ -64,6 +65,7 @@ class App extends Component {
               <Route exact path="/signup" component={Signup} />
               <Route exact path="/userSettings" component={UserSettings} />
               <Route exact path="/profile/:username" component={UserFeed}/>
+              <Route exact path = "/searchUser/:searchName" component={SearchUser} />
               <Route exact path="/" component={() => this.state.isLoggedIn ?  <Timeline username={this.state.username}/> : <Home />} /> 
               <Route component={(props) => <Error message="Page cannot be found." statusCode="404"></Error>}/>
             </Switch>

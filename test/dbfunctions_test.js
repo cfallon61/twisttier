@@ -328,11 +328,7 @@ describe('database functions test', function() {
       assert.deepStrictEqual(res, false);
     });
 
-<<<<<<< HEAD
     it.skip('@not an actual test - undoring first follow test to properly check for duplicate', async () => {
-=======
-    it('@not an actual test - undoing first follow test to properly check for duplicate', async () => {
->>>>>>> 27c9067eb9009ff34a37c1f5317125c33a887dcf
       user = {
         username: 'testingUser',
       };
@@ -349,6 +345,24 @@ describe('database functions test', function() {
       assert.notEqual(res, false);
     });
 
+  });
+
+  describe('#updateSpin',  () => {
+    it('first test', async () => {
+      user = {
+        username: 'doeJohn',
+      };
+
+      spin_edit = {
+        content: 'this is has been edited',
+        tags: ['editing', 'nice'],
+        id: 1111
+      };
+
+      var res = await db.updateSpin(user.username, spin_edit);
+      console.log(res);
+      assert.equal(res, user.username);
+    });
   });
 
 });

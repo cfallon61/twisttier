@@ -15,6 +15,7 @@ import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import { Redirect } from 'react-router';
 import { selectFields } from 'express-validator/src/select-fields';
+import * as DarkModeToggle from 'dark-mode-toggle';
 
 class Navbardemo extends Component {
   constructor(props)
@@ -79,7 +80,7 @@ handleSearch(event) {
 
 renderSearchRedirect = () => {
   if (this.state.redirectToSearch) {
-    let searchURL = '/searchUser/' + this.state.searchValue; 
+    let searchURL = '/searchUser/' + this.state.searchValue;
     return <Redirect to={searchURL} />
   }
 }
@@ -103,13 +104,13 @@ renderSearchRedirect = () => {
 
           <Button variant="outline-success" onClick={this.onLogoutClicked}>Logout</Button>
         </div>
-      ); 
+      );
     }
     else
     {
       dynamicView = <Button variant="outline-success" onClick={() => this.props.history.push("/login")}>Login</Button>
     }
-    
+
     return (
       <div>
 
@@ -119,16 +120,16 @@ renderSearchRedirect = () => {
               <Image src={icon_twister} className='icon'/>
             </Link>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          
+
           <Nav className="ml-auto">
 
 
             <Navbar.Brand id="basic-navbar-nav">
                 <Form inline>
-                  <FormControl 
-                    type="text" 
-                    placeholder="Search" 
-                    className="mr-sm-2" 
+                  <FormControl
+                    type="text"
+                    placeholder="Search"
+                    className="mr-sm-2"
                     value = {this.state.searchValue}
                     onChange = {this.handleSearchValueChange}
                   />
@@ -136,7 +137,9 @@ renderSearchRedirect = () => {
                     Search
                   </Button>
                 </Form>
-                
+                <Nav>
+                  <dark-mode-toggle/>
+                </Nav>
             </Navbar.Brand>
             {dynamicView}
           </Nav>

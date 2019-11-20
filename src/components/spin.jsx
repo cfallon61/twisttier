@@ -10,6 +10,8 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import Modal from './Modal.js';
 import Form from 'react-bootstrap/Form';
+import LikeImage from './like.png';
+import Image from 'react-bootstrap/Image';
 
 const tagContainerStyle = {
     display: "grid",
@@ -618,7 +620,7 @@ class Spin extends Component
         // console.log("Editor bool: ", this.state.showEditer);
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
-        let buttonToShow = null;
+        let likeButton = null;
         let actionsButton = null;
         let tagList = [];
 
@@ -626,11 +628,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                buttonToShow = <Button onClick={this.likeSpin}>Like</Button>;
+                likeButton = <button className="like-button" onClick={this.likeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
             else
             {
-                buttonToShow = <Button onClick={this.unlikeSpin}>Unlike</Button>;
+                likeButton = <button className="unlike-button" onClick={this.unlikeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
 
             if(this.state.tags.length === 0)
@@ -644,51 +646,49 @@ class Spin extends Component
 
                     if(this.state.viewingUserTags.includes(tagName))
                     {
-                        return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
+                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
                     else
                     {
-                        return <Button size="sm" variant="danger" onClick={() => this.followTag(tagName)}>{tagName}</Button>;
+                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                     }
                 });
             }
 
             // decide what actions should be visible to the user
             actionsButton = this.decideAvailableActionsButton();
-
-
         }
+
+        let usernameLink  = `/profile/${this.props.username}`;
+        let usernameField = <a href={usernameLink}>{this.props.username}</a>
 
         return (
             <div className="spin-area">
 
                 <div className="username-section">
-                    <div>
-                        <h5>
-                            {this.props.username}
-                            <span class = "actionsButton">
-                                {actionsButton}
-                            </span>
-                        </h5>
-
+                    <div className="username-link">
+                        {usernameField}  
                     </div>
-
-
+                    <div className="time-section">
+                        <h6>
+                            {this.formatDate(this.state.timestamp)}
+                        </h6>
+                    </div> 
                 </div>
                 <div className="spin-content">
                     <p>
                         {this.state.content}
                     </p>
                 </div>
-                <div className="time-section">
-                    <h6>
-                        {this.formatDate(this.state.timestamp)}
-                    </h6>
-                </div>
+
                 <div className="other-info">
-                    <p>Likes: {this.state.likes}</p>
+                    {likeButton} 
+                    <p className="num-likes">{this.state.likes}</p>
+                    <div className="action-button">
+                        {actionsButton}
+                    </div>
                 </div>
-                {buttonToShow}
+                
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagList}
                 </div>

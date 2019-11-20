@@ -43,6 +43,29 @@ async function createSpin(req, res, next) {
   return next();
 }
 
+// @brief: middleware to edit a post. sets 'error' header if errors occur
+// @return: none
+async function updateSpin(req, res, next) {
+  if (extFuncs.check_errors(req, res)) {
+    // return next();
+  }
+
+  var spin = {
+    content: req.body.spinBody,
+    tags: req.body.tags,
+    edited: true
+  };
+
+  var updated = await db.updateSpin(req.params.username, spin);
+  console.log(updated);
+  if (!updated) {
+    res.setHeader("error", "unable to add spin");
+  } else {
+    res.setHeader("spinId", updated);
+  }
+  return next();
+}
+
 // @brief: middleware to delete a post. sets 'error' header if
 //         errors occur
 // @return: none

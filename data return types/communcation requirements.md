@@ -309,8 +309,8 @@ __NOTE:__ When editing a spin is successful: edited will become true and the dat
 2. Server will validate user session
 3. server will attempt to add the post to the user's post table.
     * __Error:__ If the post was not able to be edited, the server will set response header `error: unable to update spin` and will return status `418: I'm a teapot`
-    * __Error:__ If the post does not fit within the length bounds of 1 <= length <= 90, server will set response header `error: ` with some arbitrary error message which I don't know and will return status `418: I'm a teapot`
-    * __Success:__ If the post was successfully added, the server will set response header `username: [username]` and will send the index file.
+    * __Error:__ If the post does not fit within the length bounds of 1 <= length <= 90, server will set response header `error: ` with some arbitrary error message and will return status `418: I'm a teapot`
+    * __Success:__ If the post was successfully added, the server will set response header `spinId: [id]` and will send the index file.
 
 ##Deleting a Spin
 <!-- __NOTE:__ This functionality has not been implemented yet. -->

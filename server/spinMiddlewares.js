@@ -61,7 +61,7 @@ async function editSpin(req, res, next) {
   if (!updated) {
     res.setHeader("error", "unable to edit spin");
   } else {
-    res.setHeader("username: ", updated);
+    res.setHeader("spinID: ", updated);
   }
   return next();
 }

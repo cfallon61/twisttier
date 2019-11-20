@@ -17,6 +17,7 @@ import { Redirect } from 'react-router';
 import { selectFields } from 'express-validator/src/select-fields';
 import * as DarkModeToggle from 'dark-mode-toggle';
 
+
 class Navbardemo extends Component {
   constructor(props)
   {
@@ -113,7 +114,6 @@ renderSearchRedirect = () => {
 
     return (
       <div>
-
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="/">Twister</Navbar.Brand>
             <Link to="/">
@@ -137,9 +137,6 @@ renderSearchRedirect = () => {
                     Search
                   </Button>
                 </Form>
-                <Nav>
-                  <dark-mode-toggle/>
-                </Nav>
             </Navbar.Brand>
             {dynamicView}
           </Nav>

@@ -63,34 +63,38 @@ onLogoutClicked()
 }
 
 handleSearchValueChange(event) {
+  event.preventDefault();
     this.setState({
         searchValue : event.target.value
     })
 }
 
+handleSubmit(event) {
+
+}
+
+// change the redirect bool
 handleSearch(event) {
-    event.preventDefault();
+    console.log("handling search");
+    // event.preventDefault();
 
-    console.log(this.state.searchValue);
 
-    this.setState({
-      redirectToSearch: true
-    })
-}
+    let url = "/searchUser/" + this.state.searchValue;
+    this.props.history.push(url);
+    
+    // routing does not rerender. So force reload the page
+    window.location.reload();
 
-renderSearchRedirect = () => {
-  if (this.state.redirectToSearch) {
-    let searchURL = '/searchUser/' + this.state.searchValue;
-    return <Redirect to={searchURL} />
   }
-}
-  render() {
+
+  
+// render component
+render() {
     let dynamicView = null;
     if(this.props.loggedIn)
     {
       dynamicView = (
         <div>
-          {this.renderSearchRedirect()}
           <Navbar.Collapse>
             <Link to="/">
               <Image src={icon_home}  className='icon'/>
@@ -125,16 +129,19 @@ renderSearchRedirect = () => {
 
 
             <Navbar.Brand id="basic-navbar-nav">
-                <Form inline>
+                <Form>
                   <FormControl
-                    type="text"
+                    as = "textarea"
                     placeholder="Search"
-                    className="mr-sm-2"
                     value = {this.state.searchValue}
                     onChange = {this.handleSearchValueChange}
+                    onSubmit = {this.handleSearch}
                   />
-                  <Button variant="outline-success" onClick = {this.handleSearch} >
-                    Search
+                  <Button 
+                    variant="outline-success" 
+                    onClick = {this.handleSearch} 
+                  >
+                      Search
                   </Button>
                 </Form>
                 <Nav>

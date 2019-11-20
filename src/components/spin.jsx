@@ -82,6 +82,8 @@ class Spin extends Component
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
+        // this.decideAvailableActionsButton = this.decideAvailableActionsButton.bind(this);
+    
     }
 
     /**
@@ -419,47 +421,55 @@ class Spin extends Component
     };
 
     
-    // decide the actions that would be available for a viewing user
-    decideAvailableActionsButton(){
+    // // decide the actions that would be available for a viewing user
+    // decideAvailableActionsButton(){
 
 
-        // if the post is the user's own post, return options of share, edit, and delete
-        // console.log("This: ", this);
-        if (this.author === this.userToView) {
-            return(
-                <DropdownButton
-                    title='Actions'
-                    variant='secondary'
-                    size = "sm"
-                    // id={`dropdown-variants-${variant}`}
-                    // key='Info'
-                >
-                    <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
-                    <Dropdown.Item eventKey="2" onClick = {this.showEditModal}>Edit</Dropdown.Item>
-                    <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
-                        Delete
-                    </Dropdown.Item>
+    // //     // if the post is the user's own post, return options of share, edit, and delete
+    // //     // console.log("This: ", this);
+    // //     // if (this.author === this.userToView) {
+    // //     //     return(
+    // //     //         <DropdownButton
+    // //     //             title='Actions'
+    // //     //             variant='secondary'
+    // //     //             size = "sm"
+    // //     //             // id={`dropdown-variants-${variant}`}
+    // //     //             // key='Info'
+    // //     //         >
+    // //     //             <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
+    // //     //             <Dropdown.Item eventKey="2" onClick = {this.showEditModal}>Edit</Dropdown.Item>
+    // //     //             <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
+    // //     //                 Delete
+    // //     //             </Dropdown.Item>
 
-                </DropdownButton>
-            )
-        }
+    // //     //         </DropdownButton>
+    // //     //     )
+    // //     // }
 
-        // if the post is someone else's only return ooption of share
-        return(
-            <DropdownButton
-                title='Actions'
-                variant='secondary'
-                size = "sm"
-                // id={`dropdown-variants-${variant}`}
-                // key='Info'
-            >
-                <Dropdown.Item eventKey="1">Share</Dropdown.Item>
-            </DropdownButton>
-        )
+    // //     // // if the post is someone else's only return ooption of share
+    // //     // return(
+    // //     //     <DropdownButton
+    // //     //         title='Actions'
+    // //     //         variant='secondary'
+    // //     //         size = "sm"
+    // //     //         // id={`dropdown-variants-${variant}`}
+    // //     //         // key='Info'
+    // //     //     >
+    // //     //         <Dropdown.Item eventKey="1">Share</Dropdown.Item>
+    // //     //     </DropdownButton>
+    // //     // )
 
+    //     let buttons = ["Share"];
 
+    //     if (this.author === this.userToView) {
+    //         buttons.push("Edit/Delete");
+    //     }
 
-    }
+    //     console.log("Buttons",buttons);
+
+    //     return buttons;
+        
+    // }
     
 
     // handles change of text for edit spin
@@ -677,8 +687,9 @@ class Spin extends Component
     {   
 
         let buttonToShow = null;
-        let actionsButton = null;
+        let actionsButtonString = null;
         let tagList = [];
+        let actionsButtons = [];
 
         if(this.viewerIsAuthenticated())
         {
@@ -712,11 +723,24 @@ class Spin extends Component
             }
 
             // decide what actions should be visible to the user
-            actionsButton = this.decideAvailableActionsButton();
+            // actionsButtonString = this.decideAvailableActionsButton();
+
+            actionsButtonString = ["Share"];
+            if (this.author === this.userToView) {
+                actionsButtonString.push("Edit/Delete");
+            }
+
+            actionsButtons = actionsButtonString.map( (action) => {
+                return  <Button size="sm" variant="" >
+                            {action}
+                        </Button>;
+            });
 
 
         }
 
+        
+        
         return (
             <div className="spin-area">
 
@@ -724,14 +748,10 @@ class Spin extends Component
                     <div>
                         <h5>
                             {this.props.username}
-                            <span class = "actionsButton">
-                                {actionsButton}
-                            </span>
+                           
                         </h5>
 
                     </div>
-
-
                 </div>
                 <div className="spin-content">
                     <p>
@@ -747,6 +767,9 @@ class Spin extends Component
                     <p>Likes: {this.state.likes}</p>
                 </div>
                 {buttonToShow}
+                <span>
+                    {actionsButtons}
+                </span>
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagList}
                 </div>

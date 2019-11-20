@@ -15,6 +15,7 @@ import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
 import "./searchuser.css";
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 const imgScale = {
     "height" : "100%",
@@ -26,10 +27,10 @@ class SearchUser extends Component {
     constructor(props)
     {
         super(props);   
-      
-        this.searchName = this.props.match.params.searchName; 
+        
         this.state = {
-              users : []
+              users : [],
+              searchName : this.props.match.params.searchName   
         }
 
         
@@ -55,7 +56,7 @@ class SearchUser extends Component {
                 // console.log("SUCCESFULL RESPONSE");
                 res.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log("Response: ", jsonData);
+                    // console.log("Response: ", jsonData);
                     self.setState({
                         users : jsonData
                     });
@@ -77,11 +78,12 @@ class SearchUser extends Component {
     }
      
     componentDidMount() {
-        this.getUsers(this.searchName);
+        console.log("Component did mount search: ", this.state.searchName);
+        this.getUsers(this.state.searchName);
     }
 
     render() {
-      console.log("Seaching for: ", this.searchName);
+      console.log("Seaching for: ", this.state.searchName);
 
       let profiles = [];
       let tempUsers = this.state.users;
@@ -92,33 +94,69 @@ class SearchUser extends Component {
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
-            
+            // console.log("User: ", user);
             // formulate tags of user
             let tags = [];
             if ( user.tags_associated.length === 0) {
-                tags.push(<span>User does not have any associated tags yet</span>);
+                let noItem = (  <Dropdown.Item>
+                            No tags to show
+                </Dropdown.Item>);
+                tags.push(noItem);
+
             } else {
                 tags = user.tags_associated.map( (tag) => {
-                    return  <p>
-                                {tag}
-                            </p>
+                    return  <Dropdown.Item >
+                            {tag}
+                        </Dropdown.Item>;
                 });
             }
 
-            // TODO: Formulate the picture, setting default for now
-            let defaultProfileView = (
-                <div>
-                    <img src={defaultPic} alt={user.username} style={imgScale}/>
-                </div>
+            var userTagsDropdown = (
+                <DropdownButton
+                    title='User Tags'
+                    variant='primary'
+                >
+                    {tags}
+                </DropdownButton>
             );
-            
+
+
+
+
+
+            // TODO: Formulate the picture, setting default for now
+            var chosenProfilePic;
+            if(user.profile_pic !== ""){
+
+                  fetch(user.profile_pic).then(function(res)
+                  {
+                    // console.log('received ', res, 'from server');
+                    if(res.status === 200)
+                    {
+                        let pic_url = res.url;
+
+                        chosenProfilePic = (<div>
+                                                <img src={pic_url} alt={user.username} style={imgScale}/>
+                                            </div>);
+
+                    }
+
+                  });
+
+            } else {
+                chosenProfilePic = (
+                    <div>
+                        <img src={defaultPic} alt={user.username} style={imgScale}/>
+                    </div>
+                );
+            }            
 
 
             return <div className = "profile-container">
                         <div className = "profile-info">
-                             {defaultProfileView}
+                            {chosenProfilePic}
                             <h3>{user.username}</h3>
-                            <p>{tags}</p>
+                            <p>{userTagsDropdown}</p>
 
                         </div>
                         

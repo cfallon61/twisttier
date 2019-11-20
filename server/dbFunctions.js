@@ -41,8 +41,8 @@ var userExists = async function (user) {
     console.log("what the fuck")
     return false;
   }
-  // console.log(query, params);
-  // console.log('before query')
+  console.log(query, params);
+  console.log('before query')
   var res = await pool.query(query, params);
 
   // response is a json
@@ -275,7 +275,7 @@ async function updateLoginTime(user){
     query += ` USERNAME = $1 RETURNING username`;
     arg = user.username;
   }
-  // console.log(query)
+  console.log(query)
   var client = await pool.connect();
   try{
 
@@ -378,7 +378,7 @@ async function getSpins(users) {
     // ORDER BY date DESC;
     query += ' ORDER BY date DESC';
 
-    // console.log(query);
+    console.log(query);
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
@@ -495,11 +495,72 @@ async function addSpin(username, spin) {
   return (rows.length === 0 ? false : rows[0].id);
 };
 
+// Allows user to edit the content and tags of a spin
+async function updateSpin(username, spin_edit) {
+  var rows = [];
+  var client = await pool.connect();
+  try {
+
+    var tablename = userSpinTableName(username);
+    await client.query('BEGIN');
+
+    var args = [
+      spin_edit.content,
+      unique(spin_edit.tags),
+      spin_edit.id
+    ];
+
+    var query = `UPDATE ${tablename} 
+      SET content=$1, tags=$2, date=NOW(), edited=true
+      WHERE id = $3 RETURNING username`
+    ;
+
+    var res = await client.query(query, args);
+    
+    var query = `SELECT tags_associated
+      FROM ${USER_TABLE} 
+      WHERE username = $1`
+    ;
+
+    var res = await client.query(query, [username]);
+
+    rows = res.rows;
+
+    var tags_associated = res.rows[0].tags_associated;
+    var tags = tags_associated.concat(spin_edit.tags);
+    tags = unique(tags)
+
+    args = [
+      tags,
+      username
+    ];
+
+    var query = `UPDATE ${USER_TABLE} 
+      SET tags_associated=$1
+      WHERE username = $2 RETURNING username`
+    ;
+
+    var res = await client.query(query, args);
+    rows = res.rows;
+    await client.query('COMMIT');
+
+  }
+  catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`An error occurred in db.updateSpin: ${ e }`);
+  }
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? false : rows[0].username);
+}
+
 // Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
   var rows = [];
   var client = await pool.connect();
   try {
+
     var tablename = userSpinTableName(username);
     await client.query('BEGIN');
 
@@ -851,7 +912,7 @@ pool.on('error', (err, client) => {
 // @return: False if the user is not found,
 async function searchForUser(userdata)
 {
-  var query = `SELECT username, profile_pic, tags_associated, bio
+  var query = `SELECT username, profile_pic, tags_associated
    FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
   var results = [];
   try
@@ -879,6 +940,7 @@ module.exports = {
   deleteUser,
   updateLoginTime,
   updateUser,
+  updateSpin,
   deleteSpin,
   unfollowTopicUserPair,
   searchForUser,

@@ -1,14 +1,19 @@
+:root{
+    --spin-main: rgb(37, 0, 37);
+    --spin-second:  rgb(180, 78, 78);
+    --spin-back: rgb(158, 188, 199);
+}
+
 .spin-area{
-    max-width: 40vw;
     width: 95%;
     max-height: 50vh;
-    margin: 2vh auto;
-    border: 3px solid darkmagenta; 
-    border-radius:50px;
-    padding: 20px;
-    background: linear-gradient(lightblue, white);
+    margin: 1vh auto;
+    border: 2px solid var(--spin-main); 
+    border-radius: 25px;
+    padding: 10px;
+    background: linear-gradient(var(--spin-back), white);
     color: black;
-    font-weight: 600;
+    font-weight: 400;
     display: block;
 }
 
@@ -28,25 +33,23 @@
 .username-section .username-link a {
     font-family: 'Lato', cursive;
     font-weight: 800;
-    color: darkmagenta;
+    color: var(--spin-main);
 }
 
 .spin-content{
     display: block;
     text-align: left;
     padding-left: 1vw;
-    
-    
     border: solid;
     border-radius: 50px;
     font-size: 1em;
-    box-shadow: 2px 3px magenta;
+    box-shadow: 2px 3px var(--spin-second);
     margin: 10px;
 }
 
 .spin-content p{
     font-family: 'Lato', cursive;
-    max-height: 5ch;
+    max-height: 50vh;
     max-width: 30ch;
     margin: auto;
 }
@@ -77,14 +80,15 @@
 }
 
 .action-button{
-    flex: 5;
+    flex: 25;
 }
 
 .like-button {
-    background-color: dodgerblue;
+    background-color: var(--spin-main);
     width: 4vw;
     height: 4vh;
     flex: 1;
+    border-radius: 10px;
     border: none;
     outline: none;
     margin: none;
@@ -95,6 +99,7 @@
     width: 4vw;
     height: 4vh;
     flex: 1;
+    border-radius: 10px;
     border: none;
     outline: none;
     margin: none;
@@ -102,12 +107,12 @@
 
 .like-button:hover, .unlike-button:hover{
     cursor: pointer;
-    transform: scale(1.05);
+    background-color: goldenrod;
 }
 
 .tags-container p {
-    font-size: 1em;
-    padding: 0.3em;
+    font-size: 0.9em;
+    padding: 0.1em;
 }
 
 .tags-container p:hover {
@@ -116,13 +121,13 @@
 }
 
 p.followed-tags {
-    color: darkmagenta;
+    color: var(--spin-main);
 }
 
 p.unfollowed-tags {
-    color: darkslateblue;
+    color: var(--spin-second);
 }
 
 .num-likes{
-    flex: 2;
+    flex: 1;
 }

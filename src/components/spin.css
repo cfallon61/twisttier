@@ -2,6 +2,8 @@
     --spin-main: rgb(37, 0, 37);
     --spin-second:  rgb(180, 78, 78);
     --spin-back: rgb(158, 188, 199);
+    --button-main: rgba(0, 102, 255, 0.63);
+    --button-second: rgba(255, 0, 76, 0.63);
 }
 
 .spin-area{
@@ -84,7 +86,7 @@
 }
 
 .like-button {
-    background-color: var(--spin-main);
+    background-color: var(--button-main);
     width: 4vw;
     height: 4vh;
     flex: 1;
@@ -95,7 +97,7 @@
 }
 
 .unlike-button {
-    background-color: red;
+    background-color: var(--button-second);
     width: 4vw;
     height: 4vh;
     flex: 1;
@@ -115,7 +117,7 @@
     padding: 0.1em;
 }
 
-.tags-container p:hover {
+p.followed-tags:hover, p.unfollowed-tags:hover {
     text-decoration: underline;
     cursor: pointer;
 }
@@ -130,4 +132,20 @@ p.unfollowed-tags {
 
 .num-likes{
     flex: 1;
+}
+
+.more-tags-button {
+    background-color: var(--button-main);
+    width: 2vw;
+    height: 4vh;
+    text-align: center;
+    flex: 1;
+    border: none;
+    outline: none;
+    margin: none;
+    border-radius: 10px;
+}
+
+.more-tags-button:hover {
+    background-color: goldenrod;
 }

@@ -24,6 +24,8 @@ const tagContainerStyle = {
     "padding-top" : "2vh"
 };
 
+const MAX_TAGS = 3;
+
 /**
  * The spin component that displays username, message content and user timestamp.
  */
@@ -48,7 +50,8 @@ class Spin extends Component
             // for handling the edit form modal
             showEditer : false,
             initialEditorValue : this.props.content,
-            newTagText : ""
+            newTagText : "",
+            showMoreTagsModal : false
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -80,6 +83,8 @@ class Spin extends Component
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
+        this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
+        this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
     }
 
     /**
@@ -613,7 +618,29 @@ class Spin extends Component
         );
     }
 
+    openMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : true});
+    }
 
+    closeMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : false});
+    }
+
+    getModalTagViews()
+    {
+        return this.state.tags.map((tagName) => {
+            if(this.state.viewingUserTags.includes(tagName))
+            {
+                return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+            }
+            else
+            {
+                return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+            }
+        });
+    }
 
     render()
     {
@@ -622,7 +649,8 @@ class Spin extends Component
         // console.log("UserToView: ", this.userToView);
         let likeButton = null;
         let actionsButton = null;
-        let tagList = [];
+        let moreTagsButton = null;
+        let tagViewList = [];
 
         if(this.viewerIsAuthenticated())
         {
@@ -637,12 +665,34 @@ class Spin extends Component
 
             if(this.state.tags.length === 0)
             {
-                tagList.push(<h6>No associated tags found.</h6>);
+                tagViewList.push(<h6>No associated tags found.</h6>);
             }
             else
             {
-                // console.log(this.state.viewingUserTags);
-                tagList = this.state.tags.map( (tagName) => {
+                let i = 0;
+                
+                while(i < MAX_TAGS && i < this.state.tags.length)
+                {
+                    let tagName = this.state.tags[i];
+                    let view = null;
+                    if(this.state.viewingUserTags.includes(tagName))
+                    {
+                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                    }
+                    else
+                    {
+                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                    }
+                    tagViewList.push(view);
+                    i++;
+                }
+
+                if(this.state.tags.length > MAX_TAGS)
+                {
+                    moreTagsButton = <button className="more-tags-button" onClick={this.openMoreTagsModal}>...</button>;
+                }
+
+                let tagList = this.state.tags.map( (tagName) => {
 
                     if(this.state.viewingUserTags.includes(tagName))
                     {
@@ -690,10 +740,16 @@ class Spin extends Component
                 </div>
                 
                 <div className="tags-container" style={tagContainerStyle}>
-                    {tagList}
+                    {tagViewList}
+                    {moreTagsButton}
                 </div>
                 <Modal show = {this.state.showEditer}>
                     {this.renderEditForm()}
+                </Modal>
+
+                <Modal show={this.state.showMoreTagsModal}>
+                    {this.getModalTagViews()}
+                    <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
 
             </div>

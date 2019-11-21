@@ -212,6 +212,17 @@ app.post('/api/add_spin/:username', helpers.loggedIn,
   res.sendFile(index);
 });
 
+// @brief: endpoint for editing a spin. user must be logged in or this will not work.
+app.post('/api/edit_spin/:username', helpers.loggedIn,
+        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
+        ], spins.editSpin, (req, res) => {
+    // TODO add error states for invalid input
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
+
 app.post('/api/deleteSpin/:username', helpers.loggedIn, spins.removeSpin, (req, res) => {
 
   if (res.getHeader('error') != undefined) {

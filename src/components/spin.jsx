@@ -10,6 +10,8 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import Modal from './Modal.js';
 import Form from 'react-bootstrap/Form';
+import LikeImage from './like.png';
+import Image from 'react-bootstrap/Image';
 
 const tagContainerStyle = {
     display: "grid",
@@ -21,6 +23,8 @@ const tagContainerStyle = {
     "margin" : "auto",
     "padding-top" : "2vh"
 };
+
+const MAX_TAGS = 3;
 
 /**
  * The spin component that displays username, message content and user timestamp.
@@ -48,7 +52,7 @@ class Spin extends Component
             showEditer : false,
             initialEditorValue : this.props.content,
             newTagText : "",
-            
+            showMoreTagsModal : false
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -82,6 +86,8 @@ class Spin extends Component
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
+        this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
+        this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
     }
 
     /**
@@ -672,86 +678,138 @@ class Spin extends Component
         );
     }
 
-    
-    render()
-    {   
+    openMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : true});
+    }
 
-        let buttonToShow = null;
+    closeMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : false});
+    }
+
+    getModalTagViews()
+    {
+        return this.state.tags.map((tagName) => {
+            if(this.state.viewingUserTags.includes(tagName))
+            {
+                return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+            }
+            else
+            {
+                return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+            }
+        });
+    }
+
+    render()
+    {
+        // console.log("Editor bool: ", this.state.showEditer);
+        // console.log("Author: ", this.author);
+        // console.log("UserToView: ", this.userToView);
+        let likeButton = null;
         let actionsButton = null;
-        let tagList = [];
+        let moreTagsButton = null;
+        let tagViewList = [];
 
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
             {
-                buttonToShow = <Button onClick={this.likeSpin}>Like</Button>;
+                likeButton = <button className="like-button" onClick={this.likeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
             else
             {
-                buttonToShow = <Button onClick={this.unlikeSpin}>Unlike</Button>;
+                likeButton = <button className="unlike-button" onClick={this.unlikeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
 
             if(this.state.tags.length === 0)
             {
-                tagList.push(<h6>No associated tags found.</h6>);
+                tagViewList.push(<h6>No associated tags found.</h6>);
             }
             else
             {
-                // console.log(this.state.viewingUserTags);
-                tagList = this.state.tags.map( (tagName) => {
-
+                let i = 0;
+                
+                while(i < MAX_TAGS && i < this.state.tags.length)
+                {
+                    let tagName = this.state.tags[i];
+                    let view = null;
                     if(this.state.viewingUserTags.includes(tagName))
                     {
-                        return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
+                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
                     else
                     {
-                        return <Button size="sm" variant="danger" onClick={() => this.followTag(tagName)}>{tagName}</Button>;
+                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                    }
+                    tagViewList.push(view);
+                    i++;
+                }
+
+                if(this.state.tags.length > MAX_TAGS)
+                {
+                    moreTagsButton = <button className="more-tags-button" onClick={this.openMoreTagsModal}>...</button>;
+                }
+
+                let tagList = this.state.tags.map( (tagName) => {
+
+                    if(this.state.viewingUserTags.includes(tagName))
+                    {
+                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                    }
+                    else
+                    {
+                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                     }
                 });
             }
 
             // decide what actions should be visible to the user
             actionsButton = this.decideAvailableActionsButton();
-
-
         }
+
+        let usernameLink  = `/profile/${this.props.username}`;
+        let usernameField = <a href={usernameLink}>{this.props.username}</a>
 
         return (
             <div className="spin-area">
 
                 <div className="username-section">
-                    <div>
-                        <h5>
-                            {this.props.username}
-                            <span class = "actionsButton">
-                                {actionsButton}
-                            </span>
-                        </h5>
-
+                    <div className="username-link">
+                        {usernameField}  
                     </div>
-
-
+                    <div className="time-section">
+                        <h6>
+                            {this.formatDate(this.state.timestamp)}
+                        </h6>
+                    </div> 
                 </div>
                 <div className="spin-content">
                     <p>
                         {this.state.content}
                     </p>
                 </div>
-                <div className="time-section">
-                    <h6>
-                        {this.formatDate(this.state.timestamp)}
-                    </h6>
-                </div>
+
                 <div className="other-info">
-                    <p>Likes: {this.state.likes}</p>
+                    {likeButton} 
+                    <p className="num-likes">{this.state.likes}</p>
+                    <div className="action-button">
+                        {actionsButton}
+                    </div>
                 </div>
-                {buttonToShow}
+                
                 <div className="tags-container" style={tagContainerStyle}>
-                    {tagList}
+                    {tagViewList}
+                    {moreTagsButton}
                 </div>
                 <Modal show = {this.state.showEditer}>
                     {this.renderEditForm()}
+                </Modal>
+
+                <Modal show={this.state.showMoreTagsModal}>
+                    {this.getModalTagViews()}
+                    <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
 
             </div>

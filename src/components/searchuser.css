@@ -1,14 +1,18 @@
-.profile-info {
-    background-color : darkslategrey;
-    margin : auto;
-    border-radius : 10px;
-    border : solid 3px;
-    max-width : 20vw;
-    box-shadow: 5px 7px 5px;
-    margin-bottom: 10vh;
+.search-profile-info {
+    border: solid 10px green;
 }
 
-.profile-container {
-    padding-top : 10px;
+.search-profile-container {
+    padding-top : 20px;
+    background-color : darkslategrey;
+    width : 70%;
+    height : 20%;
+    padding : 20px;
 
+}
+
+.searchDP {
+    padding : 20px;
+    border : solid 10px red;
+    float :  left;
 }

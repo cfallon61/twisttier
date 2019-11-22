@@ -18,10 +18,36 @@ import "./searchuser.css";
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 const imgScale = {
-    "height" : "100%",
-    "width" : "100%",
-    "float" : "left"
+    "height" : "auto",
+    "width" : "250px",
 }
+
+function myModal(props) {
+    return (
+      <Modal
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Tags of the user
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <h4>Centered Modal</h4>
+          <p>
+            Tags of user
+          </p>
+        </Modal.Body>
+        
+        <Modal.Footer>
+          <Button>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
 
 class SearchUser extends Component {
     constructor(props)
@@ -30,7 +56,8 @@ class SearchUser extends Component {
         
         this.state = {
               users : [],
-              searchName : this.props.match.params.searchName   
+              searchName : this.props.match.params.searchName ,
+              showAllTags :  false,  
         }
 
         
@@ -42,6 +69,7 @@ class SearchUser extends Component {
     getUsers(searchValue) {
         let self = this;
         let postURL = "/api/search/" + searchValue;
+        
         fetch(postURL, {
             
             method : 'POST',
@@ -78,7 +106,6 @@ class SearchUser extends Component {
     }
      
     componentDidMount() {
-        console.log("Component did mount search: ", this.state.searchName);
         this.getUsers(this.state.searchName);
     }
 
@@ -90,25 +117,48 @@ class SearchUser extends Component {
 
       // check if users is empty  
       if (tempUsers.length === 0) {
-          profiles = <h3>Could not find any user that matches your search.</h3>
+          profiles = <p>No matches found</p>
+
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
-            // console.log("User: ", user);
+            console.log("User: ", user);
+            
             // formulate tags of user
             let tags = [];
+            
             if ( user.tags_associated.length === 0) {
                 let noItem = (  <Dropdown.Item>
                             No tags to show
                 </Dropdown.Item>);
                 tags.push(noItem);
 
-            } else {
+            } else if ( user.tags_associated.length <= 3 ) {
+                // if less than 5 tags
                 tags = user.tags_associated.map( (tag) => {
                     return  <Dropdown.Item >
                             {tag}
                         </Dropdown.Item>;
                 });
+            } else {
+                // if more than 5 tags, show 5 and show all button
+                for (var i = 0; i < 4; i++) {
+                    let item = (
+                        <Dropdown.Item >
+                            {user.tags_associated[i]}
+                        </Dropdown.Item>
+                    );
+                    tags.push(item);   
+
+                }
+                
+                let show_all_button = (
+                    <Dropdown.Item >
+                            {"Show All"}
+                    </Dropdown.Item>
+                );
+                tags.push(show_all_button);
+                
             }
 
             var userTagsDropdown = (
@@ -120,41 +170,28 @@ class SearchUser extends Component {
                 </DropdownButton>
             );
 
-
-
-
-
             // TODO: Formulate the picture, setting default for now
-            var chosenProfilePic;
-            if(user.profile_pic !== ""){
+            var chosenProfilePic = (
+                    <img src={defaultPic} alt={user.username} style={imgScale}/>
+            );
+            // console.log("pic before check:", chosenProfilePic);
 
-                  fetch(user.profile_pic).then(function(res)
-                  {
-                    // console.log('received ', res, 'from server');
-                    if(res.status === 200)
-                    {
-                        let pic_url = res.url;
-
-                        chosenProfilePic = (<div>
-                                                <img src={pic_url} alt={user.username} style={imgScale}/>
-                                            </div>);
-
-                    }
-
-                  });
-
-            } else {
+            if(user.profile_pic !== "" && user.profile_pic !== null && user.profile_pic !== "{}"){
+                // console.log("IMAGE exists");
                 chosenProfilePic = (
-                    <div>
-                        <img src={defaultPic} alt={user.username} style={imgScale}/>
-                    </div>
-                );
-            }            
+                            <img src={user.profile_pic} alt={user.username} style={imgScale}/>
+                                                );
 
+            }           
 
-            return <div className = "profile-container">
-                        <div className = "profile-info">
+            // console.log("PIC: ", chosenProfilePic);
+
+            return <div>
+                        <div >
                             {chosenProfilePic}
+                        </div>
+                        <div>
+                            
                             <h3>{user.username}</h3>
                             <p>{userTagsDropdown}</p>
 
@@ -171,9 +208,11 @@ class SearchUser extends Component {
 
       return (
         <div>
-
             {profiles}
         </div>
+        <myModal show = {this.state.showAllTags}>
+
+        </myModal>
       )
     }
   }

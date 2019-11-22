@@ -76,8 +76,8 @@ handleSubmit(event) {
 
 // change the redirect bool
 handleSearch(event) {
-    console.log("handling search");
-    // event.preventDefault();
+    // console.log("handling search");
+    event.preventDefault();
 
 
     let url = "/searchUser/" + this.state.searchValue;
@@ -129,14 +129,14 @@ render() {
 
 
             <Navbar.Brand id="basic-navbar-nav">
-                <Form>
+                <Form inline onSubmit = {this.handleSearch}>
+                  
                   <FormControl
-                    as = "textarea"
                     placeholder="Search"
                     value = {this.state.searchValue}
                     onChange = {this.handleSearchValueChange}
-                    onSubmit = {this.handleSearch}
                   />
+
                   <Button 
                     variant="outline-success" 
                     onClick = {this.handleSearch} 

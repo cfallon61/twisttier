@@ -131,6 +131,7 @@ async function authorize(req, res, next) {
 // returns error or success response
 async function deleteAccount(req, res, next) {
   // extract info from the request
+  console.log(req.body);
   const user = {
     username: req.body.username,
     password: req.body.password,
@@ -140,6 +141,11 @@ async function deleteAccount(req, res, next) {
   var userData = await db.userExists(user);
   // console.log(userData);
   try {
+    if (!user.username || !user.password || !user.email)
+    {
+      res.setHeader('error', 'invalid data provided: empty fields will not be tolerated, sir. Fix your junk.');
+      return next();
+    }
     var goodPass = await bcrypt.compare(user.password, userData.passhash);
   }
   catch (e) {
@@ -170,7 +176,7 @@ async function deleteAccount(req, res, next) {
 
 // API for frontend development
 async function getUserInfo(req, res, next) {
-  console.log('get user info')
+  // console.log('get user info')
   var user = {
     // send the username as a url parameter ex: /api/users/bringMeDeath
     username: req.params.username,
@@ -279,9 +285,9 @@ async function updateProfileInfo(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
     // return next();
   }
-  var imgsrc = null;
+  var imgsrc = '';
 
-  if (req.file.path) {
+  if (req.file && req.file.path) {
     imgsrc = req.file.path;
   }
   var user = {
@@ -326,8 +332,8 @@ async function updateProfileInfo(req, res, next) {
   }
   else {
     res.setHeader('username', userData.username);
-    res.userdata = userdata;
-    req.imgsrc = userdata.profile_pic;
+    res.userdata = userData;
+    req.imgsrc = userData.profile_pic;
   }
   return next();
 

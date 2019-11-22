@@ -43,43 +43,18 @@ const cloudinaryConfig = (req, res, next) =>
 const dataUri = req => uri.format(path.extname(req.file.originalname).toString(), req.file.buffer);
 
 
-// setup multer with upload desination for images
-const storage = multer.diskStorage({
-
-  destination: './profileImages',
-
-  // handle filename creation
-  filename: function(req, file, cb) {
-
-    try {
-      
-      var tempName = Date.now().toString() + "_" + file.originalname;
-      var filepath = path.join(images, tempName);
-      console.log('filepath =', filepath);
-      // console.log(filepath);
-      // super hacky way of doing the file name handling
-      while (fs.existsSync(filepath)) {
-        filepath = path.join(images, tempName);
-        tempName = Date.now().toString() + "_" + file.originalname;
-      }
-      console.log('filename =', tempName, 'file =', file);
-
-      cb(null, tempName);
-    }
-    catch (e) {
-      console.log('Multer.storage encountered an error:', e);
-      return cb(null, undefined);
-    }
-  }
-});
-
 // configure other multer params
 const multerUpload = multer({
   storage: multer.memoryStorage(),
 
   fileFilter: function(req, file, next) {
+    // console.log(req.body)
     console.log('filtering files');
-    if (!file) return next(null, false);
+    if (!file) 
+    {
+      console.log('no file provided or an error occurred. Either way i am dying.');
+      return next(null, false);
+    }
     try {
       console.log(file);
       var ext = getExtension(file.originalname);
@@ -95,6 +70,7 @@ const multerUpload = multer({
     }
     catch (e) {
       console.log('Multer.upload encountered an error:', e);
+      req.file = false;
       return next(null, false);
     }
   },
@@ -113,7 +89,8 @@ function cloudinaryUpload(req, res, next)
   }
   if (!req.file) 
   {
-    res.setHeader("error", 'unable to upload image for whatever reason');
+    console.log('no file found. Either this is an error or the user did not provide one. Either way I don\'t particularly care.');
+    // res.setHeader("error", 'unable to upload image for whatever reason');
     return next();
   }
   // console.log('file provided:', req.file);

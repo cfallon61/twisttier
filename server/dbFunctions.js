@@ -197,7 +197,7 @@ async function updateUser(user) {
       user.bio,
       user.name,
       user.interests,
-      user.accessibility_features,
+      JSON.stringify(user.accessibility_features),
       user.profile_pic
     ];
 
@@ -370,9 +370,9 @@ async function getSpins(users) {
 
 
     // final string:
-    // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+    // SELECT * FROM <user1_spins> WHERE tags =ANY(tags) <tags>
     // UNION ALL
-    // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+    // SELECT * FROM <user2_spins> WHERE tags =ANY(tags) <tags>
     // UNION ALL
     // ...
     // ORDER BY date DESC;
@@ -450,7 +450,7 @@ async function addSpin(username, spin) {
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
       spin.like_list,
-      username,
+      username
     ];
 
 
@@ -464,6 +464,7 @@ async function addSpin(username, spin) {
     rows = res.rows;
 
     var postid = res.rows[0].id;
+  
     // if there are any new tags, then add this post's id to the new post column
     if (newtags.length > 0) {
       args = [
@@ -494,6 +495,67 @@ async function addSpin(username, spin) {
   }
   return (rows.length === 0 ? false : rows[0].id);
 };
+
+// Allows user to edit the content and tags of a spin
+async function updateSpin(username, spin_edit) {
+  var rows = [];
+  var client = await pool.connect();
+  try {
+
+    var tablename = userSpinTableName(username);
+    await client.query('BEGIN');
+
+    var args = [
+      spin_edit.content,
+      unique(spin_edit.tags),
+      spin_edit.id
+    ];
+
+    var query = `UPDATE ${tablename} 
+      SET content=$1, tags=$2, date=NOW(), edited=true
+      WHERE id = $3 RETURNING id`
+    ;
+
+    var res = await client.query(query, args);
+    spin_id = res.rows[0].id;
+    
+    var query = `SELECT tags_associated
+      FROM ${USER_TABLE} 
+      WHERE username = $1`
+    ;
+
+    var res = await client.query(query, [username]);
+
+    rows = res.rows;
+
+    var tags_associated = res.rows[0].tags_associated;
+    var tags = tags_associated.concat(spin_edit.tags);
+    tags = unique(tags)
+
+    args = [
+      tags,
+      username
+    ];
+
+    var query = `UPDATE ${USER_TABLE} 
+      SET tags_associated=$1
+      WHERE username = $2 RETURNING username`
+    ;
+
+    var res = await client.query(query, args);
+    rows = res.rows;
+    await client.query('COMMIT');
+
+  }
+  catch(e) {
+    await client.query('ROLLBACK');
+    console.log(`An error occurred in db.updateSpin: ${ e }`);
+  }
+  finally {
+    client.release();
+  }
+  return (rows.length === 0 ? false : spin_id);
+}
 
 // Deletes a spin provided that it exists
 async function deleteSpin(username, spin_id) {
@@ -880,6 +942,7 @@ module.exports = {
   deleteUser,
   updateLoginTime,
   updateUser,
+  updateSpin,
   deleteSpin,
   unfollowTopicUserPair,
   searchForUser,

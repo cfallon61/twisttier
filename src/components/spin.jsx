@@ -48,6 +48,7 @@ class Spin extends Component
             likeList: this.props.likeList,
 
             // for handling the edit form modal
+            
             showEditer : false,
             initialEditorValue : this.props.content,
             newTagText : "",
@@ -62,6 +63,8 @@ class Spin extends Component
         this.author = this.props.username;
         this.spinID = this.props.spinID;
         this.interestsOfUser = this.props.userInterests;
+
+        
 
         //this.followTag = this.followTag.bind(this);
         //this.unfollowTag = this.unfollowTag.bind(this);
@@ -110,7 +113,8 @@ class Spin extends Component
         // console.log("Return empty from end.");
         return [];//Empty list
     }
-
+    
+    // likes spin 
     likeSpin()
     {
         let esteemBody = {
@@ -151,6 +155,7 @@ class Spin extends Component
         });
     }
 
+    // unlikes spin
     unlikeSpin()
     {
         let esteemBody = {
@@ -194,6 +199,7 @@ class Spin extends Component
         });
     }
 
+    // follows tags of spins
     followTag(tagName)
     {
         let tagList = [];
@@ -233,6 +239,7 @@ class Spin extends Component
         });
     }
 
+    // unfollows tags of spin
     unfollowTag(tagName)
     {
         let tagList = [];
@@ -271,6 +278,7 @@ class Spin extends Component
             }
         });
     }
+
     //Returns a boolean indicating the user already liked the spin.
     updateWhetherViewerLikedTheSpin()
     {
@@ -327,6 +335,7 @@ class Spin extends Component
         ;
     }
 
+    // checks whether viewer is logged in or nor
     viewerIsAuthenticated()
     {
         return document.cookie !== "";
@@ -341,6 +350,8 @@ class Spin extends Component
         }
     }
 
+
+    // formats the date
     formatDate(timestamp)
     {
         let dateAndTime = timestamp.split('T');
@@ -348,42 +359,54 @@ class Spin extends Component
         return dateAndTime[0] + " " + time;
     }
 
+
+    // deletes the spin
     deleteSpin() {
         console.log("Deleting spin");
         let deleteSpinID = this.spinID;
+        let spinAuthor = this.author;
         let spinToBeDeleted = {"spinId" : deleteSpinID};
 
         // console.log("SpinID: ", spinToBeDeleted);
+        // console.log("username: ", this.author);
 
         // TODO:call the server function and refresh the page
-        // let self = this;
-        // fetch("/api/deleteSping", {
+        let self = this;
+        fetch("/api/deleteSpin/" + spinAuthor, {
 
-        //     method : "POST",
-        //     headers : {
-        //         "Content-Type" : "application/json"
-        //     },
-        //     body : JSON.stringify(spinToBeDeleted)
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(spinToBeDeleted)
 
-        // }).then(function(res){
-        //     if(res.status === 200)
-        //     {
-        //         // NotificationManager.success(`You delted the spin`);
-        //         window.location.reload();
-        //     }
-        //     else{
-        //         if(res.headers.has("error"))
-        //         {
-        //             NotificationManager.error(res.headers.get('error'));
-        //         }
-        //         else
-        //         {
-        //             NotificationManager.error("Server didn't return OK response.");
-        //         }
-        //     }
-        // });
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                // console.log("status:", res.status);
+                NotificationManager.success("Spin has been deleted");
+                
+                // show the notification and then delete
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 1000)
+                
+                // console.log("Spin deleted");
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
     }
 
+    // asks for Confirmation for delete spin
     askForConfirmation = () => {
         confirmAlert({
           title: 'Confirm to Delete',
@@ -401,8 +424,8 @@ class Spin extends Component
         })
     };
 
-
-
+    
+    // decide the actions that would be available for a viewing user
     decideAvailableActionsButton(){
 
 
@@ -443,35 +466,34 @@ class Spin extends Component
 
 
     }
-
-    // show the edit post modal
-    showEditModal() {
-        this.setState({showEditer : true})
-    }
-
-    // closes the edit post modal
-    closeEditModal() {
-        this.setState({showEditer : false})
-    }
+    
 
     // handles change of text for edit spin
     handleTextChange(event){
-        this.setState({initialEditorValue : event.target.value});
+        if (event.target.value.length <= 90) {
+            this.setState({
+                content : event.target.value
+            }); 
+        }
+        
     }
 
     // handles change of interest for edit spin
-    handleInterestAddition(newTag) {
+    handleInterestAddition(newTag) { 
+
         let tagList = this.state.tags;
 
         tagList.push(newTag);
 
-        this.setState({tags : tagList});
-
+        this.setState({
+            tags : tagList
+        });
 
     }
 
     // handles deletion of tag from the post
     handleInterestDeletion(oldTag) {
+
         let tagList = this.state.tags;
 
         // find index of the tag
@@ -481,9 +503,10 @@ class Spin extends Component
         if (indexOfTag != -1) {
             tagList.splice(indexOfTag, 1);
         }
-
         // reset the state
-        this.setState({tags: tagList});
+        this.setState({
+            tags : tagList
+        });
     }
 
     // handles the change of text of new tag to be added
@@ -503,20 +526,55 @@ class Spin extends Component
         this.setState({newTagText : ""})
     }
 
+    // show the edit post modal
+    showEditModal() {
+        this.setState({showEditer : true})
+        // console.log("Initial values:", this.state.initialValues);
+    }
+
+    // closes the edit post modal
+    closeEditModal() {
+        this.setState({            
+            // close the modal
+            showEditer : false
+        })
+        window.location.reload();
+    }
+    
     // sends the edited post to server and refreshes the front end
     // TODO: handle server response
     handleEditPostSubmission(){
-        console.log("Submitting the editted post");
+       
+        let spinBody = {
+        tags: this.state.tags,
+        edited: true, 
+        quoted: this.state.quoted,
+        content: this.state.content,
+        timestamp: this.state.timestamp,
+        quoteOrigin: this.state.quoteOrigin,
+        likes : this.state.likes,
+        spinID : this.state.spinID,
+        showLike : this.state.showLike,
+        viewingUserTags : this.state.viewingUserTags,
+        likeList: this.state.likeList,
+       }
+
+        this.setState({
+            // close the modal
+            showEditer : false
+        })
+
+        // send the data to server, refresh the location
     }
 
     // creates the components of the edit modal
     renderEditForm() {
-        let spinContent = this.state.content;
         let userInterestsCopy = this.interestsOfUser;
 
         // console.log("user interests after: ", userInterestsCopy);
-
+        
         let spinInterests = [];
+        
         // return all the tags the user has posted with before
         if(userInterestsCopy !== undefined)
         {
@@ -531,6 +589,7 @@ class Spin extends Component
         }
 
         let userInterestsDropdown = null;
+        
         // create a dropdown using those interests. If list is empty, then the view will only consist of text.
         if(spinInterests.length === 0)
         {
@@ -563,6 +622,7 @@ class Spin extends Component
         }
 
         let addedTagsDropdown = null;
+        
         if(initialTagsDropdown.length === 0)
         {
             addedTagsDropdown = <h3>This spin doesn't associate with any tags.</h3>
@@ -585,14 +645,14 @@ class Spin extends Component
             <div className="spin-form">
                     <Form >
                         <Form.Label>Edit Spin</Form.Label>
-                        <Form.Control
-                            as = "textarea"
-                            value= {this.state.initialEditorValue}
-                            rows="3"
+                        <Form.Control 
+                            as = "textarea" 
+                            value= {this.state.content}
+                            rows="3" 
                             onChange = {this.handleTextChange}
                         />
-                            <p>{this.state.initialEditorValue.length}/90 characters</p>
-
+                            <p>{this.state.content.length}/90 characters</p>
+                        
                         {userInterestsDropdown}
                         {addedTagsDropdown}
                     </Form>

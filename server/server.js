@@ -32,14 +32,14 @@ app.use(express.static(path.join(__dirname, '../build/')));
 app.use(helpers.cloudinaryConfig);
 
 
-var server = app.listen(port, (err) => {
+app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
 });
 
 
 
-// TODO ADD SESSION CACHING
+// TODO fix express-validator
 // handle user creation
 // [check('email').isEmail().withMessage('invalid email'),
 //   check('password').isLength({ min: 8 }).withMessage('password too short'),
@@ -67,22 +67,25 @@ app.post('/create_user',
   });
 
 
-// handle profile image uploading
-// @param req: the html headers which will include
-//              a json with the user information
-// @param res: response to client
-//             will return 406, Not acceptable to the client
-app.post('/uploadProfileImage',  helpers.multerUpload, helpers.cloudinaryUpload, (req, res, next) => {
-  //placeholder @TODO implement database mapping
-  // console.log(req.file);
-  if (!req.file || res.getHeader('error') != undefined) {
-    res.status(418).send('idk wtf is wrong');
-  }
-  else {
-    res.status(200).send("good job you uploaded a picture " + JSON.stringify(req.file.path));
-  }
-});
-
+if (process.env.TEST === 'true')
+{
+  // handle profile image uploading
+  // THIS IS NOW EXPLICITLY FOR TESTING PURPOSES
+  // @param req: the html headers which will include
+  //              a json with the user information
+  // @param res: response to client
+  //             will return 406, Not acceptable to the client
+  app.post('/uploadProfileImage',  helpers.multerUpload, helpers.cloudinaryUpload, (req, res, next) => {
+    //placeholder @TODO implement database mapping
+    // console.log(req.file);
+    if (!req.file || res.getHeader('error') != undefined) {
+      res.status(418).send('idk wtf is wrong');
+    }
+    else {
+      res.status(200).send("good job you uploaded a picture " + JSON.stringify(req.file.path));
+    }
+  });
+}
 
 // TODO send responses to front based on login / logout
 app.get('/logout', helpers.loggedIn, (req, res) => {
@@ -141,6 +144,7 @@ app.post('/api/login_status', (req, res) => {
 
 // @brief: enpoint to get a supplied user's profile information
 app.post('/api/users/:username', users.getUserInfo, (req, res) => {
+  console.log('POST /api/users/' + req.params.username)
   if (res.getHeader('error') != undefined) {
     res.status(406);
     res.sendFile(index);
@@ -187,7 +191,8 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
          users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
-      res.status(406).sendFile(index);
+    console.log(res.getHeader('error'));
+    res.status(406).sendFile(index);
   }
   // i'm just hacking this together at this point i want to sleep
   var userdata = req.userdata;
@@ -201,6 +206,17 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
 app.post('/api/add_spin/:username', helpers.loggedIn,
         [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
         ], spins.createSpin, (req, res) => {
+    // TODO add error states for invalid input
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
+
+// @brief: endpoint for editing a spin. user must be logged in or this will not work.
+app.post('/api/edit_spin/:username', helpers.loggedIn,
+        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
+        ], spins.editSpin, (req, res) => {
     // TODO add error states for invalid input
   if (res.getHeader('error') != undefined) {
     res.status(418)
@@ -226,7 +242,8 @@ app.post('/api/spins/esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => 
 
 // @brief:  endpoint for deleting account
 // @author: Chris Fallon
-app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
+// helpers.loggedIn,
+app.post('/api/delete',  users.deleteAccount, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(406);
@@ -238,29 +255,13 @@ app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
   }
 });
 
-// @brief: route for getting profile images stored on the server.
-// @return: profile image located at the specified path, or 404 otherwise.
-app.get('/profileImages/*', (req, res) => {
-  console.log(req.originalUrl);
-  var img = req.originalUrl.substring(req.originalUrl.lastIndexOf("/"));
-  const imgpath = path.join(images, img);
-
-  if (fs.existsSync(imgpath)) {
-    res.sendFile(imgpath);
-    console.log('sending profile img at ', imgpath);
-  }
-  else {
-    res.status(404);
-    res.sendFile(index);
-  }
-});
-
 
 // TODO implement this endpoint and middlewares associated.
 app.post('/api/search/:user', users.search, (req, res) => {
   if (res.getHeader('error'))
   {
-    res.sendfile(index);
+    res.status(404);
+    res.sendFile(index);
   }
 });
 

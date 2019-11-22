@@ -17,12 +17,14 @@ __NOTE__ This functionality is not yet implemented. This is a preliminary specif
           {
             username: 'seriously1',
             profile_pic: 'profileImages/1571946143009_IMG_20180804_121544677_copy.jpg',
-            tags_associated: []
+            tags_associated: [],
+            bio: ""
           },
           {
             username: 'sidv',
             profile_pic: 'profileImages\\1572393972370_pic.jpg',
-            tags_associated: []
+            tags_associated: [],
+            bio: ""
           },
         ]
         ```
@@ -290,6 +292,24 @@ __Note__ Please refer to [this section](#new-tags-posted) for information on how
     * __Error:__ If the post was not able to be added, the server will set response header `error: unable to add spin` and will return status `418: I'm a teapot`
     * __Error:__ If the post does not fit within the length bounds of 1 <= length <= 90, server will set response header `error: ` with some arbitrary error message which I don't know and will return status `418: I'm a teapot`
     * __Error:__ If the post is a quote, but no quote origin is specified, server will set response header `error: no quote origin specified` and will return status `418: I'm a teapot`
+    * __Success:__ If the post was successfully added, the server will set response header `spinId: [id]` and will send the index file.
+
+## Editing a Spin
+__NOTE:__ This is not Chris writing this so I hope you won't get an aneurysm while reading this.
+__NOTE:__ When editing a spin is successful: edited will become true and the date of the spin will be updated.
+
+1. Client will `POST /api/edit_spin/<username>` with `username` as a URL parameter with the following parameters in the body:
+ ```
+  body: {
+    spinBody: [some arbitary text here. <= 90 characters in length],
+    tags: [list of tags i.e. ['tag1', 'tag2']],
+    spinID: id of the spin to edit
+  };
+  ```
+2. Server will validate user session
+3. server will attempt to add the post to the user's post table.
+    * __Error:__ If the post was not able to be edited, the server will set response header `error: unable to update spin` and will return status `418: I'm a teapot`
+    * __Error:__ If the post does not fit within the length bounds of 1 <= length <= 90, server will set response header `error: ` with some arbitrary error message and will return status `418: I'm a teapot`
     * __Success:__ If the post was successfully added, the server will set response header `spinId: [id]` and will send the index file.
 
 ##Deleting a Spin

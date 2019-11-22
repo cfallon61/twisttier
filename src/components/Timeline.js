@@ -254,7 +254,7 @@ class Timeline extends Component
         if(this.state.error.exist) {
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
-        let feed = new Feed();
+        let feed = new Feed(this.props.username);
         if(this.state.spins !== undefined && this.state.spins.length > 0)
         {
             for(var i = 0; i < this.state.spins.length; i++)

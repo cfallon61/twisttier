@@ -197,7 +197,7 @@ async function updateUser(user) {
       user.bio,
       user.name,
       user.interests,
-      user.accessibility_features,
+      JSON.stringify(user.accessibility_features),
       user.profile_pic
     ];
 
@@ -370,9 +370,9 @@ async function getSpins(users) {
 
 
     // final string:
-    // SELECT * FROM <user1_spins> WHERE tags @> <tags>
+    // SELECT * FROM <user1_spins> WHERE tags =ANY(tags) <tags>
     // UNION ALL
-    // SELECT * FROM <user2_spins> WHERE tags @> <tags>
+    // SELECT * FROM <user2_spins> WHERE tags =ANY(tags) <tags>
     // UNION ALL
     // ...
     // ORDER BY date DESC;
@@ -450,7 +450,7 @@ async function addSpin(username, spin) {
       spin.is_quote,
       JSON.stringify(spin.quote_origin),
       spin.like_list,
-      username,
+      username
     ];
 
 
@@ -464,6 +464,7 @@ async function addSpin(username, spin) {
     rows = res.rows;
 
     var postid = res.rows[0].id;
+  
     // if there are any new tags, then add this post's id to the new post column
     if (newtags.length > 0) {
       args = [

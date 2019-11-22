@@ -285,9 +285,9 @@ async function updateProfileInfo(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
     // return next();
   }
-  var imgsrc = null;
+  var imgsrc = '';
 
-  if (req.file.path) {
+  if (req.file && req.file.path) {
     imgsrc = req.file.path;
   }
   var user = {
@@ -332,8 +332,8 @@ async function updateProfileInfo(req, res, next) {
   }
   else {
     res.setHeader('username', userData.username);
-    res.userdata = userdata;
-    req.imgsrc = userdata.profile_pic;
+    res.userdata = userData;
+    req.imgsrc = userData.profile_pic;
   }
   return next();
 

@@ -191,7 +191,8 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
          users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
-      res.status(406).sendFile(index);
+    console.log(res.getHeader('error'));
+    res.status(406).sendFile(index);
   }
   // i'm just hacking this together at this point i want to sleep
   var userdata = req.userdata;

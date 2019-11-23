@@ -75,7 +75,7 @@ class Profile extends Component{
                 // console.log("This is the json data: ", jsonData);
                 let chosenProfilePic = self.defaultProfileView;
                 //If link is not empty
-                if(dataDict.profile_pic !== "")
+              if (dataDict.profile_pic !== "" && dataDict.profile_pic != null)
                 {
                   // console.log(dataDict.profile_pic);
                   fetch(dataDict.profile_pic).then(function(res)

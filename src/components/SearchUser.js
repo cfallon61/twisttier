@@ -22,32 +22,32 @@ const imgScale = {
     "width" : "250px",
 }
 
-function myModal(props) {
-    return (
-      <Modal
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Tags of the user
-          </Modal.Title>
-        </Modal.Header>
+// function myModal(props) {
+//     return (
+//       <Modal
+//         size="lg"
+//         aria-labelledby="contained-modal-title-vcenter"
+//         centered
+//       >
+//         <Modal.Header closeButton>
+//           <Modal.Title id="contained-modal-title-vcenter">
+//             Tags of the user
+//           </Modal.Title>
+//         </Modal.Header>
 
-        <Modal.Body>
-          <h4>Centered Modal</h4>
-          <p>
-            Tags of user
-          </p>
-        </Modal.Body>
+//         <Modal.Body>
+//           <h4>Centered Modal</h4>
+//           <p>
+//             Tags of user
+//           </p>
+//         </Modal.Body>
         
-        <Modal.Footer>
-          <Button>Close</Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
+//         <Modal.Footer>
+//           <Button>Close</Button>
+//         </Modal.Footer>
+//       </Modal>
+//     );
+//   }
 
 class SearchUser extends Component {
     constructor(props)
@@ -210,9 +210,6 @@ class SearchUser extends Component {
         <div>
             {profiles}
         </div>
-        <myModal show = {this.state.showAllTags}>
-
-        </myModal>
       )
     }
   }

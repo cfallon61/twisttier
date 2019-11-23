@@ -191,7 +191,8 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
          users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
-      res.status(406).sendFile(index);
+    console.log(res.getHeader('error'));
+    res.status(406).sendFile(index);
   }
   // i'm just hacking this together at this point i want to sleep
   var userdata = req.userdata;
@@ -205,6 +206,17 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
 app.post('/api/add_spin/:username', helpers.loggedIn,
         [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
         ], spins.createSpin, (req, res) => {
+    // TODO add error states for invalid input
+  if (res.getHeader('error') != undefined) {
+    res.status(418)
+  }
+  res.sendFile(index);
+});
+
+// @brief: endpoint for editing a spin. user must be logged in or this will not work.
+app.post('/api/edit_spin/:username', helpers.loggedIn,
+        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
+        ], spins.editSpin, (req, res) => {
     // TODO add error states for invalid input
   if (res.getHeader('error') != undefined) {
     res.status(418)

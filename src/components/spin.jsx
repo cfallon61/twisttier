@@ -10,6 +10,11 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import Modal from './Modal.js';
 import Form from 'react-bootstrap/Form';
+import LikeImage from './like.png';
+import Image from 'react-bootstrap/Image';
+import editImage from './edit.png';
+import shareImage from './share.png';
+import deleteImage from "./delete.png";
 
 const tagContainerStyle = {
     display: "grid",
@@ -21,6 +26,8 @@ const tagContainerStyle = {
     "margin" : "auto",
     "padding-top" : "2vh"
 };
+
+const MAX_TAGS = 3;
 
 /**
  * The spin component that displays username, message content and user timestamp.
@@ -48,7 +55,7 @@ class Spin extends Component
             showEditer : false,
             initialEditorValue : this.props.content,
             newTagText : "",
-            
+            showMoreTagsModal : false
         };
 
         this.likeSpin = this.likeSpin.bind(this);
@@ -82,8 +89,8 @@ class Spin extends Component
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
-        // this.decideAvailableActionsButton = this.decideAvailableActionsButton.bind(this);
-    
+        this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
+        this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
     }
 
     /**
@@ -419,57 +426,6 @@ class Spin extends Component
           ]
         })
     };
-
-    
-    // // decide the actions that would be available for a viewing user
-    // decideAvailableActionsButton(){
-
-
-    // //     // if the post is the user's own post, return options of share, edit, and delete
-    // //     // console.log("This: ", this);
-    // //     // if (this.author === this.userToView) {
-    // //     //     return(
-    // //     //         <DropdownButton
-    // //     //             title='Actions'
-    // //     //             variant='secondary'
-    // //     //             size = "sm"
-    // //     //             // id={`dropdown-variants-${variant}`}
-    // //     //             // key='Info'
-    // //     //         >
-    // //     //             <Dropdown.Item eventKey="1" active>Share</Dropdown.Item>
-    // //     //             <Dropdown.Item eventKey="2" onClick = {this.showEditModal}>Edit</Dropdown.Item>
-    // //     //             <Dropdown.Item eventKey="3" onClick={this.askForConfirmation}>
-    // //     //                 Delete
-    // //     //             </Dropdown.Item>
-
-    // //     //         </DropdownButton>
-    // //     //     )
-    // //     // }
-
-    // //     // // if the post is someone else's only return ooption of share
-    // //     // return(
-    // //     //     <DropdownButton
-    // //     //         title='Actions'
-    // //     //         variant='secondary'
-    // //     //         size = "sm"
-    // //     //         // id={`dropdown-variants-${variant}`}
-    // //     //         // key='Info'
-    // //     //     >
-    // //     //         <Dropdown.Item eventKey="1">Share</Dropdown.Item>
-    // //     //     </DropdownButton>
-    // //     // )
-
-    //     let buttons = ["Share"];
-
-    //     if (this.author === this.userToView) {
-    //         buttons.push("Edit/Delete");
-    //     }
-
-    //     console.log("Buttons",buttons);
-
-    //     return buttons;
-        
-    // }
     
 
     // handles change of text for edit spin
@@ -549,26 +505,59 @@ class Spin extends Component
     // TODO: handle server response
     handleEditPostSubmission(){
        
-        let spinBody = {
+        let body = {
         tags: this.state.tags,
-        edited: true, 
-        quoted: this.state.quoted,
-        content: this.state.content,
-        timestamp: this.state.timestamp,
-        quoteOrigin: this.state.quoteOrigin,
-        likes : this.state.likes,
+        spinBody: this.state.content,
         spinID : this.state.spinID,
-        showLike : this.state.showLike,
-        viewingUserTags : this.state.viewingUserTags,
-        likeList: this.state.likeList,
-       }
+        }
 
-        this.setState({
-            // close the modal
-            showEditer : false
-        })
+        console.log(body);
+        
 
         // send the data to server, refresh the location
+        let spinAuthor = this.author;
+        let self = this;
+        fetch("/api/edit_spin/" + spinAuthor, {
+
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify(body)
+
+        }).then(function(res){
+            console.log("Response: ", res);
+            if(res.status === 200)
+            {
+                console.log("status:", res.status);
+                NotificationManager.success("Spin has been edited");
+                
+                self.setState({
+                    // close the modal
+                    showEditer : false
+                });
+
+                // show the notification and then delete
+                // setTimeout(function() { //Start the timer
+                //     window.location.reload();
+                // }.bind(this), 1000)
+
+
+                
+                
+
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
     }
 
     // creates the components of the edit modal
@@ -587,7 +576,7 @@ class Spin extends Component
                 if (!this.state.tags.includes(tagName)){
                     return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
                             {tagName}
-                        </Dropdown.Item>;
+                            </Dropdown.Item>;
                 }
             });
         }
@@ -682,99 +671,161 @@ class Spin extends Component
         );
     }
 
-    
-    render()
-    {   
+    openMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : true});
+    }
 
-        let buttonToShow = null;
-        let actionsButtonString = null;
-        let tagList = [];
-        let actionsButtons = [];
+    closeMoreTagsModal()
+    {
+        this.setState({showMoreTagsModal : false});
+    }
+
+    getModalTagViews()
+    {
+        return this.state.tags.map((tagName) => {
+            if(this.state.viewingUserTags.includes(tagName))
+            {
+                return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+            }
+            else
+            {
+                return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+            }
+        });
+    }
+
+    render()
+    {
+        // console.log("Editor bool: ", this.state.showEditer);
+        // console.log("Author: ", this.author);
+        // console.log("UserToView: ", this.userToView);
+        let likeButton = null;
+        let actionsButton = null;
+        let moreTagsButton = null;
+        let share_button = null;
+        let edit_button = null;
+        let tagViewList = [];
+        let delete_button = null;
 
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
             {
-                buttonToShow = <Button onClick={this.likeSpin}>Like</Button>;
+                likeButton = <button className="like-button" onClick={this.likeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
             else
             {
-                buttonToShow = <Button onClick={this.unlikeSpin}>Unlike</Button>;
+                likeButton = <button className="unlike-button" onClick={this.unlikeSpin}><Image className="like-image" src={LikeImage}/></button>;
             }
 
             if(this.state.tags.length === 0)
-            {
-                tagList.push(<h6>No associated tags found.</h6>);
+            {   
+                tagViewList.push(<h6>No associated tags found.</h6>);
             }
             else
-            {
-                // console.log(this.state.viewingUserTags);
-                tagList = this.state.tags.map( (tagName) => {
-
+            {   
+                let i = 0;
+                
+                while(i < MAX_TAGS && i < this.state.tags.length)
+                {
+                    let tagName = this.state.tags[i];
+                    let view = null;
                     if(this.state.viewingUserTags.includes(tagName))
                     {
-                        return <Button size="sm" variant="success" onClick={() => this.unfollowTag(tagName)}>{tagName}</Button>;
+                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
                     else
                     {
-                        return <Button size="sm" variant="danger" onClick={() => this.followTag(tagName)}>{tagName}</Button>;
+                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                    }
+                    tagViewList.push(view);
+                    i++;
+                }
+
+                if(this.state.tags.length > MAX_TAGS)
+                {
+                    moreTagsButton = <button className="more-tags-button" onClick={this.openMoreTagsModal}>...</button>;
+                }
+
+                let tagList = this.state.tags.map( (tagName) => {
+
+                    if(this.state.viewingUserTags.includes(tagName))
+                    {
+                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                    }
+                    else
+                    {
+                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                     }
                 });
             }
 
-            // decide what actions should be visible to the user
-            // actionsButtonString = this.decideAvailableActionsButton();
+            share_button = <Image 
+            className="share-image" 
+            src={shareImage}
+            // onClick = {this.askForConfirmation} TODO: Implement share
+            />
 
-            actionsButtonString = ["Share"];
+
             if (this.author === this.userToView) {
-                actionsButtonString.push("Edit/Delete");
-            }
+                edit_button = <Image 
+                className="share-image" // using same properties
+                src={editImage}
+                onClick = {this.showEditModal}
+                />
 
-            actionsButtons = actionsButtonString.map( (action) => {
-                return  <Button size="sm" variant="" >
-                            {action}
-                        </Button>;
-            });
+                delete_button = <Image 
+                className="share-image" // using same properties
+                src={deleteImage}
+                onClick = {this.askForConfirmation}
+                />
+            }
 
 
         }
 
-        
-        
+        let usernameLink  = `/profile/${this.props.username}`;
+        let usernameField = <a href={usernameLink}>{this.props.username}</a>
+
         return (
             <div className="spin-area">
 
                 <div className="username-section">
-                    <div>
-                        <h5>
-                            {this.props.username}
-                           
-                        </h5>
-
+                    <div className="username-link">
+                        {usernameField}  
                     </div>
+                    <div className="time-section">
+                        <h6>
+                            {this.formatDate(this.state.timestamp)}
+                        </h6>
+                    </div> 
                 </div>
                 <div className="spin-content">
                     <p>
                         {this.state.content}
                     </p>
                 </div>
-                <div className="time-section">
-                    <h6>
-                        {this.formatDate(this.state.timestamp)}
-                    </h6>
-                </div>
+
                 <div className="other-info">
-                    <p>Likes: {this.state.likes}</p>
+                    {likeButton} 
+                    <p className="num-likes">{this.state.likes}</p>
+                        {delete_button}
+                        {edit_button}
+                        {share_button}
                 </div>
-                {buttonToShow}
-                <span>
-                    {actionsButtons}
-                </span>
+                
                 <div className="tags-container" style={tagContainerStyle}>
-                    {tagList}
+                    {tagViewList}
+                    {moreTagsButton}
                 </div>
                 <Modal show = {this.state.showEditer}>
                     {this.renderEditForm()}
+                </Modal>
+
+                <Modal show={this.state.showMoreTagsModal}>
+                    {this.getModalTagViews()}
+                    <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
 
             </div>

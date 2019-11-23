@@ -37,7 +37,7 @@ class App extends Component {
   {
     console.log(document.cookie);
     if(document.cookie !== "")
-    {   
+    {
         var username = document.cookie.split('=')[1];
         this.setState({isLoggedIn : true, username:username});
     }
@@ -63,14 +63,17 @@ class App extends Component {
             <Switch>
               <Route exact path="/login" component={Login} />
               <Route exact path="/signup" component={Signup} />
-              <Route exact path="/userSettings" component={UserSettings} />
+              <Route exact path="/userSettings" component={() => this.state.isLoggedIn ? <UserSettings/> : <Home/>} />
               <Route exact path="/profile/:username" component={UserFeed}/>
               <Route exact path = "/searchUser/:searchName" component={SearchUser} />
-              <Route exact path="/" component={() => this.state.isLoggedIn ?  <Timeline username={this.state.username}/> : <Home />} /> 
+              <Route exact path="/" component={() => this.state.isLoggedIn ?  <Timeline username={this.state.username}/> : <Home />} />
               <Route component={(props) => <Error message="Page cannot be found." statusCode="404"></Error>}/>
             </Switch>
           </div>
         </Router>
+        <footer>
+            <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+          </footer>
       </div>
     );
   }

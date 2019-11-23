@@ -764,6 +764,8 @@ class Spin extends Component
             share_button = <Image 
             className="share-image" 
             src={shareImage}
+            title = "Share"
+            alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
             />
 
@@ -773,12 +775,16 @@ class Spin extends Component
                 className="share-image" // using same properties
                 src={editImage}
                 onClick = {this.showEditModal}
+                title = "Edit"
+                alt = "Edit"
                 />
 
                 delete_button = <Image 
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
+                title = "Delete"
+                alt = "Delete"
                 />
             }
 

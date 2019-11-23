@@ -92,6 +92,10 @@
     margin: 3px;
 }
 
+.share-image:hover {
+    border: 4px solid lightskyblue;
+}
+
 .action-button{
     flex: 25;
 }
@@ -101,17 +105,6 @@
     width: 4vw;
     height: 4vh;
     flex: 1;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    margin: none;
-}
-
-.share-button {
-    background-color: transparent;
-    width: 4vw;
-    height: 4vh;
-    flex: 2;
     border-radius: 10px;
     border: none;
     outline: none;

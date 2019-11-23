@@ -57,11 +57,11 @@ async function editSpin(req, res, next) {
   };
 
   var updated = await db.updateSpin(req.params.username, spin);
-  console.log(updated);
+  console.log("Returned spin id:", updated);
   if (!updated) {
     res.setHeader("error", "unable to edit spin");
   } else {
-    res.setHeader("spinID: ", updated);
+    res.setHeader("spinID", updated);
   }
   return next();
 }

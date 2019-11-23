@@ -526,25 +526,18 @@ class Spin extends Component
             body : JSON.stringify(body)
 
         }).then(function(res){
-            console.log("Response: ", res);
+
             if(res.status === 200)
             {
-                console.log("status:", res.status);
-                NotificationManager.success("Spin has been edited");
-                
-                self.setState({
-                    // close the modal
-                    showEditer : false
-                });
+                NotificationManager.success("Spin has been edited");       
 
-                // show the notification and then delete
-                // setTimeout(function() { //Start the timer
-                //     window.location.reload();
-                // }.bind(this), 1000)
-
-
-                
-                
+                // show the notification and then close the modal
+                setTimeout(function() { //Start the timer
+                    self.setState({
+                        // close the modal
+                        showEditer : false
+                    });
+                }.bind(this), 900)   
 
             }
             else{
@@ -764,6 +757,8 @@ class Spin extends Component
             share_button = <Image 
             className="share-image" 
             src={shareImage}
+            title = "Share"
+            alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
             />
 
@@ -773,12 +768,16 @@ class Spin extends Component
                 className="share-image" // using same properties
                 src={editImage}
                 onClick = {this.showEditModal}
+                title = "Edit"
+                alt = "Edit"
                 />
 
                 delete_button = <Image 
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
+                title = "Delete"
+                alt = "Delete"
                 />
             }
 

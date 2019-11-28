@@ -8,46 +8,20 @@ import FormControl from 'react-bootstrap/FormControl'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link } from 'react-router-dom'
 import Image from 'react-bootstrap/Image'
-import icon_settings from './settingsIcon.png'
-import icon_home from  './homeIcon.png'
-import icon_twister from './twisterIcon.png'
+
 import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
-import "./searchuser.css";
+
 import { Dropdown, DropdownButton } from 'react-bootstrap';
+
+import './search.css';
+import Modal from './Modal.js';
 
 const imgScale = {
     "height" : "auto",
     "width" : "250px",
 }
-
-// function myModal(props) {
-//     return (
-//       <Modal
-//         size="lg"
-//         aria-labelledby="contained-modal-title-vcenter"
-//         centered
-//       >
-//         <Modal.Header closeButton>
-//           <Modal.Title id="contained-modal-title-vcenter">
-//             Tags of the user
-//           </Modal.Title>
-//         </Modal.Header>
-
-//         <Modal.Body>
-//           <h4>Centered Modal</h4>
-//           <p>
-//             Tags of user
-//           </p>
-//         </Modal.Body>
-        
-//         <Modal.Footer>
-//           <Button>Close</Button>
-//         </Modal.Footer>
-//       </Modal>
-//     );
-//   }
 
 class SearchUser extends Component {
     constructor(props)
@@ -57,13 +31,17 @@ class SearchUser extends Component {
         this.state = {
               users : [],
               searchName : this.props.match.params.searchName ,
-              showAllTags :  false,  
+              showAllTags :  false,
+              oneUserTags : []  
         }
 
         
       
       // functions
       this.getUsers = this.getUsers.bind(this);
+      this.showTagsModal = this.showTagsModal.bind(this);
+      this.renderAllTagsForm = this.renderAllTagsForm.bind(this);
+      this.closeAllTagsModal = this.closeAllTagsModal.bind(this);
     }
 
     getUsers(searchValue) {
@@ -109,11 +87,51 @@ class SearchUser extends Component {
         this.getUsers(this.state.searchName);
     }
 
+    showTagsModal(tags) {
+        console.log("Showing modal with tags: ", tags);
+
+        this.setState({
+            oneUserTags : tags,
+            showAllTags : true
+        });
+    }
+
+    renderAllTagsForm() {
+        // console.log("Rendering form. Tags are: ", this.state.oneUserTags);
+        var tagsToShow = this.state.oneUserTags;
+
+        var shownTags = []
+        
+        var header = (
+            <h3>All tags:</h3>
+        );
+
+        shownTags.push(header);
+
+        tagsToShow.map( (tag) => {
+            shownTags.push( <p>#{tag}</p> );
+        });
+
+        // push the close button
+        shownTags.push(<Button onClick={this.closeAllTagsModal}>Close</Button>);
+
+        return shownTags;
+    }
+
+    closeAllTagsModal() {
+        this.setState({
+            oneUserTags : [],
+            showAllTags : false
+        });
+    }
+
     render() {
-      console.log("Seaching for: ", this.state.searchName);
+    //   console.log("Seaching for: ", this.state.searchName);
+    //   console.log("Oneusertags: ", this.state.oneUserTags);
 
       let profiles = [];
       let tempUsers = this.state.users;
+      let userName = null;
 
       // check if users is empty  
       if (tempUsers.length === 0) {
@@ -122,8 +140,20 @@ class SearchUser extends Component {
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
-            console.log("User: ", user);
+            // console.log("User: ", user);
             
+            // link the username to profile
+            let usernameLink  = `/profile/${user.username}`;
+            // console.log("Link", usernameLink);
+            
+            userName = (
+            <a href={usernameLink}>
+                <h3 className = "searchUsername">
+                    {user.username}
+                </h3>
+            </a>
+            );
+
             // formulate tags of user
             let tags = [];
             
@@ -152,9 +182,13 @@ class SearchUser extends Component {
 
                 }
                 
+                // all tags of this user
+                var thisUserTags = user.tags_associated;
+                // console.log("User tags being passed.", thisUserTags);
+
                 let show_all_button = (
-                    <Dropdown.Item >
-                            {"Show All"}
+                    <Dropdown.Item onClick = { () => this.showTagsModal(thisUserTags)}>
+                            ...
                     </Dropdown.Item>
                 );
                 tags.push(show_all_button);
@@ -172,43 +206,41 @@ class SearchUser extends Component {
 
             // TODO: Formulate the picture, setting default for now
             var chosenProfilePic = (
-                    <img src={defaultPic} alt={user.username} style={imgScale}/>
-            );
-            // console.log("pic before check:", chosenProfilePic);
+                <div className = "searchDP">
+                    <img className = "searchDP" src={defaultPic} alt={user.username} style={imgScale}/>
+                </div>
+                    );
+
 
             if(user.profile_pic !== "" && user.profile_pic !== null && user.profile_pic !== "{}"){
                 // console.log("IMAGE exists");
                 chosenProfilePic = (
-                            <img src={user.profile_pic} alt={user.username} style={imgScale}/>
-                                                );
+                            <img className = "searchDP" src={user.profile_pic} alt={user.username} style={imgScale}/>
+                            );
 
             }           
 
+            // console.log("username: ", userName);
             // console.log("PIC: ", chosenProfilePic);
 
-            return <div>
-                        <div >
-                            {chosenProfilePic}
-                        </div>
-                        <div>
-                            
-                            <h3>{user.username}</h3>
-                            <p>{userTagsDropdown}</p>
-
-                        </div>
-                        
+            return <div className="searchProfileContainter">
+                            {chosenProfilePic}               
+                            <h3>{userName}</h3>
+                            <p>{userTagsDropdown}</p>   
                     </div>
 
           });
       }
 
-      
-      
-
-
       return (
         <div>
+            <div className = "profilesContainer">
             {profiles}
+            </div>
+
+            <Modal show = {this.state.showAllTags}>
+                    {this.renderAllTagsForm()}
+            </Modal>
         </div>
       )
     }

@@ -529,15 +529,15 @@ class Spin extends Component
 
             if(res.status === 200)
             {
+                // show the notification and then close the modal
                 NotificationManager.success("Spin has been edited");       
 
-                // show the notification and then close the modal
-                setTimeout(function() { //Start the timer
-                    self.setState({
-                        // close the modal
-                        showEditer : false
-                    });
-                }.bind(this), 900)   
+                self.setState({
+                    // close the modal
+                    showEditer : false
+                });
+                
+  
 
             }
             else{

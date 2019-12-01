@@ -17,6 +17,7 @@ import editImage from './edit.png';
 import shareImage from './share.png';
 import deleteImage from "./delete.png";
 import showMoreButton from "./showMore.png";
+import Speech from "react-speech";
 
 const tagContainerStyle = {
     display: "grid",
@@ -652,11 +653,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
+                likeButton = <Image title = "Like spin" className="like-image" alt="like" src={LikeImage} onClick={this.likeSpin}/>;
             }
             else
             {
-                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
+                likeButton = <Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/>;
             }
 
             if(this.state.tags.length === 0)
@@ -687,43 +688,28 @@ class Spin extends Component
                 {
                     moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
-
-                let tagList = this.state.tags.map( (tagName) => {
-
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                    }
-                    else
-                    {
-                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                });
             }
 
-            share_button = <Image 
+            share_button = <Image title = "Share"
             className="share-image" 
             src={shareImage}
-            title = "Share"
             alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
             />
 
 
             if (this.author === this.userToView) {
-                edit_button = <Image 
+                edit_button = <Image title = "Edit"
                 className="share-image" // using same properties
                 src={editImage}
                 onClick = {this.showEditModal}
-                title = "Edit"
                 alt = "Edit"
                 />
 
-                delete_button = <Image 
+                delete_button = <Image title = "Delete"
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
-                title = "Delete"
                 alt = "Delete"
                 />
             }
@@ -733,6 +719,17 @@ class Spin extends Component
 
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
+
+        let speechText = this.props.username + " wrote:      " + this.state.content + "       ";
+        if(this.state.tags.length > 0)
+        {
+            speechText += "  Added tags: ";
+            for(let i = 0; i < this.state.tags.length; i++)
+            {
+                speechText += this.state.tags[i] + "       ";
+            }
+        } 
+  
 
         return (
             <div className="spin-area">
@@ -756,14 +753,11 @@ class Spin extends Component
                 <div className="other-info">
                     {likeButton} 
                     <p className="num-likes">{this.state.likes} people like this</p>
-                    <div id = "action-buttons">
-                        <div>{share_button}</div>
-                        <div>{edit_button}</div>
-                        <div>{delete_button}</div>
-                    </div>
-                    
+                    {share_button}
+                    {edit_button}
+                    {delete_button}
                 </div>
-                
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagViewList}
                     {moreTagsButton}

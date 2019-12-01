@@ -81,9 +81,8 @@
 }
 
 .share-image:hover, .like-image:hover {
-    width: 4vw;
-    height: 6vh;
     border: 2px solid lightskyblue;
+    cursor: pointer;
 }
 
 .more-tags-image {
@@ -98,9 +97,8 @@
 }
 
 .more-tags-image:hover {
-    width: 5vw;
-    height: 6vh;
-    border: 2px solid lightblue;
+    border: 2px solid lightskyblue;
+    cursor: pointer;
 }
 
 .tags-container p {
@@ -121,10 +119,10 @@ p.unfollowed-tags {
     color: var(--spin-second);
 }
 
-.num-likes{
+p.num-likes{
     margin-left: 5px;
-    margin-right: 40px;
-    margin-top: 5px;
+    text-align: left;
+    flex: 50;
 }
 
 .more-tags-button {
@@ -139,12 +137,12 @@ p.unfollowed-tags {
     border-radius: 10px;
 }
 
-
-
-#action-buttons {
+.action-buttons {
     display: flex;
-    position : relative;
-    left: 70px;
+    flex: 40;
+    align-items: right;
+    margin-right: 1vw;
+    z-index: 0;
 }
 
 .editButtons {

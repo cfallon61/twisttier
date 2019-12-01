@@ -12,6 +12,7 @@ import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
 import "./userfeed.css";
+import Speech from "react-speech";
 
 
 var OperationEnum = {
@@ -345,6 +346,9 @@ class UserFeed extends Component
         {
             followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
+
+        let speechText = "You are right now checking the profile of: " + this.username;
+
         /**
          * The view organized by these parts:
          *          Page
@@ -353,6 +357,7 @@ class UserFeed extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                     {followButton}
                     <Modal show={this.state.showFollowModal}>

@@ -653,11 +653,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
+                likeButton = <Image title = "Like spin" className="like-image" alt="like" src={LikeImage} onClick={this.likeSpin}/>;
             }
             else
             {
-                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
+                likeButton = <Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/>;
             }
 
             if(this.state.tags.length === 0)
@@ -688,24 +688,12 @@ class Spin extends Component
                 {
                     moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
-
-                let tagList = this.state.tags.map( (tagName) => {
-
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                    }
-                    else
-                    {
-                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                });
             }
 
             share_button = <Image title = "Share"
             className="share-image" 
             src={shareImage}
-            //alt = "Share"
+            alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
             />
 
@@ -715,14 +703,14 @@ class Spin extends Component
                 className="share-image" // using same properties
                 src={editImage}
                 onClick = {this.showEditModal}
-                //alt = "Edit"
+                alt = "Edit"
                 />
 
                 delete_button = <Image title = "Delete"
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
-                //alt = "Delete"
+                alt = "Delete"
                 />
             }
 

@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
 import { NotificationManager } from 'react-notifications';
 import Dropdown from 'react-bootstrap/Dropdown';
+import Speech from 'react-speech';
 
 
 /**
@@ -274,6 +275,8 @@ class Timeline extends Component
 
         let spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
 
+        let speechText = "You are right now in your timeline.";
+
         /**
          * The view organized by these parts:
          *          Page
@@ -282,6 +285,7 @@ class Timeline extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
+                    <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                 </div>
 

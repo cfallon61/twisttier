@@ -200,7 +200,7 @@ class Timeline extends Component
 
         let dropdownInterests = (
             <Dropdown>
-                <Dropdown.Toggle variant = "primary" id="dropdown-basic">
+                <Dropdown.Toggle className = "editButtons" variant = "outline-primary" id="dropdown-basic">
                     Tags
                 </Dropdown.Toggle>
 
@@ -236,11 +236,11 @@ class Timeline extends Component
 
                     <Form onSubmit = {this.handleTag} >
                     <Form.Control width = "40%" placeholder = "add tag" onChange = {this.handleTagChange.bind(this)}/>
-                        <Button variant = "primary" type = "submit">add tag</Button>
+                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
                     </Form>
                 <div className="modal-footer">
-                    <Button onClick={this.onSpinPressedAtModal}>Spin</Button>
-                    <Button onClick={this.closeModal}>Cancel</Button>
+                    <Button variant = "outline-primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
+                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeModal}>Cancel</Button>
                 </div>
             </div>
 

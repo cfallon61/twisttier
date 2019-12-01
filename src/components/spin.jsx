@@ -11,10 +11,12 @@ import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import Modal from './Modal.js';
 import Form from 'react-bootstrap/Form';
 import LikeImage from './like.png';
+import unlikeImage from './unlike.png';
 import Image from 'react-bootstrap/Image';
 import editImage from './edit.png';
 import shareImage from './share.png';
 import deleteImage from "./delete.png";
+import showMoreButton from "./showMore.png";
 
 const tagContainerStyle = {
     display: "grid",
@@ -527,8 +529,10 @@ class Spin extends Component
         {
             userInterestsDropdown = (
                 <DropdownButton
-                    title='Suggested Tags'
-                    variant='primary'
+                    title='   Add from Suggested Tags   '
+                    variant='outline-success'
+                    block
+                    className = "editButtons"
                 >
                     {spinInterests}
                 </DropdownButton>
@@ -560,8 +564,10 @@ class Spin extends Component
             // create a dropdown using those interests
             addedTagsDropdown = (
                 <DropdownButton
-                    title='Tags'
-                    variant='secondary'
+                    title='Remove from Existing Tags'
+                    variant='outline-danger'
+                    block
+                    className = "editButtons"
                 >
                     {initialTagsDropdown}
                 </DropdownButton>
@@ -593,13 +599,13 @@ class Spin extends Component
                             value = {this.state.newTagText}
                         />
 
-                        <Button variant = "primary" type = "submit">Add tag</Button>
+                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add a new tag</Button>
                     </Form>
 
 
                 <div className="modal-footer">
-                    <Button onClick = {this.handleEditPostSubmission}>Edit</Button>
-                    <Button onClick={this.closeEditModal}>Cancel</Button>
+                    <Button variant = "outline-primary" onClick = {this.handleEditPostSubmission}>Edit</Button>
+                    <Button variant = "outline-primary" onClick={this.closeEditModal}>Cancel</Button>
                 </div>
             </div>
 
@@ -636,7 +642,6 @@ class Spin extends Component
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
         let likeButton = null;
-        let actionsButton = null;
         let moreTagsButton = null;
         let share_button = null;
         let edit_button = null;
@@ -647,11 +652,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <button className="like-button" onClick={this.likeSpin}><Image className="like-image" src={LikeImage}/></button>;
+                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
             }
             else
             {
-                likeButton = <button className="unlike-button" onClick={this.unlikeSpin}><Image className="like-image" src={LikeImage}/></button>;
+                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
             }
 
             if(this.state.tags.length === 0)
@@ -680,7 +685,7 @@ class Spin extends Component
 
                 if(this.state.tags.length > MAX_TAGS)
                 {
-                    moreTagsButton = <button className="more-tags-button" onClick={this.openMoreTagsModal}>...</button>;
+                    moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
 
                 let tagList = this.state.tags.map( (tagName) => {
@@ -750,10 +755,13 @@ class Spin extends Component
 
                 <div className="other-info">
                     {likeButton} 
-                    <p className="num-likes">{this.state.likes}</p>
-                        {delete_button}
-                        {edit_button}
-                        {share_button}
+                    <p className="num-likes">{this.state.likes} people like this</p>
+                    <div id = "action-buttons">
+                        <div>{share_button}</div>
+                        <div>{edit_button}</div>
+                        <div>{delete_button}</div>
+                    </div>
+                    
                 </div>
                 
                 <div className="tags-container" style={tagContainerStyle}>

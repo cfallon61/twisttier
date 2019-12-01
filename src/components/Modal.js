@@ -14,7 +14,7 @@ const modalStyle = {
   margin: 'auto',
   padding: 30,
   color: "black",
-  zIndex : 10
+  zIndex : 100
 };
 
 const backdropStyle = {

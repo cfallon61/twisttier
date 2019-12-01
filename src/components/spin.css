@@ -47,6 +47,7 @@
     font-size: 1em;
     box-shadow: 2px 3px var(--spin-second);
     margin: 10px;
+    margin-bottom: 30px;
 }
 
 .spin-content p{
@@ -70,18 +71,7 @@
     margin: 10px;
 }
 
-.like-image {
-    width: 3vw;
-    height: 5vh;
-    max-width: 100%;
-    max-height: 100%;
-    justify-content: center;
-    border: none;
-    outline: none;
-    margin: none;
-}
-
-.share-image {
+.share-image, .like-image {
     width: 3vw;
     height: 5vh;
     max-width: 100%;
@@ -92,39 +82,27 @@
     margin: 3px;
 }
 
-.share-image:hover {
-    border: 4px solid lightskyblue;
-}
-
-.action-button{
-    flex: 25;
-}
-
-.like-button {
-    background-color: var(--button-main);
+.share-image:hover, .like-image:hover {
     width: 4vw;
+    height: 6vh;
+    border: 2px solid lightskyblue;
+}
+
+.more-tags-image {
+    width: 3vw;
     height: 4vh;
-    flex: 1;
-    border-radius: 10px;
+    max-width: 100%;
+    max-height: 100%;
+    justify-content: center;
     border: none;
     outline: none;
-    margin: none;
+    margin-left: 20px;
 }
 
-.unlike-button {
-    background-color: var(--button-second);
-    width: 4vw;
-    height: 4vh;
-    flex: 1;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    margin: none;
-}
-
-.like-button:hover, .unlike-button:hover{
-    cursor: pointer;
-    background-color: goldenrod;
+.more-tags-image:hover {
+    width: 5vw;
+    height: 6vh;
+    border: 2px solid lightblue;
 }
 
 .tags-container p {
@@ -146,7 +124,9 @@ p.unfollowed-tags {
 }
 
 .num-likes{
-    flex: 1;
+    margin-left: 5px;
+    margin-right: 40px;
+    margin-top: 5px;
 }
 
 .more-tags-button {
@@ -161,6 +141,15 @@ p.unfollowed-tags {
     border-radius: 10px;
 }
 
-.more-tags-button:hover {
-    background-color: goldenrod;
+
+
+#action-buttons {
+    display: flex;
+    position : relative;
+    left: 70px;
 }
+
+.editButtons {
+    margin : 10px;
+}
+

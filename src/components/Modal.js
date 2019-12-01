@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 
 const modalStyle = {
-  backgroundColor: 'black',
+  backgroundColor: 'rgb(223,223,223)',
   borderRadius: 5,
   top: "25%",
   bottom: "25%",
@@ -13,8 +13,8 @@ const modalStyle = {
   minHeight: 300,
   margin: 'auto',
   padding: 30,
-  color: "white",
-  zIndex : 10
+  color: "black",
+  zIndex : 100
 };
 
 const backdropStyle = {
@@ -36,7 +36,7 @@ class Modal extends Component
 {
     render()
     {
-        // console.log(this.props.children);
+
         if(!this.props.show)
         {
             return null;

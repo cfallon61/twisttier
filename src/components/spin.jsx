@@ -12,10 +12,12 @@ import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import Modal from './Modal.js';
 import Form from 'react-bootstrap/Form';
 import LikeImage from './like.png';
+import unlikeImage from './unlike.png';
 import Image from 'react-bootstrap/Image';
 import editImage from './edit.png';
 import shareImage from './share.png';
 import deleteImage from "./delete.png";
+import showMoreButton from "./showMore.png";
 
 const tagContainerStyle = {
     display: "grid",
@@ -75,7 +77,6 @@ class Spin extends Component
         //this.unfollowTag = this.unfollowTag.bind(this);
         this.updateViewerTags = this.updateViewerTags.bind(this);
         this.updateWhetherViewerLikedTheSpin = this.updateWhetherViewerLikedTheSpin.bind(this);
-        this.getUserTags = this.getUserTags.bind(this);
         this.formatDate = this.formatDate.bind(this);
 
         // functions to delete spin
@@ -101,28 +102,9 @@ class Spin extends Component
         this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
     }
 
-    /**
-     * Helper method for getting tags of the author
-     */
-    getUserTags(followingList, author)
+    getAuthor()
     {
-        // console.log(followingList);
-        // console.log(author);
-        if(followingList === undefined || followingList.users.length === 0)
-        {
-            console.log("Return empty");
-            return [];//Empty list
-        }
-        // console.log(followingList.users.length);
-        for(var i = 0; i < followingList.users.length; i++)
-        {
-            if(followingList.users[i].username === author)
-            {
-                return followingList.users[i].tags;
-            }
-        }
-        // console.log("Return empty from end.");
-        return [];//Empty list
+        return this.author;
     }
     
     // likes spin 
@@ -234,7 +216,6 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
-                self.updateViewerTags();
                 window.location.reload();
             }
             else{
@@ -274,7 +255,6 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
-                self.updateViewerTags();
                 window.location.reload();
             }
             else{
@@ -303,47 +283,12 @@ class Spin extends Component
         }
     }
 
-    updateViewerTags()
+    updateViewerTags(tags)
     {
-        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
-        const self = this;
-        // console.log(`/api/users/${self.userToView}`);
-        fetch(`/api/users/${self.userToView}`, {
-            method : 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            }
-        })
-        .then(function(res)
+        if(tags !== undefined)
         {
-          // console.log(res);
-          if(res.status === 200)
-          {
-            res.json().then(function(jsonData)
-            {
-                const dataDict = JSON.parse(jsonData);
-                let followingList = dataDict.following;
-                // console.log(followingList);
-                // console.log(self.author);
-                let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
-                // console.log(followedTagsFromAuthor);
-                self.setState({ viewingUserTags: followedTagsFromAuthor});
-              })
-          }
-          else
-          {
-            if(res.headers.error)
-            {
-              NotificationManager.error(res.headers.error);
-              self.setState({error : res.headers.error});
-            }
-          }
-        })
-        .catch(function(err){
-            console.log(err);
-            self.setState({error : err});
-        })
-        ;
+            this.setState({ viewingUserTags: tags});
+        }
     }
 
     // checks whether viewer is logged in or nor
@@ -357,7 +302,6 @@ class Spin extends Component
         if(this.viewerIsAuthenticated())
         {
             this.updateWhetherViewerLikedTheSpin();
-            this.updateViewerTags();
         }
     }
 
@@ -544,15 +488,15 @@ class Spin extends Component
 
             if(res.status === 200)
             {
+                // show the notification and then close the modal
                 NotificationManager.success("Spin has been edited");       
 
-                // show the notification and then close the modal
-                setTimeout(function() { //Start the timer
-                    self.setState({
-                        // close the modal
-                        showEditer : false
-                    });
-                }.bind(this), 900)   
+                self.setState({
+                    // close the modal
+                    showEditer : false
+                });
+                
+  
 
             }
             else{
@@ -642,8 +586,10 @@ class Spin extends Component
         {
             userInterestsDropdown = (
                 <DropdownButton
-                    title='Suggested Tags'
-                    variant='primary'
+                    title='   Add from Suggested Tags   '
+                    variant='outline-success'
+                    block
+                    className = "editButtons"
                 >
                     {spinInterests}
                 </DropdownButton>
@@ -675,8 +621,10 @@ class Spin extends Component
             // create a dropdown using those interests
             addedTagsDropdown = (
                 <DropdownButton
-                    title='Tags'
-                    variant='secondary'
+                    title='Remove from Existing Tags'
+                    variant='outline-danger'
+                    block
+                    className = "editButtons"
                 >
                     {initialTagsDropdown}
                 </DropdownButton>
@@ -708,13 +656,13 @@ class Spin extends Component
                             value = {this.state.newTagText}
                         />
 
-                        <Button variant = "primary" type = "submit">Add tag</Button>
+                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add a new tag</Button>
                     </Form>
 
 
                 <div className="modal-footer">
-                    <Button onClick = {this.handleEditPostSubmission}>Edit</Button>
-                    <Button onClick={this.closeEditModal}>Cancel</Button>
+                    <Button variant = "outline-primary" onClick = {this.handleEditPostSubmission}>Edit</Button>
+                    <Button variant = "outline-primary" onClick={this.closeEditModal}>Cancel</Button>
                 </div>
             </div>
 
@@ -863,7 +811,6 @@ class Spin extends Component
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
         let likeButton = null;
-        let actionsButton = null;
         let moreTagsButton = null;
         let share_button = null;
         let edit_button = null;
@@ -874,11 +821,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <button className="like-button" onClick={this.likeSpin}><Image className="like-image" src={LikeImage}/></button>;
+                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
             }
             else
             {
-                likeButton = <button className="unlike-button" onClick={this.unlikeSpin}><Image className="like-image" src={LikeImage}/></button>;
+                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
             }
 
             if(this.state.tags.length === 0)
@@ -907,7 +854,7 @@ class Spin extends Component
 
                 if(this.state.tags.length > MAX_TAGS)
                 {
-                    moreTagsButton = <button className="more-tags-button" onClick={this.openMoreTagsModal}>...</button>;
+                    moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
 
                 let tagList = this.state.tags.map( (tagName) => {
@@ -978,10 +925,13 @@ class Spin extends Component
 
                 <div className="other-info">
                     {likeButton} 
-                    <p className="num-likes">{this.state.likes}</p>
-                        {delete_button}
-                        {edit_button}
-                        {share_button}
+                    <p className="num-likes">{this.state.likes} people like this</p>
+                    <div id = "action-buttons">
+                        <div>{share_button}</div>
+                        <div>{edit_button}</div>
+                        <div>{delete_button}</div>
+                    </div>
+                    
                 </div>
                 
                 <div className="tags-container" style={tagContainerStyle}>

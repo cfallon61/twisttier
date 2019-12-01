@@ -161,8 +161,8 @@ class Profile extends Component{
 
     renderFollowersFollowingList()
     {
-      let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Following</Button>;
-      let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Followers</Button>;
+      let followerListButton = <Button onClick={this.openFollowerModal}>{this.state.followers.length} Followers</Button>;
+      let followingListButton = <Button onClick={this.openFollowingModal}>{this.state.following.length} Following</Button>;
 
       return (
         <div className="follow-info-container">

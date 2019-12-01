@@ -208,7 +208,10 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
-                window.location.reload();
+                
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 800)
             }
             else{
                 if(res.headers.has("error"))
@@ -247,7 +250,9 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
-                window.location.reload();
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 800)
             }
             else{
                 if(res.headers.has("error"))
@@ -336,7 +341,7 @@ class Spin extends Component
                 // show the notification and then delete
                 setTimeout(function() { //Start the timer
                     window.location.reload();
-                }.bind(this), 1000)
+                }.bind(this), 800)
                 
                 // console.log("Spin deleted");
             }
@@ -637,10 +642,11 @@ class Spin extends Component
     }
 
     render()
-    {
+    {   console.log("Debug viewing tags:" , this.state.viewingUserTags);
         // console.log("Editor bool: ", this.state.showEditer);
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
+        console.log("Tags followed for this spin", this.state.viewingUserTags);
         let likeButton = null;
         let moreTagsButton = null;
         let share_button = null;
@@ -671,16 +677,20 @@ class Spin extends Component
                 {
                     let tagName = this.state.tags[i];
                     let view = null;
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+
+                    if (this.state.viewingUserTags !== undefined && this.state.viewingUserTags !== null) {
+                        if(this.state.viewingUserTags.includes(tagName))
+                        {
+                            view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                        }
+                        else
+                        {
+                            view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                        }
+                        tagViewList.push(view);
+                        i++;
                     }
-                    else
-                    {
-                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                    tagViewList.push(view);
-                    i++;
+                    
                 }
 
                 if(this.state.tags.length > MAX_TAGS)
@@ -688,17 +698,6 @@ class Spin extends Component
                     moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
 
-                let tagList = this.state.tags.map( (tagName) => {
-
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                    }
-                    else
-                    {
-                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                });
             }
 
             share_button = <Image 

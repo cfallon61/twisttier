@@ -186,6 +186,7 @@ class Profile extends Component{
 
     render()
     {
+        console.log("Rednginering Profile.");
         let tagViews = [];
         var followinglist = [];
         // console.log('interests =', this.state.interests);

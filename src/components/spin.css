@@ -83,9 +83,8 @@
 }
 
 .share-image:hover, .like-image:hover {
-    width: 4vw;
-    height: 6vh;
     border: 2px solid lightskyblue;
+    cursor: pointer;
 }
 
 .more-tags-image {
@@ -100,9 +99,8 @@
 }
 
 .more-tags-image:hover {
-    width: 5vw;
-    height: 6vh;
     border: 2px solid lightblue;
+    cursor: pointer;
 }
 
 .tags-container p {

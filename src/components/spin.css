@@ -10,10 +10,9 @@
     width: 95%;
     max-height: 50vh;
     margin: 1vh auto;
-    border: 2px solid var(--spin-main); 
+    border: 2px solid var(--spin-main);
     border-radius: 25px;
     padding: 10px;
-    background: linear-gradient(var(--spin-back), white);
     color: black;
     font-weight: 400;
     display: block;
@@ -35,7 +34,6 @@
 .username-section .username-link a {
     font-family: 'Lato', cursive;
     font-weight: 800;
-    color: var(--spin-main);
 }
 
 .spin-content{
@@ -152,4 +150,3 @@ p.unfollowed-tags {
 .editButtons {
     margin : 10px;
 }
-

@@ -732,7 +732,16 @@ class Spin extends Component
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
 
-        let speechText = this.props.username + " wrote:      " + this.state.content;
+        let speechText = this.props.username + " wrote:      " + this.state.content + "       ";
+        if(this.state.tags.length > 0)
+        {
+            speechText += "  Added tags: ";
+            for(let i = 0; i < this.state.tags.length; i++)
+            {
+                speechText += this.state.tags[i] + "       ";
+            }
+        } 
+  
 
         return (
             <div className="spin-area">

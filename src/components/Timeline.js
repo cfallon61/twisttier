@@ -289,6 +289,9 @@ class Timeline extends Component
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
                     {feed.render()}
+                    <footer>
+                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                    </footer>
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>

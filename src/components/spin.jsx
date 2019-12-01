@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import './spin.css';
@@ -53,7 +54,8 @@ class Spin extends Component
             // for handling the edit form modal
             
             showEditer : false,
-            initialEditorValue : this.props.content,
+            showShare : false,
+           /// initialEditorValue : this.props.content,
             newTagText : "",
             showMoreTagsModal : false
         };
@@ -83,12 +85,18 @@ class Spin extends Component
         this.showEditModal = this.showEditModal.bind(this);
         this.closeEditModal = this.closeEditModal.bind(this);
         this.renderEditForm = this.renderEditForm.bind(this);
+
+        this.showShareModal = this.showShareModal.bind(this);
+        this.closeShareModal = this.closeShareModal.bind(this);
+        this.renderShareForm = this.renderShareForm.bind(this);
+
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleInterestAddition = this.handleInterestAddition.bind(this);
         this.handleInterestDeletion = this.handleInterestDeletion.bind(this);
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
+        this.handleSharePostSubmission = this.handleSharePostSubmission.bind(this);
         this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
         this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
     }
@@ -428,7 +436,7 @@ class Spin extends Component
     };
     
 
-    // handles change of text for edit spin
+    // handles change of text for spin
     handleTextChange(event){
         if (event.target.value.length <= 90) {
             this.setState({
@@ -438,7 +446,7 @@ class Spin extends Component
         
     }
 
-    // handles change of interest for edit spin
+    // handles change of interest for spin
     handleInterestAddition(newTag) { 
 
         let tagList = this.state.tags;
@@ -486,6 +494,13 @@ class Spin extends Component
         this.setState({newTagText : ""})
     }
 
+    showShareModal() {
+        this.setState({showShare : true})
+    }
+    closeShareModal() {
+        this.setState({showShare : false})
+    }
+
     // show the edit post modal
     showEditModal() {
         this.setState({showEditer : true})
@@ -498,7 +513,7 @@ class Spin extends Component
             // close the modal
             showEditer : false
         })
-        window.location.reload();
+        //window.location.reload();
     }
     
     // sends the edited post to server and refreshes the front end
@@ -551,6 +566,48 @@ class Spin extends Component
                 }
             }
         });
+    }
+
+    handleSharePostSubmission(){
+        let body = {
+            spinBody: this.state.content,
+            tags: this.state.tags,
+            is_quote: true,
+            quote_origin: {
+                username: this.userToView,
+            }
+        };
+        console.log(body);
+        fetch(`/api/add_spin/${this.userToView}`, {
+            method : 'POST',
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(body)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                NotificationManager.success("Shared!");
+                setTimeout(function() { //Start the timer
+                    this.setState({
+                        showShare : false
+                    });
+                }.bind(this), 1000)   
+
+            }
+            else
+            {
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            
+            }
+        });
+        this.closeShareModal();
     }
 
     // creates the components of the edit modal
@@ -664,6 +721,118 @@ class Spin extends Component
         );
     }
 
+    renderShareForm(){        
+        // get all the tags the user has posted with before
+        let newAuthorInterests = this.viewingUserTags;
+        let newInterestOptions = [];
+        
+        // create dropdown of previously used tags
+        if(newAuthorInterests !== undefined)
+        {
+            newInterestOptions = newAuthorInterests.map((tagName) => {
+
+                if (!this.state.tags.includes(tagName)){
+                    return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
+                            {tagName}
+                            </Dropdown.Item>;
+                }
+            });
+        }
+    
+        let newInterestsDropdown = null;
+        
+        // create a dropdown using those interests. If list is empty, then the view will only consist of text.
+        if(newInterestOptions.length === 0)
+        {
+            newInterestsDropdown = <h3>You don't have any tags yet.</h3>
+        }
+        else
+        {
+            newInterestsDropdown = (
+                <DropdownButton
+                    title='Suggested Tags'
+                    variant='primary'
+                >
+                    {newInterestOptions}
+                </DropdownButton>
+            );
+        }
+
+        let addedInterests = null;
+        if (this.state.tags !== undefined) {
+            addedInterests = this.state.tags.map((tagName) => {
+                return <h6>{tagName}</h6>;
+           });
+        }
+
+        let oldTags = this.state.tags;
+        let oldTagsDropdown = [];
+
+        if (oldTags !== undefined) {
+            oldTagsDropdown = oldTags.map((tagName) => {
+                return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
+                {tagName}
+            </Dropdown.Item>;
+            });
+        }
+        
+        let addedTagsDropdown = null;
+
+        if(oldTagsDropdown.length === 0)
+        {
+            addedTagsDropdown = <h3>This spin doesn't have any associated tags.</h3>
+        }
+        else
+        {
+            // create a dropdown using those interests
+            addedTagsDropdown = (
+                <DropdownButton
+                    title='Tags'
+                    variant='secondary'
+                >
+                    {oldTagsDropdown}
+                </DropdownButton>
+            );
+        }
+        this.state.content = "";
+
+        return (
+            <div className="spin-form">
+                    <Form >
+                        <Form.Label>Share Spin</Form.Label>
+                        <Form.Control 
+                            as = "textarea" 
+                            placeholder="Your Spin here"
+                            rows="3" 
+                            onChange = {this.handleTextChange}
+                        />
+                            <p>{this.state.content.length}/90 characters</p>
+                        
+                        {newInterestsDropdown}
+                        {addedTagsDropdown}
+                    </Form>
+
+                    <Form onSubmit = {this.handleNewTagAddition}>
+                        <Form.Control
+                            width = "40%"
+                            placeholder = "Add a new tag"
+                            onChange = {this.handleNewTagTextChange}
+                            value = {this.state.newTagText}
+                        />
+
+                        <Button variant = "primary" type = "submit">Add tag</Button>
+                    </Form>
+
+
+                <div className="modal-footer">
+                    <Button onClick = {this.handleSharePostSubmission}>Share</Button>
+                    <Button onClick={this.closeShareModal}>Cancel</Button>
+                </div>
+            </div>
+    );
+}
+
+
     openMoreTagsModal()
     {
         this.setState({showMoreTagsModal : true});
@@ -757,6 +926,7 @@ class Spin extends Component
             share_button = <Image 
             className="share-image" 
             src={shareImage}
+            onClick = {this.showShareModal}
             title = "Share"
             alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
@@ -820,6 +990,9 @@ class Spin extends Component
                 </div>
                 <Modal show = {this.state.showEditer}>
                     {this.renderEditForm()}
+                </Modal>
+                <Modal show = {this.state.showShare}>
+                    {this.renderShareForm()}
                 </Modal>
 
                 <Modal show={this.state.showMoreTagsModal}>

@@ -257,11 +257,11 @@ class Timeline extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.props.username);
-        if(this.state.newSpins !== undefined && this.state.spins.length > 0)
+        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
         {
-            for(var i = 0; i < this.state.spins.length; i++)
+            for(var i = 0; i < this.state.newSpins.length; i++)
             {
-                var spin = this.state.spins[i];
+                var spin = this.state.newSpins[i];
                 if(spin.username !== this.props.username)
                 {
                     feed.addSpin(<Spin username={spin.username} content={spin.content}

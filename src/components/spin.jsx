@@ -653,7 +653,10 @@ class Spin extends Component
 
         if(this.state.hasNewTags)
         {
-            flameIcon = <Image src={Flame} style={{'display' : 'inline'}}/>;
+            flameIcon = <div>
+                <Image src={Flame} style={{'display' : 'inline'}}/>
+                <p style={{'display' : 'inline'}}>New topic!</p>
+            </div>;
         }
 
         if(this.viewerIsAuthenticated())
@@ -745,10 +748,7 @@ class Spin extends Component
                     <div className="username-link">
                         {usernameField}  
                     </div>
-                    <div>
-                        {flameIcon}
-                        <p style={{'display' : 'inline'}}>New topic!</p>
-                     </div>
+                    {flameIcon}
                     <div className="time-section">
                         <h6>
                             {this.formatDate(this.state.timestamp)}

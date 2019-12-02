@@ -13,6 +13,7 @@ const spins = require('./spinMiddlewares.js');
 const index = path.join(__dirname, '../build/index.html');
 const helpers = require('./helpers.js');
 const helmet = require('helmet');
+const validator = require('./data_validators');
 
 
 
@@ -37,8 +38,15 @@ app.listen(port, (err) => {
   console.log('Server started on port', port);
 });
 
-
-
+if (process.env.TEST === 'true')
+{
+  app.get('/testgarbage', [validator.validEmail, validator.validName, validator.validUsername], (req, res) =>
+  {
+    console.log('fdjsklahjdslk')
+    console.log(res.getHeader('error'));
+  });
+}
+  
 // TODO fix express-validator
 // handle user creation
 // [check('email').isEmail().withMessage('invalid email'),
@@ -47,9 +55,12 @@ app.listen(port, (err) => {
 //   check('name').isLength({ max: 25, min: 1 }).withMessage('invalid name'),
 //   check('username').isLength({ max: 15, min: 1 }).withMessage('invalid username')
 // ],
-app.post('/create_user',
-  
-  helpers.notLoggedIn, helpers.multerUpload, helpers.cloudinaryUpload, users.postCreateUser, (req, res) => {
+app.post('/create_user', helpers.notLoggedIn, helpers.multerUpload, helpers.cloudinaryUpload,
+  [validator.validEmail,
+    validator.validName,
+    validator.validUsername,
+    validator.validBio,
+    validator.validPassword], users.postCreateUser, (req, res) => {
     // console.log(validationResult(req));
       console.log(req.body);
     if (res.getHeader('error') != undefined) {
@@ -76,7 +87,6 @@ if (process.env.TEST === 'true')
   // @param res: response to client
   //             will return 406, Not acceptable to the client
   app.post('/uploadProfileImage',  helpers.multerUpload, helpers.cloudinaryUpload, (req, res, next) => {
-    //placeholder @TODO implement database mapping
     // console.log(req.file);
     if (!req.file || res.getHeader('error') != undefined) {
       res.status(418).send('idk wtf is wrong');
@@ -142,7 +152,7 @@ app.post('/api/login_status', (req, res) => {
 });
 
 
-// @brief: enpoint to get a supplied user's profile information
+// @brief: endpoint to get a supplied user's profile information
 app.post('/api/users/:username', users.getUserInfo, (req, res) => {
   console.log('POST /api/users/' + req.params.username)
   if (res.getHeader('error') != undefined) {
@@ -160,6 +170,16 @@ app.post('/api/timeline/:username', users.getTimeline, (req, res) => {
     res.status(404).send('user page not found');
   }
   
+});
+
+app.post('/api/spin/:username', spins.getspin, (req, res) => {
+  var error = res.getHeader('error');
+  // console.log(req.body);
+  if (error != undefined)
+  {
+    res.status(404);
+    res.sendFile(index);
+  }
 });
 
 // @brief: get a supplied user's posts
@@ -187,7 +207,8 @@ app.post('/api/updateFollowing', helpers.loggedIn, users.updateFollowing, (req, 
 // [check('bio').isLength({ max: 150 }).withMessage('bio too long'),
   // check('name').isLength({ min: 1, max: 25 }).withMessage('invalid name'), ],
 app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload, 
-        
+        [validator.validBio,
+         validator.validName],
          users.updateProfileInfo, (req, res) => {
     
   if (res.getHeader('error') != undefined) {
@@ -204,22 +225,24 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
 
 // @brief: endpoint for creating a spin. user must be logged in or this will not work.
 app.post('/api/add_spin/:username', helpers.loggedIn,
-        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
-        ], spins.createSpin, (req, res) => {
-    // TODO add error states for invalid input
-  if (res.getHeader('error') != undefined) {
+        [validator.validSpin], spins.createSpin, (req, res) => {
+  var error = res.getHeader('error');
+
+  if (error != undefined) {
     res.status(418)
+    console.log(error);
   }
   res.sendFile(index);
 });
 
 // @brief: endpoint for editing a spin. user must be logged in or this will not work.
 app.post('/api/edit_spin/:username', helpers.loggedIn,
-        [check('spinBody').isLength({ min: 1, max: 90 }).withMessage('invalid spin length') 
-        ], spins.editSpin, (req, res) => {
-    // TODO add error states for invalid input
-  if (res.getHeader('error') != undefined) {
+        [validator.validSpin], spins.editSpin, (req, res) => {
+  var error = res.getHeader('error');
+
+  if (error != undefined) {
     res.status(418)
+    console.log(error);
   }
   res.sendFile(index);
 });

@@ -40,7 +40,8 @@ class UserFeed extends Component
             //This is for the follow modal to keep track of the items selected.
             toFollowInterests : [],
             toUnfollowInterests : [],
-            currentOperation : OperationEnum.FOLLOW
+            currentOperation : OperationEnum.FOLLOW,
+            newSpins: []
         }
 
         this.onFollowPressed = this.onFollowPressed.bind(this);
@@ -72,8 +73,8 @@ class UserFeed extends Component
                 //res.json also is a promise thus we attach a success callback
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    console.log("Response: ", jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    console.log(jsonData);
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
                 });
@@ -326,6 +327,22 @@ class UserFeed extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.username);
+        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
+        {
+            for(var i = 0; i < this.state.newSpins.length; i++)
+            {
+                var spin = this.state.newSpins[i];
+                if(spin.username !== this.props.username)
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests} hasNewTags={true}
+                    />);
+                }
+            }
+        }
         if(this.state.spins != undefined && this.state.spins.length > 0) 
         {
             for(var i = 0; i < this.state.spins.length; i++)
@@ -336,7 +353,7 @@ class UserFeed extends Component
             }
         }
         else{
-            feed.addSpin(<h6>This user currently has no spins...</h6>);
+          feed.addSpin(<h6>This user currently has no spins 😢</h6>);
         }
 
         let followButton = null;

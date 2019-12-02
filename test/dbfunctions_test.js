@@ -339,4 +339,22 @@ describe('database functions test', function() {
 
   });
 
+  describe('#updateSpin',  () => {
+    it('first test', async () => {
+      user = {
+        username: 'doeJohn',
+      };
+
+      spin_edit = {
+        content: 'this is has been edited',
+        tags: ['editing', 'nice'],
+        id: 1111
+      };
+
+      var res = await db.updateSpin(user.username, spin_edit);
+      console.log(res);
+      assert.equal(res, user.username);
+    });
+  });
+
 });

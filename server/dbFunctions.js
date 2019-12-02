@@ -100,7 +100,8 @@ function userSpinTableName(username) {
       accountInfo.bio,
       accountInfo.name,
       [], // followers
-      {users: [ { username: accountInfo.username, tags: [] } ] }, // following
+      // { username: accountInfo.username, tags: [] } 
+      {users: [] }, // following
       [], // interests
       {}, // accessibility features
       accountInfo.profile_pic,
@@ -301,7 +302,7 @@ async function updateLoginTime(user){
 // @brief get the spins made by a user
 // @return list of spins which match the tags supplied
 //          if tags are empty then it returns all user spins
-async function getSpins(users) {
+async function getSpins(user, users) {
   // add each user to a list of users
   const baseQuery = `SELECT * FROM `;
   var query = '';
@@ -323,6 +324,10 @@ async function getSpins(users) {
     for (var index = 0; index < followed.length; index++)
     {
       var item = followed[index];
+      if (user != null && user === item.username)
+      {
+        continue;
+      }
       // get the post id of the new topic thing idk
       var newpostid = await client.query(
         `SELECT username, new_tag_posts from ${USER_TABLE}
@@ -513,11 +518,10 @@ async function updateSpin(username, spin_edit) {
 
     var query = `UPDATE ${tablename} 
       SET content=$1, tags=$2, date=NOW(), edited=true
-      WHERE id = $3 RETURNING id`
+      WHERE id = $3 RETURNING username`
     ;
 
     var res = await client.query(query, args);
-    spin_id = res.rows[0].id;
     
     var query = `SELECT tags_associated
       FROM ${USER_TABLE} 
@@ -554,7 +558,7 @@ async function updateSpin(username, spin_edit) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : spin_id);
+  return (rows.length === 0 ? false : rows[0].username);
 }
 
 // Deletes a spin provided that it exists
@@ -930,6 +934,33 @@ async function searchForUser(userdata)
   }
 }
 
+async function getSingleSpin(username, spinid)
+{
+  var spintable = userSpinTableName(username);
+  var query = `SELECT * FROM ${spintable} where id = $1`;
+  try 
+  {
+    var res = await pool.query(query, [spinid]);
+    // console.log(res);
+    var spin = res.rows[0];
+    // console.log(spin);
+    if (spin != undefined && spin.length === 0)
+    {
+      return false;
+    }
+    else
+    {
+      return spin;;
+    }
+  }
+  catch (e)
+  {
+    console.log("Error encountered in db.getSingleSpin: ", e);
+    return false;
+  }
+
+}
+
 module.exports = {
   getSpins,
   addSpin,
@@ -946,4 +977,5 @@ module.exports = {
   deleteSpin,
   unfollowTopicUserPair,
   searchForUser,
+  getSingleSpin,
 };

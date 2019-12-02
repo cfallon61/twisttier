@@ -89,7 +89,7 @@ class Login extends Component {
       {
         //Redirecting to home page.
         NotificationManager.success("Login successful!"); 
-        window.location.href = "/";
+        setTimeout(() => window.location.href = "/", 900);
       }
       else{
         NotificationManager.error("Invalid username / email");

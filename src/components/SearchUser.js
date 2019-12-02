@@ -73,7 +73,7 @@ class SearchUser extends Component {
             {
                 if(res.headers.has('error'))
                 {
-                    NotificationManager.error(res.headers['error']);
+                    NotificationManager.error(res.headers.get('error'));
                 }
                 else
                 {

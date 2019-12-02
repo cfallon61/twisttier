@@ -86,13 +86,15 @@ class Signup extends Component {
       //Response returned.
       if(res.status === 200)
       {
-        NotificationManager.success("User created.");
-        window.location.href = "/login";
+        NotificationManager.success("User created. Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 800);
       }
       else{
         if(res.headers.has('error'))
         {
-          NotificationManager.error(res.headers['error']);
+          NotificationManager.error(res.headers.get('error'));
         }
         else
         {

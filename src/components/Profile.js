@@ -108,10 +108,13 @@ class Profile extends Component{
           }
           else
           {
-            if(res.headers.error)
+            if(res.headers.has('error'))
             {
-              NotificationManager.error(res.headers.error);
-              self.setState({error : res.headers.error});
+              NotificationManager.error(res.headers.get('error'));
+            }
+            else
+            {
+              NotificationManager.error("Server didn't return an OK response.");
             }
           }
         })

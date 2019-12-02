@@ -17,6 +17,20 @@ const NEW_POST_TIMEOUT = (process.env.NEW_POST_TIMEOUT || 24 * 60 * 60 * 1000);
 const reservedTag = require('./config.json').reservedTag;
 
 
+async function bootClearNewPosts(req, res, next)
+{
+  try 
+  {
+    var result = await pool.query(`UPDATE ${USER_TABLE} SET new_tag_posts = NULL`);
+    console.log(result.old);
+  }
+  catch (e)
+  {
+    console.log("Error encountered in db.bootClearNewPosts:", e);
+  }
+  return next();
+}
+
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 // @return: object of all user's data
@@ -42,7 +56,7 @@ var userExists = async function (user) {
     return false;
   }
   console.log(query, params);
-  console.log('before query')
+  // console.log('before query')
   var res = await pool.query(query, params);
 
   // response is a json
@@ -53,6 +67,7 @@ var userExists = async function (user) {
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
     // so this is why the [0];
+    // console.log(rows[0]);
     return rows[0];
   }
   // return false if they dont already exist, this is good
@@ -100,7 +115,8 @@ function userSpinTableName(username) {
       accountInfo.bio,
       accountInfo.name,
       [], // followers
-      {users: [ { username: accountInfo.username, tags: [] } ] }, // following
+      // { username: accountInfo.username, tags: [] } 
+      {users: [] }, // following
       [], // interests
       {}, // accessibility features
       accountInfo.profile_pic,
@@ -244,7 +260,7 @@ async function clearNewPostColumn(username) {
 
     client.query("BEGIN");
 
-    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
 
     await client.query(query, [username]);
 
@@ -301,7 +317,7 @@ async function updateLoginTime(user){
 // @brief get the spins made by a user
 // @return list of spins which match the tags supplied
 //          if tags are empty then it returns all user spins
-async function getSpins(users) {
+async function getSpins(user, users) {
   // add each user to a list of users
   const baseQuery = `SELECT * FROM `;
   var query = '';
@@ -314,7 +330,11 @@ async function getSpins(users) {
   var client = await pool.connect();
   try {
     followed = JSON.parse(users);
-    console.log(followed);
+    // console.log(followed);
+    if (followed.length < 1)
+    {
+      return [];
+    }
     // SELECT new_tag_posts from USERS_TABLE where username
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string
@@ -323,6 +343,10 @@ async function getSpins(users) {
     for (var index = 0; index < followed.length; index++)
     {
       var item = followed[index];
+      if (user != null && user === item.username)
+      {
+        continue;
+      }
       // get the post id of the new topic thing idk
       var newpostid = await client.query(
         `SELECT username, new_tag_posts from ${USER_TABLE}
@@ -513,11 +537,10 @@ async function updateSpin(username, spin_edit) {
 
     var query = `UPDATE ${tablename} 
       SET content=$1, tags=$2, date=NOW(), edited=true
-      WHERE id = $3 RETURNING id`
+      WHERE id = $3 RETURNING username`
     ;
 
     var res = await client.query(query, args);
-    spin_id = res.rows[0].id;
     
     var query = `SELECT tags_associated
       FROM ${USER_TABLE} 
@@ -554,7 +577,7 @@ async function updateSpin(username, spin_edit) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : spin_id);
+  return (rows.length === 0 ? false : rows[0].username);
 }
 
 // Deletes a spin provided that it exists
@@ -930,6 +953,33 @@ async function searchForUser(userdata)
   }
 }
 
+async function getSingleSpin(username, spinid)
+{
+  var spintable = userSpinTableName(username);
+  var query = `SELECT * FROM ${spintable} where id = $1`;
+  try 
+  {
+    var res = await pool.query(query, [spinid]);
+    // console.log(res);
+    var spin = res.rows[0];
+    // console.log(spin);
+    if (spin != undefined && spin.length === 0)
+    {
+      return false;
+    }
+    else
+    {
+      return spin;;
+    }
+  }
+  catch (e)
+  {
+    console.log("Error encountered in db.getSingleSpin: ", e);
+    return false;
+  }
+
+}
+
 module.exports = {
   getSpins,
   addSpin,
@@ -946,4 +996,7 @@ module.exports = {
   deleteSpin,
   unfollowTopicUserPair,
   searchForUser,
+  getSingleSpin,
+  bootClearNewPosts,
+
 };

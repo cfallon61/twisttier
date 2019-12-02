@@ -12,6 +12,7 @@ import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
 import "./userfeed.css";
+import Speech from "react-speech";
 
 
 var OperationEnum = {
@@ -40,7 +41,8 @@ class UserFeed extends Component
             //This is for the follow modal to keep track of the items selected.
             toFollowInterests : [],
             toUnfollowInterests : [],
-            currentOperation : OperationEnum.FOLLOW
+            currentOperation : OperationEnum.FOLLOW,
+            newSpins: []
         }
 
         this.onFollowPressed = this.onFollowPressed.bind(this);
@@ -72,7 +74,7 @@ class UserFeed extends Component
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
                     console.log(jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
                 });
@@ -325,6 +327,22 @@ class UserFeed extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.username);
+        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
+        {
+            for(var i = 0; i < this.state.newSpins.length; i++)
+            {
+                var spin = this.state.newSpins[i];
+                if(spin.username !== this.props.username)
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests} hasNewTags={true}
+                    />);
+                }
+            }
+        }
         if(this.state.spins != undefined && this.state.spins.length > 0) 
         {
             for(var i = 0; i < this.state.spins.length; i++)
@@ -335,7 +353,7 @@ class UserFeed extends Component
             }
         }
         else{
-            feed.addSpin(<h6>This user currently has no spins...</h6>);
+          feed.addSpin(<h6>This user currently has no spins 😢</h6>);
         }
 
         let followButton = null;
@@ -345,6 +363,9 @@ class UserFeed extends Component
         {
             followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
+
+        let speechText = "You are right now checking the profile of: " + this.username;
+
         /**
          * The view organized by these parts:
          *          Page
@@ -353,6 +374,7 @@ class UserFeed extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                     {followButton}
                     <Modal show={this.state.showFollowModal}>
@@ -361,6 +383,9 @@ class UserFeed extends Component
                 </div>
                 <div className="user-feed-middle">
                     {feed.render()}
+                    <footer>
+                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                    </footer>
                 </div>
 
             </div>

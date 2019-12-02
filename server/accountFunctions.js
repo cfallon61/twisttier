@@ -13,7 +13,7 @@ async function postCreateUser(req, res, next) {
 
   // TODO figure out why express-validator isnt working
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
 
 
@@ -231,12 +231,11 @@ async function getPosts(req, res, next) {
       username: user.username,
       tags: []
     }]);
-  var spins = await db.getSpins(request);
+  var spins = await db.getSpins(null, request);
 
   if (!spins || spins.length === 0) {
-    res.setHeader('alert', 'no spins found :(')
+    res.setHeader('alert', 'no spins found :(');
   }
-  // console.log(spins);
   res.json(JSON.stringify(spins));
   // return next();
 
@@ -262,7 +261,7 @@ async function getTimeline(req, res, next) {
   var following = JSON.stringify(data.following.users);
   // console.log(following);
 
-  var followedSpins = await db.getSpins(following);
+  var followedSpins = await db.getSpins(user.username, following);
 
   if (req.clientSession.uid != user.username)
   {
@@ -283,7 +282,7 @@ async function getTimeline(req, res, next) {
 async function updateProfileInfo(req, res, next) {
 
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
   var imgsrc = '';
 
@@ -299,9 +298,10 @@ async function updateProfileInfo(req, res, next) {
     accessibility_features: req.body.accessibility_features,
     profile_pic: imgsrc
   };
-  console.log(req.params, "\n", req.body, "\n", user);
+  // console.log(req.params, "\n", req.body, "\n", user);
 
   // get user's profile data so i can be lazy
+  console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
 
   if (!userData) {
@@ -328,15 +328,16 @@ async function updateProfileInfo(req, res, next) {
   // if all checking fine, update the user
   if (userData === false) {
     // if use use header, we need to return next
+    console.log('user not found in user updating');
     res.setHeader('error', 'user not found');
   }
-  else {
+  else 
+  {
     res.setHeader('username', userData.username);
-    res.userdata = userData;
     req.imgsrc = userData.profile_pic;
+    res.json(JSON.stringify(userData));
   }
   return next();
-
 }
 
 // updates following and followers of two relevant users depending on

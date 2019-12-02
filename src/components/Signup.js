@@ -84,13 +84,22 @@ class Signup extends Component {
       body : formdata 
     }).then(function(res){
       //Response returned.
-      if(res.status === 406)
+      if(res.status === 200)
       {
-        NotificationManager.error("User cannot be created.");
-        return;
+        NotificationManager.success("User created.");
+        window.location.href = "/login";
       }
-      NotificationManager.success("User created.");
-      window.location.href = "/login";
+      else{
+        if(res.headers.has('error'))
+        {
+          NotificationManager.error(res.headers['error']);
+        }
+        else
+        {
+          NotificationManager.error("User cannot be created.");
+        }
+      }
+      
     }).catch(function(err){
       NotificationManager.error(err);
     });
@@ -104,26 +113,26 @@ class Signup extends Component {
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group controlId="formNewEmail">
                     <Form.Label>Email address</Form.Label>
-                    <Form.Control type="email" placeholder="Email" onChange={this.handleEmailChange} required/>
+                    <Form.Control type="email" placeholder="Email (Required)" onChange={this.handleEmailChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formNewPasswrd">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange} required/>
+                    <Form.Control type="password" placeholder="Password (Required)" onChange={this.handlePasswordChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formConfirmPasswrd">
                     <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control type="password" placeholder="Confirm Password" onChange={this.handleRepeatedPassChange} required/>
+                    <Form.Control type="password" placeholder="Confirm Password (Required)" onChange={this.handleRepeatedPassChange} required/>
                 </Form.Group>
                  <Form.Group controlId="formNewUsername">
                     <Form.Label>Username</Form.Label>
-                    <Form.Control type="username" placeholder="Username" onChange={this.handleUsernameChange} required/>
+                    <Form.Control type="username" placeholder="Username (Required)" onChange={this.handleUsernameChange} required/>
                 </Form.Group>
 
                 <Form.Group controlId="formNewName">
                     <Form.Label>Name</Form.Label>
-                    <Form.Control type="name" placeholder="Name" onChange={this.handleNameChange}/>
+                    <Form.Control type="name" placeholder="Name (Required)" onChange={this.handleNameChange}/>
                 </Form.Group>
 
                 <Form.Group controlId="formNewBio">

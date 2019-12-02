@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
 import { NotificationManager } from 'react-notifications';
 import Dropdown from 'react-bootstrap/Dropdown';
+import Speech from 'react-speech';
 
 
 /**
@@ -23,6 +24,7 @@ class Timeline extends Component
         this.state = {
             tag : "",
             spins : [],
+            newSpins : [],
             interests : [],
             error : {
                 exist : false,
@@ -62,7 +64,7 @@ class Timeline extends Component
             {
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 });
             }
             else{
@@ -200,7 +202,7 @@ class Timeline extends Component
 
         let dropdownInterests = (
             <Dropdown>
-                <Dropdown.Toggle className = "editButtons" variant = "outline-primary" id="dropdown-basic">
+                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
                     Tags
                 </Dropdown.Toggle>
 
@@ -255,17 +257,36 @@ class Timeline extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.props.username);
+        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
+        {
+            for(var i = 0; i < this.state.newSpins.length; i++)
+            {
+                var spin = this.state.newSpins[i];
+                if(spin.username !== this.props.username)
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests} hasNewTags={true}
+                    />);
+                }
+            }
+        }
         if(this.state.spins !== undefined && this.state.spins.length > 0)
         {
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content}
-                    timestamp={spin.date} spinID = {spin.id}
-                    userToView={this.username} tags={spin.tags}
-                    likes= {spin.likes} likeList = {spin.like_list}
-                    userInterests = {this.state.interests}
-                />);
+                if(spin.username !== this.props.username) //Filter out spins that the user made.
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests}
+                    />);
+                }
             }
         }
         else{
@@ -273,6 +294,8 @@ class Timeline extends Component
         }
 
         let spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
+
+        let speechText = "You are right now in your timeline.";
 
         /**
          * The view organized by these parts:
@@ -282,6 +305,7 @@ class Timeline extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
+                    <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                 </div>
 
@@ -289,6 +313,9 @@ class Timeline extends Component
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
                     {feed.render()}
+                    <footer>
+                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                    </footer>
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>

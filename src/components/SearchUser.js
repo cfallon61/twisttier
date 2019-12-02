@@ -8,7 +8,7 @@ import FormControl from 'react-bootstrap/FormControl'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link } from 'react-router-dom'
 import Image from 'react-bootstrap/Image'
-
+import Speech from 'react-speech';
 import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
@@ -132,16 +132,18 @@ class SearchUser extends Component {
       let profiles = [];
       let tempUsers = this.state.users;
       let userName = null;
+      let speechText = "";
 
       // check if users is empty  
       if (tempUsers.length === 0) {
           profiles = <p>No matches found</p>
+          speechText = "No matches found.";
 
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
             // console.log("User: ", user);
-            
+            speechText += `Details of user ${user.username}`;
             // link the username to profile
             let usernameLink  = `/profile/${user.username}`;
             // console.log("Link", usernameLink);
@@ -165,21 +167,24 @@ class SearchUser extends Component {
 
             } else if ( user.tags_associated.length <= 3 ) {
                 // if less than 5 tags
+                speechText += `Tags: `;
                 tags = user.tags_associated.map( (tag) => {
+                    speechText += `${tag},  `;
                     return  <Dropdown.Item >
                             {tag}
                         </Dropdown.Item>;
                 });
             } else {
                 // if more than 5 tags, show 5 and show all button
+                speechText += `Tags: `;
                 for (var i = 0; i < 4; i++) {
+                    speechText += `${user.tags_associated[i]}`;
                     let item = (
-                        <Dropdown.Item >
+                        <Dropdown.Item >            
                             {user.tags_associated[i]}
                         </Dropdown.Item>
                     );
                     tags.push(item);   
-
                 }
                 
                 // all tags of this user
@@ -227,6 +232,7 @@ class SearchUser extends Component {
                             {chosenProfilePic}               
                             <h3>{userName}</h3>
                             <p>{userTagsDropdown}</p>   
+                            <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     </div>
 
           });

@@ -4,6 +4,7 @@ import {NotificationManager} from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
 import Modal from "./Modal";
 import Button from "react-bootstrap/Button";
+import Speech from "react-speech";
 
 const imgScale = {
     "height" : "100%",
@@ -99,7 +100,7 @@ class Profile extends Component{
                   self.setState({ profilePic: chosenProfilePic });
 
                 }
-              self.setState({ bio: dataDict.bio, interests: dataDict.interests, following: dataDict.following.users});
+              self.setState({ bio: dataDict.bio, interests: dataDict.interests, following: dataDict.following.users, followers: dataDict.followers});
 
 
               }).catch(function(error){
@@ -188,19 +189,23 @@ class Profile extends Component{
     {
         let tagViews = [];
         var followinglist = [];
+        let speechText = `Details of user ${this.username}: Bio: ${this.state.bio}`
         // console.log('interests =', this.state.interests);
         // console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;
+            speechText += `Interests:   `;
             for(var i = 0; i < currentTags.length; i++)
             {
                 tagViews.push(<h6 className="tag-entry">{currentTags[i]}</h6>);
+                speechText += `${currentTags[i]}   `;
             }
         }
         else
         {
-            tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
+          tagViews.push(<h6 className="tag-entry">I have no interests 😢 Life is meaningless without interests</h6>);
+          speechText += `I have no interests 😢 Life is meaningless without interests`;
         }
 
         return (
@@ -208,15 +213,16 @@ class Profile extends Component{
                 <div className="profile-info">
                     <h3>{this.state.username}</h3>
                     <h6>{this.state.bio}</h6>
-                    {this.state.profilePic}
+                    {this.state.profilePic}                    
                 </div>
                 <div className="tag-info">
-                    <h4>Things I am interested</h4>
+                    <h4>My interests</h4>
                     <div className="tag-list">
                         {tagViews}
                     </div>
                 </div>
                 {this.renderFollowersFollowingList()}
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
             </div>
         );
     }
@@ -248,8 +254,16 @@ class UsernameListEntry extends Component
     this.state = {
       hover : false
     };
-    this.username = this.props.entry.username;
-    this.tags = this.props.entry.tags;
+    var entry = this.props.entry;
+    var username = entry;
+    var tags = [];
+    if (entry.username != undefined && entry.tags != undefined)
+    {
+      username = entry.username;
+      tags = entry.tags;
+    }
+    this.username = username;
+    this.tags = tags;
   }
 
   render()
@@ -257,43 +271,48 @@ class UsernameListEntry extends Component
     let userLink = `/profile/${this.username}`;
     //Building a string in form of "tag1, tag2, tag3 ..., tagn".
     let tagList = [];
-    for(let i = 0; i < this.tags.length; i++)
-    {
-      if(i == this.tags.length - 1)
-      {
-        if(this.tags[i] !== undefined && this.tags[i] !== null)
-        {
-          tagList.push(this.tags[i]);
-        }
 
-      }
-      else
+    if (this.tags !== undefined)
+    {
+      for(let i = 0; i < this.tags.length; i++)
       {
-        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        if(i == this.tags.length - 1)
         {
-          tagList.push(this.tags[i] + ',');
+          if(this.tags[i] !== undefined && this.tags[i] !== null)
+          {
+            tagList.push(this.tags[i]);
+          }
+  
+        }
+        else
+        {
+          if(this.tags[i] !== undefined && this.tags[i] !== null)
+          {
+            tagList.push(this.tags[i] + ',');
+          }
         }
       }
     }
+
 
     let tagView = tagList.join("");
 
     let hoverView = null;
     if(this.state.hover)
     {
-      if(tagView.length === 0)
+      if(tagView.length > 0)
       {
         hoverView = (
           <div className="hover-tag-view">
-              <h6>Every tag</h6>
+                {tagView}
           </div>
           );
       }
       else
       {
-        hoverView = (
+        hoverView =(
           <div className="hover-tag-view">
-                {tagView}
+                Every tag
           </div>
           );
       }

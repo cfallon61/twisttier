@@ -46,3 +46,12 @@ curl -i -X POST 'http://localhost:8080/api/search/s' \
 psql -h ec2-107-22-211-248.compute-1.amazonaws.com -U kbuesxacagftwy -p 5432 -d d1fg6lc7ogq281 
 
 c0cbcae48a84050a6ea51593d82b120e74d90907c0077cbaad4083918c2333ef
+
+// testing getting an individual spin
+
+curl -i -H "Content-Type: application/json" \
+ --request POST \
+ --data '{"spinID":"1057"}' \
+ -X POST http://localhost:8080/api/spin/doeJohn
+
+

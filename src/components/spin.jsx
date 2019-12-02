@@ -18,6 +18,8 @@ import editImage from './edit.png';
 import shareImage from './share.png';
 import deleteImage from "./delete.png";
 import showMoreButton from "./showMore.png";
+import Speech from "react-speech";
+import Flame from "./flame.png";
 
 const tagContainerStyle = {
     display: "grid",
@@ -52,7 +54,7 @@ class Spin extends Component
             showLike : true,
             viewingUserTags : [], //tags the viewing user is following
             likeList: this.props.likeList,
-
+            hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
             
             showEditer : false,
@@ -98,6 +100,31 @@ class Spin extends Component
         this.handleSharePostSubmission = this.handleSharePostSubmission.bind(this);
         this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
         this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
+        this.getUserTags = this.getUserTags.bind(this);
+    }
+
+       /**
+     * Helper method for getting tags of the author
+     */
+    getUserTags(followingList, author)
+    {
+        // console.log(followingList);
+        // console.log(author);
+        if(followingList === undefined || followingList.users.length === 0) 
+        {
+            console.log("Return empty");
+            return [];//Empty list
+        }
+        // console.log(followingList.users.length);
+        for(var i = 0; i < followingList.users.length; i++)
+        {
+            if(followingList.users[i].username === author)
+            {
+                return followingList.users[i].tags;
+            }
+        }
+        // console.log("Return empty from end.");
+        return [];//Empty list
     }
 
     getAuthor()
@@ -281,12 +308,47 @@ class Spin extends Component
         }
     }
 
-    updateViewerTags(tags)
+    updateViewerTags()
     {
-        if(tags !== undefined)
+        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        const self = this;
+        // console.log(`/api/users/${self.userToView}`);
+        fetch(`/api/users/${self.userToView}`, {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        })
+        .then(function(res)
         {
-            this.setState({ viewingUserTags: tags});
-        }
+          // console.log(res);
+          if(res.status === 200)
+          {
+            res.json().then(function(jsonData)
+            {
+                const dataDict = JSON.parse(jsonData);
+                let followingList = dataDict.following;
+                // console.log(followingList);
+                // console.log(self.author);
+                let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
+                console.log("Followed tags from author: " + followedTagsFromAuthor);
+                self.setState({ viewingUserTags: followedTagsFromAuthor});
+              })
+          }
+          else
+          {
+            if(res.headers.error)
+            {
+              NotificationManager.error(res.headers.error);
+              self.setState({error : res.headers.error});
+            }
+          }
+        })
+        .catch(function(err){
+            console.log(err);
+            self.setState({error : err});
+        })
+        ;
     }
 
     // checks whether viewer is logged in or nor
@@ -300,6 +362,7 @@ class Spin extends Component
         if(this.viewerIsAuthenticated())
         {
             this.updateWhetherViewerLikedTheSpin();
+            this.updateViewerTags();
         }
     }
 
@@ -437,7 +500,8 @@ class Spin extends Component
     }
 
     showShareModal() {
-        this.setState({showShare : true})
+        this.setState({showShare : true});
+        this.setState({content : " "})
     }
     closeShareModal() {
         window.location.reload();
@@ -521,7 +585,7 @@ class Spin extends Component
             tags: this.state.tags,
             is_quote: true,
             quote_origin: {
-                username: this.userToView,
+                username: this.author,
                 spinId: this.state.spinID,
             }
         };
@@ -725,8 +789,10 @@ class Spin extends Component
         {
             newInterestsDropdown = (
                 <DropdownButton
-                    title='Suggested Tags'
-                    variant='primary'
+                title='   Add from Suggested Tags   '
+                variant='outline-success'
+                block
+                className = "shareButtons"
                 >
                     {newInterestOptions}
                 </DropdownButton>
@@ -762,17 +828,56 @@ class Spin extends Component
             // create a dropdown using those interests
             addedTagsDropdown = (
                 <DropdownButton
-                    title='Tags'
-                    variant='secondary'
+                title='Remove from Existing Tags'
+                variant='outline-danger'
+                block
+                className = "shareButtons"
                 >
                     {oldTagsDropdown}
                 </DropdownButton>
             );
         }
+        let quote = null;
+        let jsonData = null;
+        let quoteBody = {
+            spinID: this.state.spinID,
+        };
+        fetch(`/api/spin/${this.author}`, {
+            method : 'POST',
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(quoteBody)
+        }).then(function(res){
+            if(res.status === 200)
+            {
+                res.json().then(function(data){
+                    jsonData = JSON.parse(data);
+                    quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
+                    console.log(quote);
+                    self.quote = quote;
+                });
+            }
+            else
+            {
+                if(res.headers.has('error'))
+                {
+                    NotificationManager.error(res.headers['error']);
+                }
+                else
+                {
+                    NotificationManager.error("Unexpected error while liking spin.");
+                }
+            }
+        });
+
         return (
             <div className="spin-form">
                     <Form >
                         <Form.Label>Share Spin</Form.Label>
+                        <p>{self.quote}</p>
+                        
+                        
                         <Form.Control 
                             as = "textarea" 
                             placeholder="Your Spin here"
@@ -821,11 +926,11 @@ class Spin extends Component
         return this.state.tags.map((tagName) => {
             if(this.state.viewingUserTags.includes(tagName))
             {
-                return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                return <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
             }
             else
             {
-                return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                return <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
             }
         });
     }
@@ -841,16 +946,25 @@ class Spin extends Component
         let edit_button = null;
         let tagViewList = [];
         let delete_button = null;
+        let flameIcon = null;
+
+        if(this.state.hasNewTags)
+        {
+            flameIcon = <div>
+                <Image src={Flame} style={{'display' : 'inline'}}/>
+                <p style={{'display' : 'inline'}}>New topic!</p>
+            </div>;
+        }
 
         if(this.viewerIsAuthenticated())
         {
             if(this.state.showLike)
             {
-                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
+                likeButton = <Button onClick={this.likeSpin} className="image-button-cover"><Image title = "Like spin" className="like-image" alt="like" src={LikeImage}/></Button>;
             }
             else
             {
-                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
+                likeButton = <Button onClick={this.unlikeSpin} className="image-button-cover"><Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/></Button>;
             }
 
             if(this.state.tags.length === 0)
@@ -867,11 +981,11 @@ class Spin extends Component
                     let view = null;
                     if(this.state.viewingUserTags.includes(tagName))
                     {
-                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                        view = <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
                     else
                     {
-                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                        view = <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                     }
                     tagViewList.push(view);
                     i++;
@@ -879,48 +993,34 @@ class Spin extends Component
 
                 if(this.state.tags.length > MAX_TAGS)
                 {
-                    moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
+                    moreTagsButton = <Button className="image-button-cover" onClick={this.openMoreTagsModal}><Image title = "Show all tags" alt="more_tags" src = {showMoreButton} className="more-tags-image" /></Button>;
                 }
-
-                let tagList = this.state.tags.map( (tagName) => {
-
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                    }
-                    else
-                    {
-                        return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                });
             }
 
-            share_button = <Image 
+            share_button = <Button className="image-button-cover"><Image title = "Share"
             className="share-image" 
             src={shareImage}
             onClick = {this.showShareModal}
             title = "Share"
             alt = "Share"
-            // onClick = {this.askForConfirmation} TODO: Implement share
-            />
+            // onClick = {this.askForConfirmation} TODO: Implement share (add this to button.)
+            /></Button>
 
 
             if (this.author === this.userToView) {
-                edit_button = <Image 
+                edit_button = <Button className="image-button-cover" onClick = {this.showEditModal}><Image title = "Edit"
                 className="share-image" // using same properties
                 src={editImage}
-                onClick = {this.showEditModal}
-                title = "Edit"
+               
                 alt = "Edit"
-                />
+                /></Button>
 
-                delete_button = <Image 
+                delete_button = <Button className="image-button-cover" onClick = {this.askForConfirmation}><Image title = "Delete"
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
-                title = "Delete"
                 alt = "Delete"
-                />
+                /></Button>
             }
 
 
@@ -929,6 +1029,17 @@ class Spin extends Component
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
 
+        let speechText = this.props.username + " wrote:      " + this.state.content + "       ";
+        if(this.state.tags.length > 0)
+        {
+            speechText += "  Added tags: ";
+            for(let i = 0; i < this.state.tags.length; i++)
+            {
+                speechText += this.state.tags[i] + "       ";
+            }
+        } 
+  
+
         return (
             <div className="spin-area">
 
@@ -936,6 +1047,7 @@ class Spin extends Component
                     <div className="username-link">
                         {usernameField}  
                     </div>
+                    {flameIcon}
                     <div className="time-section">
                         <h6>
                             {this.formatDate(this.state.timestamp)}
@@ -951,14 +1063,11 @@ class Spin extends Component
                 <div className="other-info">
                     {likeButton} 
                     <p className="num-likes">{this.state.likes} people like this</p>
-                    <div id = "action-buttons">
-                        <div>{share_button}</div>
-                        <div>{edit_button}</div>
-                        <div>{delete_button}</div>
-                    </div>
-                    
+                    {share_button}
+                    {edit_button}
+                    {delete_button}
                 </div>
-                
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagViewList}
                     {moreTagsButton}
@@ -974,7 +1083,6 @@ class Spin extends Component
                     {this.getModalTagViews()}
                     <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
-
             </div>
         );
     }

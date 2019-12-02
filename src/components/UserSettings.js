@@ -21,6 +21,7 @@ class UserSettings extends Component {
     this.state = {
       username: "",
       password: "",
+      oldPass: "",
       bio: "",
       name: "",
       profile_pic: "",
@@ -45,12 +46,16 @@ class UserSettings extends Component {
     this.handleConfirmEmailChange = this.handleConfirmEmailChange.bind(this);
     this.handleInterestsChange = this.handleInterestsChange.bind(this);
     this.imageFile = React.createRef();
+    this.handleOldPaswordChange = this.handleOldPaswordChange.bind(this)
   }
 
   //This is for updating the password.
   handlePasswordChange(event)
   {
     this.setState({password : event.target.value});
+  }
+  handleOldPaswordChange(event){
+    this.setState({oldpassword : event.target.value});
   }
 
   handleEditBio(event) {
@@ -65,10 +70,15 @@ class UserSettings extends Component {
   {
     event.preventDefault();
     //split the interests into array
-    let interestsArray = this.state.interests.split(',');
+    let interestsArray = []
+    if(this.state.interests != "")
+    {
+      interestsArray = this.state.interests.split(',');
+    }
 
     var formdata = new FormData();
     formdata.append('password', this.state.password);
+    formdata.append('oldPass', this.state.oldPass);
     formdata.append('bio', this.state.bio);
     formdata.append('name', this.state.name);
     formdata.append('interests', JSON.stringify(interestsArray));
@@ -241,7 +251,10 @@ class UserSettings extends Component {
                     <Form.Label>Bio</Form.Label>
                     <Form.Control type="text" placeholder="Bio" onChange={this.handleEditBio}/>
                 </Form.Group>
-
+                <Form.Group>
+                    <Form.Label>Old Password</Form.Label>
+                    <Form.Control type="password" placeholder="Old Password(required)" onChange={this.handleOldPasswordChange} required/>
+                </Form.Group>
                 <Form.Group>
                     <Form.Label>Password</Form.Label>
                     <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>

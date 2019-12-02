@@ -12,7 +12,7 @@ const express = require('express');
 // @return: none
 async function createSpin(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
 
   var spin = {
@@ -47,7 +47,7 @@ async function createSpin(req, res, next) {
 // @return: none
 async function editSpin(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
 
   var spin = {
@@ -71,7 +71,7 @@ async function editSpin(req, res, next) {
 // @return: none
 async function removeSpin(req, res, next) {
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
   var username = req.params.username
   var spin_id = req.body.spinId;
@@ -118,10 +118,31 @@ async function esteemSpin(req, res, next) {
   }
 }
 
+async function getspin(req, res, next)
+{
+  // console.log(req.body);
+  var username = req.params.username;
+  var spinid = req.body.spinID;
+
+  var result = await db.getSingleSpin(username, spinid);
+
+  if (!result)
+  {
+    console.log('error', 'unable to get spin ' + spinid.toString() + " from " + username);
+    res.setHeader('error', 'unable to get spin ' + spinid.toString() + " from " + username);
+    return next();
+  }
+  else
+  {
+    console.log('got spin', spinid, 'from', username);
+    res.json(JSON.stringify(result));
+  }
+}
 
 module.exports = {
 createSpin,
 removeSpin,
 esteemSpin,
-editSpin
+editSpin,
+getspin,
 }

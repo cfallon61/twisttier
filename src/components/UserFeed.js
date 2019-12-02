@@ -335,7 +335,7 @@ class UserFeed extends Component
             }
         }
         else{
-            feed.addSpin(<h6>This user currently has no spins...</h6>);
+          feed.addSpin(<h6>This user currently has no spins 😢</h6>);
         }
 
         let followButton = null;

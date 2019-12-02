@@ -629,11 +629,11 @@ class Spin extends Component
         return this.state.tags.map((tagName) => {
             if(this.state.viewingUserTags.includes(tagName))
             {
-                return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                return <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
             }
             else
             {
-                return <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                return <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
             }
         });
     }
@@ -663,11 +663,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <Image title = "Like spin" className="like-image" alt="like" src={LikeImage} onClick={this.likeSpin}/>;
+                likeButton = <Button onClick={this.likeSpin} className="image-button-cover"><Image title = "Like spin" className="like-image" alt="like" src={LikeImage}/></Button>;
             }
             else
             {
-                likeButton = <Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/>;
+                likeButton = <Button onClick={this.unlikeSpin} className="image-button-cover"><Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/></Button>;
             }
 
             if(this.state.tags.length === 0)
@@ -684,11 +684,11 @@ class Spin extends Component
                     let view = null;
                     if(this.state.viewingUserTags.includes(tagName))
                     {
-                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                        view = <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
                     else
                     {
-                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                        view = <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                     }
                     tagViewList.push(view);
                     i++;
@@ -696,32 +696,32 @@ class Spin extends Component
 
                 if(this.state.tags.length > MAX_TAGS)
                 {
-                    moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
+                    moreTagsButton = <Button className="image-button-cover" onClick={this.openMoreTagsModal}><Image title = "Show all tags" alt="more_tags" src = {showMoreButton} className="more-tags-image" /></Button>;
                 }
             }
 
-            share_button = <Image title = "Share"
+            share_button = <Button className="image-button-cover"><Image title = "Share"
             className="share-image" 
             src={shareImage}
             alt = "Share"
-            // onClick = {this.askForConfirmation} TODO: Implement share
-            />
+            // onClick = {this.askForConfirmation} TODO: Implement share (add this to button.)
+            /></Button>
 
 
             if (this.author === this.userToView) {
-                edit_button = <Image title = "Edit"
+                edit_button = <Button className="image-button-cover" onClick = {this.showEditModal}><Image title = "Edit"
                 className="share-image" // using same properties
                 src={editImage}
-                onClick = {this.showEditModal}
+               
                 alt = "Edit"
-                />
+                /></Button>
 
-                delete_button = <Image title = "Delete"
+                delete_button = <Button className="image-button-cover" onClick = {this.askForConfirmation}><Image title = "Delete"
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
                 alt = "Delete"
-                />
+                /></Button>
             }
 
 

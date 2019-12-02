@@ -17,6 +17,20 @@ const NEW_POST_TIMEOUT = (process.env.NEW_POST_TIMEOUT || 24 * 60 * 60 * 1000);
 const reservedTag = require('./config.json').reservedTag;
 
 
+async function bootClearNewPosts(req, res, next)
+{
+  try 
+  {
+    var result = await pool.query(`UPDATE ${USER_TABLE} SET new_tag_posts = NULL`);
+    console.log(result.old);
+  }
+  catch (e)
+  {
+    console.log("Error encountered in db.bootClearNewPosts:", e);
+  }
+  return next();
+}
+
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 // @return: object of all user's data
@@ -42,7 +56,7 @@ var userExists = async function (user) {
     return false;
   }
   console.log(query, params);
-  console.log('before query')
+  // console.log('before query')
   var res = await pool.query(query, params);
 
   // response is a json
@@ -53,6 +67,7 @@ var userExists = async function (user) {
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
     // so this is why the [0];
+    // console.log(rows[0]);
     return rows[0];
   }
   // return false if they dont already exist, this is good
@@ -245,7 +260,7 @@ async function clearNewPostColumn(username) {
 
     client.query("BEGIN");
 
-    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
 
     await client.query(query, [username]);
 
@@ -315,7 +330,11 @@ async function getSpins(user, users) {
   var client = await pool.connect();
   try {
     followed = JSON.parse(users);
-    console.log(followed);
+    // console.log(followed);
+    if (followed.length < 1)
+    {
+      return [];
+    }
     // SELECT new_tag_posts from USERS_TABLE where username
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string
@@ -978,4 +997,6 @@ module.exports = {
   unfollowTopicUserPair,
   searchForUser,
   getSingleSpin,
+  bootClearNewPosts,
+
 };

@@ -298,9 +298,10 @@ async function updateProfileInfo(req, res, next) {
     accessibility_features: req.body.accessibility_features,
     profile_pic: imgsrc
   };
-  console.log(req.params, "\n", req.body, "\n", user);
+  // console.log(req.params, "\n", req.body, "\n", user);
 
   // get user's profile data so i can be lazy
+  console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
 
   if (!userData) {
@@ -327,15 +328,16 @@ async function updateProfileInfo(req, res, next) {
   // if all checking fine, update the user
   if (userData === false) {
     // if use use header, we need to return next
+    console.log('user not found in user updating');
     res.setHeader('error', 'user not found');
   }
-  else {
+  else 
+  {
     res.setHeader('username', userData.username);
-    res.userdata = userData;
     req.imgsrc = userData.profile_pic;
+    res.json(JSON.stringify(userData));
   }
   return next();
-
 }
 
 // updates following and followers of two relevant users depending on

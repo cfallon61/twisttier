@@ -52,11 +52,7 @@ class Spin extends Component
             likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
-<<<<<<< HEAD
-            viewingUserTags : [], //tags the viewing user is following
-=======
             viewingUserTags : this.props.tagsFollowedForThisSpin,
->>>>>>> 9f379a011dc30698676435c73f406ae4550cddc3
             likeList: this.props.likeList,
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal

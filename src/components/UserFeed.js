@@ -58,9 +58,10 @@ class UserFeed extends Component
 
     updateUserSpins(username)
     {
-        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        //Since "this" changes when you enter a new context, 
+        //we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log("Fetching...");
+        console.log("Fetching... ", `/api/posts/${username}`);
         fetch(`/api/posts/${username}`, {
             method: "POST",
             credentials: 'same-origin'
@@ -71,7 +72,7 @@ class UserFeed extends Component
                 //res.json also is a promise thus we attach a success callback
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    console.log(jsonData);
+                    console.log("Response: ", jsonData);
                     self.setState({spins : dataDict.regularposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
@@ -97,7 +98,7 @@ class UserFeed extends Component
 
     componentDidMount()
     {
-        console.log(this.username);
+        console.log("Compoment did mount reached for: ", this.username);
         this.updateUserSpins(this.username);
         this.updateTagData();
     }
@@ -216,7 +217,7 @@ class UserFeed extends Component
             {
                 response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log(data);
+                    // console.log(data);
                     let currentInterests = [];
                     for(var i = 0; i < jsonData.tags_associated.length; i++)
                     {
@@ -254,7 +255,7 @@ class UserFeed extends Component
             return <Dropdown.Item onClick={() => this.onDropdownItemClicked(tagName)}>{tagName}</Dropdown.Item>;
         });
         let disableTagDropdown = false;
-        console.log(followItems);
+        // console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;

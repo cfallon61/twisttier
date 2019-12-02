@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
 import { NotificationManager } from 'react-notifications';
 import Dropdown from 'react-bootstrap/Dropdown';
+import Speech from 'react-speech';
 
 
 /**
@@ -53,7 +54,7 @@ class Timeline extends Component
 
     componentDidMount()
     {
-        console.log("Inside component did mount");
+
         this.getUserInterests();
         const self = this;
         fetch(`/api/timeline/${this.username}`, {
@@ -290,15 +291,15 @@ class Timeline extends Component
                 // console.log("tags to send: ", followingTagsForThisSpin);
 
                 // check if the user is following atleast one of the tags
-                // var tagMatchCount = 0;
-                // for (var a = 0; a < followingTagsForThisSpin.length; a++){
-                //     if (spin.tags.includes(followingTagsForThisSpin[a])) {
-                //         tagMatchCount++;
-                //         break;
-                //     }
-                // }
+                var tagMatchCount = 0;
+                for (var a = 0; a < followingTagsForThisSpin.length; a++){
+                    if (spin.tags.includes(followingTagsForThisSpin[a])) {
+                        tagMatchCount++;
+                        break;
+                    }
+                }
 
-                // if (tagMatchCount !== 0) {
+                if (tagMatchCount !== 0) {
                     feed.addSpin(<Spin username={spin.username} content={spin.content}
                         timestamp={spin.date} spinID = {spin.id}
                         userToView={this.username} tags={spin.tags}
@@ -306,7 +307,7 @@ class Timeline extends Component
                         userInterests = {this.state.interests} 
                         tagsFollowedForThisSpin = {followingTagsForThisSpin}
                     />);
-                // }
+                }
                 
             }
         }
@@ -316,6 +317,8 @@ class Timeline extends Component
 
         let spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
 
+        let speechText = "You are right now in your timeline.";
+
         /**
          * The view organized by these parts:
          *          Page
@@ -324,6 +327,7 @@ class Timeline extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
+                    <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                 </div>
 
@@ -331,6 +335,9 @@ class Timeline extends Component
                     <h4>Hello {this.username}!</h4>
                     {spinButton}
                     {feed.render()}
+                    <footer>
+                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                    </footer>
                     <Modal show={this.state.showSpinModal}>
                         {this.renderSpinForm()}
                     </Modal>

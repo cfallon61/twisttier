@@ -17,6 +17,7 @@ import editImage from './edit.png';
 import shareImage from './share.png';
 import deleteImage from "./delete.png";
 import showMoreButton from "./showMore.png";
+import Speech from "react-speech";
 
 const tagContainerStyle = {
     display: "grid",
@@ -49,7 +50,7 @@ class Spin extends Component
             likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
-            viewingUserTags : [],
+            viewingUserTags : this.props.tagsFollowedForThisSpin,
             likeList: this.props.likeList,
 
             // for handling the edit form modal
@@ -187,6 +188,7 @@ class Spin extends Component
     // follows tags of spins
     followTag(tagName)
     {
+        console.log("Following")
         let tagList = [];
         // console.log(tagName);
         tagList.push(tagName);
@@ -207,11 +209,11 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
+                console.log("Successfully followed user");
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
-                
                 setTimeout(function() { //Start the timer
                     window.location.reload();
-                }.bind(this), 800)
+                }.bind(this), 900)
             }
             else{
                 if(res.headers.has("error"))
@@ -249,10 +251,11 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
+                console.log("Unfollowed successfully");
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
                 setTimeout(function() { //Start the timer
                     window.location.reload();
-                }.bind(this), 800)
+                }.bind(this), 1000)
             }
             else{
                 if(res.headers.has("error"))
@@ -341,7 +344,7 @@ class Spin extends Component
                 // show the notification and then delete
                 setTimeout(function() { //Start the timer
                     window.location.reload();
-                }.bind(this), 800)
+                }.bind(this), 900)
                 
                 // console.log("Spin deleted");
             }
@@ -630,7 +633,7 @@ class Spin extends Component
     getModalTagViews()
     {
         return this.state.tags.map((tagName) => {
-            if(this.state.viewingUserTags.includes(tagName))
+            if(this.state.viewingUserTags !== undefined && this.state.viewingUserTags.includes(tagName))
             {
                 return <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
             }
@@ -642,11 +645,10 @@ class Spin extends Component
     }
 
     render()
-    {   console.log("Debug viewing tags:" , this.state.viewingUserTags);
+    {
         // console.log("Editor bool: ", this.state.showEditer);
         // console.log("Author: ", this.author);
         // console.log("UserToView: ", this.userToView);
-        console.log("Tags followed for this spin", this.state.viewingUserTags);
         let likeButton = null;
         let moreTagsButton = null;
         let share_button = null;
@@ -658,11 +660,11 @@ class Spin extends Component
         {
             if(this.state.showLike)
             {
-                likeButton = <Image title = "Like spin" className="like-image" src={LikeImage} onClick={this.likeSpin}/>;
+                likeButton = <Image title = "Like spin" className="like-image" alt="like" src={LikeImage} onClick={this.likeSpin}/>;
             }
             else
             {
-                likeButton = <Image title = "Unlike spin" className="like-image" src={unlikeImage} onClick={this.unlikeSpin}/>;
+                likeButton = <Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/>;
             }
 
             if(this.state.tags.length === 0)
@@ -677,52 +679,44 @@ class Spin extends Component
                 {
                     let tagName = this.state.tags[i];
                     let view = null;
-
-                    if (this.state.viewingUserTags !== undefined && this.state.viewingUserTags !== null) {
-                        if(this.state.viewingUserTags.includes(tagName))
-                        {
-                            view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                        }
-                        else
-                        {
-                            view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                        }
-                        tagViewList.push(view);
-                        i++;
+                    if(this.state.viewingUserTags !== undefined && this.state.viewingUserTags.includes(tagName))
+                    {
+                        view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                     }
-                    
+                    else
+                    {
+                        view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                    }
+                    tagViewList.push(view);
+                    i++;
                 }
 
                 if(this.state.tags.length > MAX_TAGS)
                 {
                     moreTagsButton = <Image title = "Show all tags" src = {showMoreButton} className="more-tags-image" onClick={this.openMoreTagsModal}/>;
                 }
-
             }
 
-            share_button = <Image 
+            share_button = <Image title = "Share"
             className="share-image" 
             src={shareImage}
-            title = "Share"
             alt = "Share"
             // onClick = {this.askForConfirmation} TODO: Implement share
             />
 
 
             if (this.author === this.userToView) {
-                edit_button = <Image 
+                edit_button = <Image title = "Edit"
                 className="share-image" // using same properties
                 src={editImage}
                 onClick = {this.showEditModal}
-                title = "Edit"
                 alt = "Edit"
                 />
 
-                delete_button = <Image 
+                delete_button = <Image title = "Delete"
                 className="share-image" // using same properties
                 src={deleteImage}
                 onClick = {this.askForConfirmation}
-                title = "Delete"
                 alt = "Delete"
                 />
             }
@@ -732,6 +726,17 @@ class Spin extends Component
 
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
+
+        let speechText = this.props.username + " wrote:      " + this.state.content + "       ";
+        if(this.state.tags.length > 0)
+        {
+            speechText += "  Added tags: ";
+            for(let i = 0; i < this.state.tags.length; i++)
+            {
+                speechText += this.state.tags[i] + "       ";
+            }
+        } 
+  
 
         return (
             <div className="spin-area">
@@ -755,14 +760,11 @@ class Spin extends Component
                 <div className="other-info">
                     {likeButton} 
                     <p className="num-likes">{this.state.likes} people like this</p>
-                    <div id = "action-buttons">
-                        <div>{share_button}</div>
-                        <div>{edit_button}</div>
-                        <div>{delete_button}</div>
-                    </div>
-                    
+                    {share_button}
+                    {edit_button}
+                    {delete_button}
                 </div>
-                
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagViewList}
                     {moreTagsButton}

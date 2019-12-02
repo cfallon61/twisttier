@@ -4,6 +4,7 @@ import {NotificationManager} from 'react-notifications';
 import defaultPic from "./profilepicIcon.png";
 import Modal from "./Modal";
 import Button from "react-bootstrap/Button";
+import Speech from "react-speech";
 
 const imgScale = {
     "height" : "100%",
@@ -189,19 +190,23 @@ class Profile extends Component{
         console.log("Rednginering Profile.");
         let tagViews = [];
         var followinglist = [];
+        let speechText = `Details of user ${this.username}: Bio: ${this.state.bio}`
         // console.log('interests =', this.state.interests);
         // console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;
+            speechText += `Interests:   `;
             for(var i = 0; i < currentTags.length; i++)
             {
                 tagViews.push(<h6 className="tag-entry">{currentTags[i]}</h6>);
+                speechText += `${currentTags[i]}   `;
             }
         }
         else
         {
-            tagViews.push(<h6 className="tag-entry">This user doesn't follow any tags.</h6>);
+            tagViews.push(<h6 className="tag-entry">This user doesn't have any interests.</h6>);
+            speechText += `This user doesn't have any interests. `;
         }
 
         return (
@@ -209,7 +214,7 @@ class Profile extends Component{
                 <div className="profile-info">
                     <h3>{this.state.username}</h3>
                     <h6>{this.state.bio}</h6>
-                    {this.state.profilePic}
+                    {this.state.profilePic}                    
                 </div>
                 <div className="tag-info">
                     <h4>Things I am interested</h4>
@@ -218,6 +223,7 @@ class Profile extends Component{
                     </div>
                 </div>
                 {this.renderFollowersFollowingList()}
+                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
             </div>
         );
     }

@@ -3,7 +3,7 @@ const session = require('client-sessions');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
-
+const db = require('./dbFunctions');
 
 const { check, validationResult } = require('express-validator');
 
@@ -31,7 +31,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
 app.use(helpers.cloudinaryConfig);
-
+app.use(db.bootClearNewPosts);
 
 app.listen(port, (err) => {
   if (err) throw err;
@@ -154,7 +154,7 @@ app.post('/api/login_status', (req, res) => {
 
 // @brief: endpoint to get a supplied user's profile information
 app.post('/api/users/:username', users.getUserInfo, (req, res) => {
-  console.log('POST /api/users/' + req.params.username)
+  // console.log('POST /api/users/' + req.params.username)
   if (res.getHeader('error') != undefined) {
     res.status(406);
     res.sendFile(index);
@@ -185,7 +185,7 @@ app.post('/api/spin/:username', spins.getspin, (req, res) => {
 // @brief: get a supplied user's posts
 // @respond: json with posts made if user exists,
 //           404 not found error if user not exist
-app.get('/api/posts/:username', users.getPosts, (req, res) => {
+app.post('/api/posts/:username', users.getPosts, (req, res) => {
   // console.log(res);
   if (res.getHeader('error') != undefined) {
     res.status(404)
@@ -210,16 +210,13 @@ app.post('/api/update/:username', helpers.multerUpload, helpers.cloudinaryUpload
         [validator.validBio,
          validator.validName],
          users.updateProfileInfo, (req, res) => {
-    
+  
   if (res.getHeader('error') != undefined) {
     console.log(res.getHeader('error'));
     res.status(406).sendFile(index);
   }
   // i'm just hacking this together at this point i want to sleep
-  var userdata = req.userdata;
-  if (userdata) {
-    res.json(JSON.stringify(userdata));
-  }
+
 });
 
 

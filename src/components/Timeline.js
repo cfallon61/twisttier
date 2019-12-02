@@ -24,6 +24,7 @@ class Timeline extends Component
         this.state = {
             tag : "",
             spins : [],
+            newSpins : [],
             interests : [],
             error : {
                 exist : false,
@@ -63,7 +64,7 @@ class Timeline extends Component
             {
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 });
             }
             else{
@@ -256,17 +257,36 @@ class Timeline extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.props.username);
+        if(this.state.newSpins !== undefined && this.state.spins.length > 0)
+        {
+            for(var i = 0; i < this.state.spins.length; i++)
+            {
+                var spin = this.state.spins[i];
+                if(spin.username !== this.props.username)
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests} hasNewTags={true}
+                    />);
+                }
+            }
+        }
         if(this.state.spins !== undefined && this.state.spins.length > 0)
         {
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content}
-                    timestamp={spin.date} spinID = {spin.id}
-                    userToView={this.username} tags={spin.tags}
-                    likes= {spin.likes} likeList = {spin.like_list}
-                    userInterests = {this.state.interests}
-                />);
+                if(spin.username !== this.props.username) //Filter out spins that the user made.
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests}
+                    />);
+                }
             }
         }
         else{

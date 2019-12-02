@@ -42,6 +42,7 @@ class UserSettings extends Component {
     this.handlePassChange = this.handlePassChange.bind(this);
     this.openPasswordModal = this.openPasswordModal.bind(this);
     this.closePasswordModal = this.closePasswordModal.bind(this);
+    this.handleConfirmEmailChange = this.handleConfirmEmailChange.bind(this);
   }
 
   //This is for updating the password.
@@ -117,7 +118,9 @@ class UserSettings extends Component {
       {
         if(res.headers.has('error'))
         {
-          NotificationManager.error(res.headers['error']);
+          console.log("error header exists.");
+          console.log(res.headers.get('error'));
+          NotificationManager.error(res.headers.get('error'));
         }
         else
         {
@@ -135,12 +138,19 @@ class UserSettings extends Component {
     this.setState({inputPassword : event.target.value});
   }
 
+  handleConfirmEmailChange(event)
+  {
+    this.setState({email : event.target.value});
+  }
+
   renderPasswordConfirm()
   {
     return <div>
-      <label>Please confirm deletion by re-entering your password.</label>
+      <label>Please confirm deletion by re-entering your email and password.</label>
+      <p style={{'display' : 'block', 'margin' : 'auto'}}>Email</p>
+      <input type="email" onChange={this.handleConfirmEmailChange} style={{'display' : 'block', 'margin' : 'auto'}}></input>
+      <p style={{'display' : 'block', 'margin' : 'auto'}}>Password</p>
       <input type="password" onChange={this.handlePassChange} style={{'display' : 'block', 'margin' : 'auto'}}></input>
-
       <Button onClick={this.handleDeleteAccount}  style={{'margin' : '1vw'}}>Confirm</Button>
       <Button onClick={this.closePasswordModal} style={{'margin' : '1vw'}}>Cancel</Button>
     </div>
@@ -153,7 +163,6 @@ class UserSettings extends Component {
     let d_name = "";
     let d_interests = "";
     let d_profilepic ="";
-    let d_email = "";
     let self = this;
     // console.log("USERNAME=", username);
     fetch(`/api/users/${username}`, {
@@ -172,8 +181,7 @@ class UserSettings extends Component {
             d_bio = dataDict.bio;
             d_name = dataDict.name;
             d_interests = dataDict.interests;
-            d_email = dataDict.email;
-            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic, email : d_email});
+            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
 
         });
       }

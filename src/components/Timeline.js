@@ -99,7 +99,7 @@ class Timeline extends Component
     }
 
     closeModal() {
-        this.setState({showSpinModal : false})
+        this.setState({showSpinModal : false});
     }
 
     onSpinPressedAtModal(event) {
@@ -121,10 +121,6 @@ class Timeline extends Component
                 spinBody: this.state.spin.text,
                 tags: this.state.spin.interests,
                 is_quote: false,
-                quote_oritin: {
-                    username: this.username,
-                    spinID: 'x'
-                }
             };
             fetch(`/api/add_spin/${this.username}`, {
                 method : 'POST',
@@ -137,7 +133,9 @@ class Timeline extends Component
                 {
                     NotificationManager.success("Spun!");
 
-                    //res.headers['error']
+                    setTimeout(function() { //Start the timer
+                        window.location.reload();
+                    }.bind(this), 1000)
                 }
                 else
                 {
@@ -145,8 +143,10 @@ class Timeline extends Component
                     {
                         NotificationManager.error(res.headers.get('error'));
                     }
-                    //Error handling
-                }
+                    else
+                    {
+                        NotificationManager.error("Server didn't return OK response.");
+                    }                }
             });
             this.closeModal();
         }
@@ -205,7 +205,7 @@ class Timeline extends Component
         });
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
-        currentAddedInterestView = this.state.spin.interests.map((tagName) => {
+            currentAddedInterestView = this.state.spin.interests.map((tagName) => {
             return <h6>{tagName}</h6>;
         });
         }
@@ -218,7 +218,7 @@ class Timeline extends Component
 
         let dropdownInterests = (
             <Dropdown>
-                <Dropdown.Toggle className = "editButtons" variant = "outline-primary" id="dropdown-basic">
+                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
                     Tags
                 </Dropdown.Toggle>
 

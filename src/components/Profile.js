@@ -100,7 +100,7 @@ class Profile extends Component{
                   self.setState({ profilePic: chosenProfilePic });
 
                 }
-              self.setState({ bio: dataDict.bio, interests: dataDict.interests, following: dataDict.following.users});
+              self.setState({ bio: dataDict.bio, interests: dataDict.interests, following: dataDict.following.users, followers: dataDict.followers});
 
 
               }).catch(function(error){
@@ -204,8 +204,8 @@ class Profile extends Component{
         }
         else
         {
-            tagViews.push(<h6 className="tag-entry">This user doesn't have any interests.</h6>);
-            speechText += `This user doesn't have any interests. `;
+          tagViews.push(<h6 className="tag-entry">I have no interests 😢 Life is meaningless without interests</h6>);
+          speechText += `I have no interests 😢 Life is meaningless without interests`;
         }
 
         return (
@@ -216,7 +216,7 @@ class Profile extends Component{
                     {this.state.profilePic}                    
                 </div>
                 <div className="tag-info">
-                    <h4>Things I am interested</h4>
+                    <h4>My interests</h4>
                     <div className="tag-list">
                         {tagViews}
                     </div>
@@ -254,8 +254,16 @@ class UsernameListEntry extends Component
     this.state = {
       hover : false
     };
-    this.username = this.props.entry.username;
-    this.tags = this.props.entry.tags;
+    var entry = this.props.entry;
+    var username = entry;
+    var tags = [];
+    if (entry.username != undefined && entry.tags != undefined)
+    {
+      username = entry.username;
+      tags = entry.tags;
+    }
+    this.username = username;
+    this.tags = tags;
   }
 
   render()
@@ -263,39 +271,36 @@ class UsernameListEntry extends Component
     let userLink = `/profile/${this.username}`;
     //Building a string in form of "tag1, tag2, tag3 ..., tagn".
     let tagList = [];
-    for(let i = 0; i < this.tags.length; i++)
-    {
-      if(i == this.tags.length - 1)
-      {
-        if(this.tags[i] !== undefined && this.tags[i] !== null)
-        {
-          tagList.push(this.tags[i]);
-        }
 
-      }
-      else
+    if (this.tags !== undefined)
+    {
+      for(let i = 0; i < this.tags.length; i++)
       {
-        if(this.tags[i] !== undefined && this.tags[i] !== null)
+        if(i == this.tags.length - 1)
         {
-          tagList.push(this.tags[i] + ',');
+          if(this.tags[i] !== undefined && this.tags[i] !== null)
+          {
+            tagList.push(this.tags[i]);
+          }
+  
+        }
+        else
+        {
+          if(this.tags[i] !== undefined && this.tags[i] !== null)
+          {
+            tagList.push(this.tags[i] + ',');
+          }
         }
       }
     }
+
 
     let tagView = tagList.join("");
 
     let hoverView = null;
     if(this.state.hover)
     {
-      if(tagView.length === 0)
-      {
-        hoverView = (
-          <div className="hover-tag-view">
-              <h6>Every tag</h6>
-          </div>
-          );
-      }
-      else
+      if(tagView.length > 0)
       {
         hoverView = (
           <div className="hover-tag-view">

@@ -82,13 +82,13 @@ handleSearch(event) {
 
     let url = "/searchUser/" + this.state.searchValue;
     this.props.history.push(url);
-    
+
     // routing does not rerender. So force reload the page
     window.location.reload();
 
   }
 
-  
+
 // render component
 render() {
     let dynamicView = null;
@@ -118,8 +118,8 @@ render() {
 
     return (
       <div>
-        <Navbar bg="light" expand="lg">
-          <Navbar.Brand href="/">Twister</Navbar.Brand>
+        <Navbar expand="lg">
+
             <Link to="/">
               <Image src={icon_twister} className='icon'/>
             </Link>
@@ -130,16 +130,16 @@ render() {
 
             <Navbar.Brand id="basic-navbar-nav">
                 <Form inline onSubmit = {this.handleSearch}>
-                  
+
                   <FormControl
                     placeholder="Search"
                     value = {this.state.searchValue}
                     onChange = {this.handleSearchValueChange}
                   />
 
-                  <Button 
-                    variant="outline-success" 
-                    onClick = {this.handleSearch} 
+                  <Button
+                    variant="outline-success"
+                    onClick = {this.handleSearch}
                   >
                       Search
                   </Button>

@@ -13,7 +13,7 @@ async function postCreateUser(req, res, next) {
 
   // TODO figure out why express-validator isnt working
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
 
 
@@ -231,7 +231,7 @@ async function getPosts(req, res, next) {
       username: user.username,
       tags: []
     }]);
-  var spins = await db.getSpins(request);
+  var spins = await db.getSpins(null, request);
 
   if (!spins || spins.length === 0) {
     res.setHeader('alert', 'no spins found :(')
@@ -262,7 +262,7 @@ async function getTimeline(req, res, next) {
   var following = JSON.stringify(data.following.users);
   // console.log(following);
 
-  var followedSpins = await db.getSpins(following);
+  var followedSpins = await db.getSpins(user.username, following);
 
   if (req.clientSession.uid != user.username)
   {
@@ -283,7 +283,7 @@ async function getTimeline(req, res, next) {
 async function updateProfileInfo(req, res, next) {
 
   if (extFuncs.check_errors(req, res)) {
-    // return next();
+    return next();
   }
   var imgsrc = '';
 

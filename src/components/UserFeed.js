@@ -41,9 +41,15 @@ class UserFeed extends Component
             toFollowInterests : [],
             toUnfollowInterests : [],
             currentOperation : OperationEnum.FOLLOW,
-            newSpins: []
+            newSpins: [],
+
+
+            // for edit and follow/unfollow
+            userToViewInterests : [],
+            userToViewFollowing : []
         }
 
+        // functions
         this.onFollowPressed = this.onFollowPressed.bind(this);
         this.onActionPressedAtModal = this.onActionPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -53,6 +59,7 @@ class UserFeed extends Component
         this.addInterestToUnfollowList = this.addInterestToUnfollowList.bind(this);
         this.changeOperationState = this.changeOperationState.bind(this);
         this.getViewingUser = this.getViewingUser.bind(this);
+        this.getUserInterestsAndFollowing = this.getUserInterestsAndFollowing.bind(this);
 
         this.userToView = this.getViewingUser();
     }
@@ -99,9 +106,9 @@ class UserFeed extends Component
 
     componentDidMount()
     {
-        console.log("Compoment did mount reached for: ", this.username);
         this.updateUserSpins(this.username);
         this.updateTagData();
+        this.getUserInterestsAndFollowing();
     }
 
     onFollowPressed()
@@ -117,6 +124,38 @@ class UserFeed extends Component
             return document.cookie.split('=')[1];
         }
         else return null;
+    }
+
+    getUserInterestsAndFollowing() {
+        let self = this;
+        fetch(`/api/users/${this.userToView}`, {
+            method: 'POST'
+        }).then(function(response){
+
+                if (response.status === 200) {
+                    response.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    // console.log("user data: ", data);
+                    let currentInterests = [];
+                    
+                    // fill current interests of the user
+                    for (var i = 0; i < jsonData.tags_associated.length; i++) {
+                        currentInterests.push(jsonData.tags_associated[i]);
+                    }
+
+                    // fill the following of the user
+                    let userfollowing = jsonData.following.users;
+                    // console.log("following: ", userfollowing);
+
+
+                    self.setState({
+                        userToViewInterests : currentInterests,
+                        userToViewFollowing : userfollowing
+                    });
+                    
+                })
+            }
+        })
     }
 
     /**
@@ -327,29 +366,29 @@ class UserFeed extends Component
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.username);
-        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
-        {
-            for(var i = 0; i < this.state.newSpins.length; i++)
-            {
-                var spin = this.state.newSpins[i];
-                if(spin.username !== this.props.username)
-                {
-                    feed.addSpin(<Spin username={spin.username} content={spin.content}
-                        timestamp={spin.date} spinID = {spin.id}
-                        userToView={this.username} tags={spin.tags}
-                        likes= {spin.likes} likeList = {spin.like_list}
-                        userInterests = {this.state.interests} hasNewTags={true}
-                    />);
-                }
-            }
-        }
         if(this.state.spins != undefined && this.state.spins.length > 0) 
         {
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                console.log('spin =', spin);
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
+                // console.log('spin =', spin);
+                // console.log("user to view interests: ", this.state.userToViewInterests);
+                // console.log("user to view following: ", this.state.userToViewFollowing);
+
+                // find out the tags viewing user follows from the author of the spin
+                var followingTagsForThisSpin = [];
+                for (var j = 0; j < this.state.userToViewFollowing.length; j++) {
+                    if (this.state.userToViewFollowing[j].username === spin.username) {
+                        followingTagsForThisSpin = this.state.userToViewFollowing[j].tags;
+                    }
+                }
+
+                feed.addSpin(<Spin username={spin.username} content={spin.content} 
+                    timestamp={spin.date} spinID={spin.id} userToView={this.userToView} 
+                    tags={spin.tags} likes={spin.likes} likeList={spin.like_list}
+                    userInterests = {this.state.userToViewInterests}
+                    tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                    />);
             }
         }
         else{

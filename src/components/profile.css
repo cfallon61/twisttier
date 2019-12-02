@@ -1,6 +1,5 @@
 .profile-container {
     padding-top : 10px;
-
 }
 
 .profile-info {
@@ -9,7 +8,6 @@
     border-radius : 10px;
     border : solid 3px;
     max-width : 20vw;
-    box-shadow: 5px 7px 5px;
     margin-bottom: 10vh;
 }
 
@@ -21,7 +19,6 @@
     border : solid 3px;
     max-width : 20vw;
     margin: auto;
-    box-shadow: 4px 5px 4px white;
 }
 
 .tag-entry{

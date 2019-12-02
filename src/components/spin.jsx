@@ -18,6 +18,7 @@ import shareImage from './share.png';
 import deleteImage from "./delete.png";
 import showMoreButton from "./showMore.png";
 import Speech from "react-speech";
+import Flame from "./flame.png";
 
 const tagContainerStyle = {
     display: "grid",
@@ -52,7 +53,7 @@ class Spin extends Component
             showLike : true,
             viewingUserTags : [],
             likeList: this.props.likeList,
-
+            hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
             
             showEditer : false,
@@ -648,6 +649,15 @@ class Spin extends Component
         let edit_button = null;
         let tagViewList = [];
         let delete_button = null;
+        let flameIcon = null;
+
+        if(this.state.hasNewTags)
+        {
+            flameIcon = <div>
+                <Image src={Flame} style={{'display' : 'inline'}}/>
+                <p style={{'display' : 'inline'}}>New topic!</p>
+            </div>;
+        }
 
         if(this.viewerIsAuthenticated())
         {
@@ -738,6 +748,7 @@ class Spin extends Component
                     <div className="username-link">
                         {usernameField}  
                     </div>
+                    {flameIcon}
                     <div className="time-section">
                         <h6>
                             {this.formatDate(this.state.timestamp)}
@@ -770,7 +781,6 @@ class Spin extends Component
                     {this.getModalTagViews()}
                     <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
-
             </div>
         );
     }

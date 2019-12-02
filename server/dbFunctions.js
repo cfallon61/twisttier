@@ -537,11 +537,10 @@ async function updateSpin(username, spin_edit) {
 
     var query = `UPDATE ${tablename} 
       SET content=$1, tags=$2, date=NOW(), edited=true
-      WHERE id = $3 RETURNING id`
+      WHERE id = $3 RETURNING username`
     ;
 
     var res = await client.query(query, args);
-    spin_id = res.rows[0].id;
     
     var query = `SELECT tags_associated
       FROM ${USER_TABLE} 
@@ -578,7 +577,7 @@ async function updateSpin(username, spin_edit) {
   finally {
     client.release();
   }
-  return (rows.length === 0 ? false : spin_id);
+  return (rows.length === 0 ? false : rows[0].username);
 }
 
 // Deletes a spin provided that it exists

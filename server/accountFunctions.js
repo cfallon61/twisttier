@@ -234,9 +234,8 @@ async function getPosts(req, res, next) {
   var spins = await db.getSpins(null, request);
 
   if (!spins || spins.length === 0) {
-    res.setHeader('alert', 'no spins found :(')
+    res.setHeader('alert', 'no spins found :(');
   }
-  // console.log(spins);
   res.json(JSON.stringify(spins));
   // return next();
 

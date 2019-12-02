@@ -185,7 +185,7 @@ app.post('/api/spin/:username', spins.getspin, (req, res) => {
 // @brief: get a supplied user's posts
 // @respond: json with posts made if user exists,
 //           404 not found error if user not exist
-app.get('/api/posts/:username', users.getPosts, (req, res) => {
+app.post('/api/posts/:username', users.getPosts, (req, res) => {
   // console.log(res);
   if (res.getHeader('error') != undefined) {
     res.status(404)

@@ -290,7 +290,6 @@ async function updateProfileInfo(req, res, next) {
   if (req.file && req.file.path) {
     imgsrc = req.file.path;
   }
-  var oldPass = req.body.oldPass,
   var user = {
     username: req.params.username,
     password: req.body.password,
@@ -306,20 +305,14 @@ async function updateProfileInfo(req, res, next) {
   console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
 
-  var passgood = await bcrypt.compare(oldPass, userData.passhash);
-
-  if (!passgood)
+  if (!userData) 
   {
-    res.setHeader('error', "unable to update: bad password");
-    console.log('unable to update user bad password provided');
-    extFuncs.delete_profile_img(req.file.path);
-    return next();
-  }
-
-  if (!userData) {
     res.setHeader('error', "unable to update");
     console.log('unable to update user idk what happened');
-    extFuncs.delete_profile_img(req.file.path);
+    if (req.file != undefined)
+    {
+      extFuncs.delete_profile_img(req.file.path);
+    }
     return next();
   }
 
@@ -340,6 +333,7 @@ async function updateProfileInfo(req, res, next) {
   }
 
   // attempt to update the user's crap
+  user.passhash = userData.passhash;
   userData = await db.updateUser(user);
 
   // if all checking fine, update the user

@@ -272,9 +272,11 @@ async function deleteUser(username){
 async function updateUser(user) {
 
   // extract the info to be inserted
-  if (user.password != undefined) {
-    var hash = await bcrypt.hash(user.password, 10);
+  var hash = user.passhash;
+  if (user.password != undefined && user.password.length > 0) {
+    hash = await bcrypt.hash(user.password, 10);
   }
+  
   // connect to database
   var rows = [];
   var client = await pool.connect();

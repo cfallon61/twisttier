@@ -23,13 +23,14 @@ curl -i -X POST http://localhost:8080/login \
 -b sessionInfo
 
 
-// changing profile information doesnt work rip
+// changing profile information does work yay
 
-curl -i -X POST http://localhost:8080/api/update/\?username\=doeJohn \
+curl -i -X POST http://localhost:8080/api/update/hell \       
 -H "content-type: multipart/form-data" \
--F "name=doeJohn" \
--F "bio='i wish for death'" \
--F "profileImage=@/home/vert/Downloads/IMG_7636.JPG"
+-F "bio=it makes him smell like a douche bro" \
+-F "name=hell is real" \
+-F "profileImage=@/home/vert/Downloads/portfolio/IMG_20180804_121544677_copy.jpg"
+
 
 // delete account test doesnt work :( only works when i have the upload middleware included? what?
 curl -i -X POST 'http://localhost:8080/api/delete' \

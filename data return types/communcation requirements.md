@@ -128,6 +128,7 @@ body: {
   [password: <password>] // ONLY IF UPDATING PASSWORD
   bio: <bio (not to exceed 150 characters)>
   name: <name (not to exceed 25 characters)>
+  oldPass: <the user's original password to confirm they want to change stuff>
   interests: <current interests plus any new ones (interest names not to exceed 19 characters)>
   accessibility_features: <any accessibility features that front end will decide the names and values of>
   //TODO PROFILE PIC

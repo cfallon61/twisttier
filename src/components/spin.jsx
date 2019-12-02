@@ -41,16 +41,16 @@ class Spin extends Component
     {
         super(props);
         this.state = {
-            tags: this.props.tags,
-            edited: false,
-            quoted: false,
-            content: this.props.content,
-            timestamp: this.props.timestamp,
-            quoteOrigin: "",
+            tags: this.props.tags, //spin's tags
+            edited: false, //the spin has been edited
+            quoted: false, //the spin is a quote
+            content: this.props.content, //spin's text
+            timestamp: this.props.timestamp, //spin modified
+            quoteOrigin: "", 
             likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
-            viewingUserTags : [],
+            viewingUserTags : [], //tags the viewing user is following
             likeList: this.props.likeList,
 
             // for handling the edit form modal
@@ -66,12 +66,10 @@ class Spin extends Component
         this.unlikeSpin = this.unlikeSpin.bind(this);
         this.viewerIsAuthenticated = this.viewerIsAuthenticated.bind(this);
 
-        this.userToView = this.props.userToView;
+        this.userToView = this.props.userToView; //viewer
         this.author = this.props.username;
         this.spinID = this.props.spinID;
-        this.interestsOfUser = this.props.userInterests;
-
-        
+        this.interestsOfUser = this.props.userInterests;       
 
         //this.followTag = this.followTag.bind(this);
         //this.unfollowTag = this.unfollowTag.bind(this);
@@ -442,6 +440,8 @@ class Spin extends Component
         this.setState({showShare : true})
     }
     closeShareModal() {
+        window.location.reload();
+
         this.setState({showShare : false})
     }
 
@@ -453,11 +453,12 @@ class Spin extends Component
 
     // closes the edit post modal
     closeEditModal() {
+        window.location.reload();
+
         this.setState({            
             // close the modal
             showEditer : false
         })
-        //window.location.reload();
     }
     
     // sends the edited post to server and refreshes the front end
@@ -496,8 +497,6 @@ class Spin extends Component
                     showEditer : false
                 });
                 
-  
-
             }
             else{
                 if(res.headers.has("error"))
@@ -513,12 +512,17 @@ class Spin extends Component
     }
 
     handleSharePostSubmission(){
+        // if (this.state.content === ) {
+        //     this.state.content = " ";
+        // }
+
         let body = {
             spinBody: this.state.content,
             tags: this.state.tags,
             is_quote: true,
             quote_origin: {
                 username: this.userToView,
+                spinId: this.state.spinID,
             }
         };
         console.log(body);
@@ -668,25 +672,48 @@ class Spin extends Component
 
         );
     }
-
     renderShareForm(){        
         // get all the tags the user has posted with before
-        let newAuthorInterests = this.viewingUserTags;
         let newInterestOptions = [];
-        
-        // create dropdown of previously used tags
+        let self = this;
+        fetch(`/api/users/${this.userToView}`, {
+            method: 'POST'
+        }).then(function(res){
+            if (res.status===200) {
+                res.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    let tags = [];
+                    for (var i = 0; i < jsonData.tags_associated.length; i++) {
+                        tags.push(jsonData.tags_associated[i]);
+                    }
+                    self.viewersTags = tags;                     
+                });
+            }
+            else{
+                if(res.headers.has("error"))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return OK response.");
+                }
+            }
+        });
+        let newAuthorInterests = this.viewersTags;
+
         if(newAuthorInterests !== undefined)
         {
             newInterestOptions = newAuthorInterests.map((tagName) => {
 
-                if (!this.state.tags.includes(tagName)){
+                if (!(this.state.tags !== undefined && this.state.tags.includes(tagName))){
                     return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
                             {tagName}
                             </Dropdown.Item>;
                 }
             });
         }
-    
+        // create dropdown of previously used tags    
         let newInterestsDropdown = null;
         
         // create a dropdown using those interests. If list is empty, then the view will only consist of text.
@@ -742,8 +769,6 @@ class Spin extends Component
                 </DropdownButton>
             );
         }
-        this.state.content = "";
-
         return (
             <div className="spin-form">
                     <Form >

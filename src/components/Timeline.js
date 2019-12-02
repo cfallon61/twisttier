@@ -115,9 +115,6 @@ class Timeline extends Component
                 spinBody: this.state.spin.text,
                 tags: this.state.spin.interests,
                 is_quote: false,
-                quote_origin: {
-                    username: this.username,
-                }
             };
             fetch(`/api/add_spin/${this.username}`, {
                 method : 'POST',
@@ -229,7 +226,7 @@ class Timeline extends Component
                         <Form.Label>Spin</Form.Label>
                         <Form.Control as = "textarea" placeholder="Your Spin here" rows="3"
                             onChange = {this.handleSpinChange}/>
-                            // <p>{this.state.spin.chars}/90 characters</p>
+                            <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
                     {this.state.spin.interests}

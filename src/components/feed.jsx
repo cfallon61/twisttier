@@ -14,7 +14,6 @@ class Feed extends Component
         super(props);
         this.state =  {
             spins : [],
-
         };
     }
 

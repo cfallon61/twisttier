@@ -27,6 +27,15 @@
     margin : 20px;
 }
 
+.searchDPCont {
+    border : solid 2px lightblue;
+    margin: 20px;
+}
+
+.searchDPCont:hover {
+    background-color: lightblue;
+}
+
 /* .searchUsername {
     background-color: red;
 } */

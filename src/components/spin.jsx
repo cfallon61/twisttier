@@ -52,7 +52,11 @@ class Spin extends Component
             likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
+<<<<<<< HEAD
             viewingUserTags : [], //tags the viewing user is following
+=======
+            viewingUserTags : this.props.tagsFollowedForThisSpin,
+>>>>>>> 9f379a011dc30698676435c73f406ae4550cddc3
             likeList: this.props.likeList,
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
@@ -220,6 +224,7 @@ class Spin extends Component
     // follows tags of spins
     followTag(tagName)
     {
+        console.log("Following")
         let tagList = [];
         // console.log(tagName);
         tagList.push(tagName);
@@ -240,8 +245,11 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
+                console.log("Successfully followed user");
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
-                window.location.reload();
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 900)
             }
             else{
                 if(res.headers.has("error"))
@@ -279,8 +287,11 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
+                console.log("Unfollowed successfully");
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
-                window.location.reload();
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 1000)
             }
             else{
                 if(res.headers.has("error"))
@@ -405,7 +416,7 @@ class Spin extends Component
                 // show the notification and then delete
                 setTimeout(function() { //Start the timer
                     window.location.reload();
-                }.bind(this), 1000)
+                }.bind(this), 900)
                 
                 // console.log("Spin deleted");
             }
@@ -924,7 +935,7 @@ class Spin extends Component
     getModalTagViews()
     {
         return this.state.tags.map((tagName) => {
-            if(this.state.viewingUserTags.includes(tagName))
+            if(this.state.viewingUserTags !== undefined && this.state.viewingUserTags.includes(tagName))
             {
                 return <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
             }
@@ -979,16 +990,24 @@ class Spin extends Component
                 {
                     let tagName = this.state.tags[i];
                     let view = null;
-                    if(this.state.viewingUserTags.includes(tagName))
-                    {
-                        view = <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+
+                    if (this.state.viewingUserTags !== undefined ) {
+                        
+                        if(this.state.viewingUserTags.includes(tagName))
+                        {
+                            view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                        }
+                        else
+                        {
+                            view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                        }
+                        tagViewList.push(view);
+                    
+                    } else {
+                        view = <p className="unfollowed-tags">###{tagName}</p>;
                     }
-                    else
-                    {
-                        view = <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                    }
-                    tagViewList.push(view);
                     i++;
+ 
                 }
 
                 if(this.state.tags.length > MAX_TAGS)

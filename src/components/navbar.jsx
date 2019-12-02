@@ -70,21 +70,20 @@ handleSearchValueChange(event) {
     })
 }
 
-handleSubmit(event) {
-
-}
-
 // change the redirect bool
 handleSearch(event) {
     // console.log("handling search");
     event.preventDefault();
 
-
-    let url = "/searchUser/" + this.state.searchValue;
-    this.props.history.push(url);
-
-    // routing does not rerender. So force reload the page
-    window.location.reload();
+    if (this.state.searchValue === "") {
+      NotificationManager.error("Type in the searchbox before searching");
+    } else {
+      let url = "/searchUser/" + this.state.searchValue;
+      this.props.history.push(url);
+  
+      // routing does not rerender. So force reload the page
+      window.location.reload();
+    }
 
   }
 

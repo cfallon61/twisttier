@@ -187,6 +187,7 @@ class Profile extends Component{
 
     render()
     {
+        console.log("Rednginering Profile.");
         let tagViews = [];
         var followinglist = [];
         let speechText = `Details of user ${this.username}: Bio: ${this.state.bio}`

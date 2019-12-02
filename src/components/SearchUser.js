@@ -19,7 +19,7 @@ import './search.css';
 import Modal from './Modal.js';
 
 const imgScale = {
-    "height" : "auto",
+    "height" : "250px",
     "width" : "250px",
 }
 
@@ -211,7 +211,7 @@ class SearchUser extends Component {
 
             // TODO: Formulate the picture, setting default for now
             var chosenProfilePic = (
-                <div className = "searchDP">
+                <div className = "searchDPCont">
                     <img className = "searchDP" src={defaultPic} alt={user.username} style={imgScale}/>
                 </div>
                     );
@@ -220,7 +220,9 @@ class SearchUser extends Component {
             if(user.profile_pic !== "" && user.profile_pic !== null && user.profile_pic !== "{}"){
                 // console.log("IMAGE exists");
                 chosenProfilePic = (
+                    <div className = "searchDPCont">
                             <img className = "searchDP" src={user.profile_pic} alt={user.username} style={imgScale}/>
+                    </div>
                             );
 
             }           

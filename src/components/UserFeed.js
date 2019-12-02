@@ -12,7 +12,6 @@ import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
 import "./userfeed.css";
-import Speech from "react-speech";
 
 
 var OperationEnum = {
@@ -60,9 +59,10 @@ class UserFeed extends Component
 
     updateUserSpins(username)
     {
-        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        //Since "this" changes when you enter a new context, 
+        //we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log("Fetching...");
+        console.log("Fetching... ", `/api/posts/${username}`);
         fetch(`/api/posts/${username}`, {
             method: "POST",
             credentials: 'same-origin'
@@ -99,7 +99,7 @@ class UserFeed extends Component
 
     componentDidMount()
     {
-        console.log(this.username);
+        console.log("Compoment did mount reached for: ", this.username);
         this.updateUserSpins(this.username);
         this.updateTagData();
     }
@@ -218,7 +218,7 @@ class UserFeed extends Component
             {
                 response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log(data);
+                    // console.log(data);
                     let currentInterests = [];
                     for(var i = 0; i < jsonData.tags_associated.length; i++)
                     {
@@ -256,7 +256,7 @@ class UserFeed extends Component
             return <Dropdown.Item onClick={() => this.onDropdownItemClicked(tagName)}>{tagName}</Dropdown.Item>;
         });
         let disableTagDropdown = false;
-        console.log(followItems);
+        // console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;
@@ -363,9 +363,6 @@ class UserFeed extends Component
         {
             followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
-
-        let speechText = "You are right now checking the profile of: " + this.username;
-
         /**
          * The view organized by these parts:
          *          Page
@@ -374,7 +371,6 @@ class UserFeed extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
-                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                     {followButton}
                     <Modal show={this.state.showFollowModal}>
@@ -383,9 +379,6 @@ class UserFeed extends Component
                 </div>
                 <div className="user-feed-middle">
                     {feed.render()}
-                    <footer>
-                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                    </footer>
                 </div>
 
             </div>

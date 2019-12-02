@@ -17,6 +17,20 @@ const NEW_POST_TIMEOUT = (process.env.NEW_POST_TIMEOUT || 24 * 60 * 60 * 1000);
 const reservedTag = require('./config.json').reservedTag;
 
 
+async function bootClearNewPosts(req, res, next)
+{
+  try 
+  {
+    var result = await pool.query(`UPDATE ${USER_TABLE} SET new_tag_posts = NULL`);
+    console.log(result.old);
+  }
+  catch (e)
+  {
+    console.log("Error encountered in db.bootClearNewPosts:", e);
+  }
+  return next();
+}
+
 // query the database to see if the user exists
 // parameter user is object of form {email: [email], username: [username]}
 // @return: object of all user's data
@@ -42,7 +56,7 @@ var userExists = async function (user) {
     return false;
   }
   console.log(query, params);
-  console.log('before query')
+  // console.log('before query')
   var res = await pool.query(query, params);
 
   // response is a json
@@ -53,6 +67,7 @@ var userExists = async function (user) {
   if (rows.length > 0) {
     // should have only 1 index of the username / email occurring
     // so this is why the [0];
+    // console.log(rows[0]);
     return rows[0];
   }
   // return false if they dont already exist, this is good
@@ -147,9 +162,84 @@ async function deleteUser(username){
     var tablename = userSpinTableName(username);
 
     await client.query('BEGIN');
+    var todelete = await client.query(`SELECT * FROM ${USER_TABLE} WHERE USERNAME=$1`, [username]);
+    todelete = todelete.rows[0];
+    // console.log('todelete =',todelete);
+
+    var follows = [username];
+    // get all people who todelete is following
+    todelete.following.users.forEach((entrypair, index) => {
+      follows.push(entrypair.username);
+    });
+    // get all people todelete is followed by
+    todelete.followers.forEach((user, index) => {
+      follows.push(user);
+    });
+    
+    // turn that list into a string because the postgres library sucks balls or I'm just dumb.
+    // I'm probably just dumb
+    // console.log(follows);
+    var followstring = '';
+    follows.forEach((user, index) => {
+      if (index < follows.length - 1)
+      {
+        followstring += `'${user}', `;
+      }
+      else 
+      {
+        followstring += `'${user}'`;
+      }
+    })
+    console.log(followstring);
+    // get who user is following, and who user's followers are
+    var query = `SELECT username, followers, following FROM ${USER_TABLE} WHERE USERNAME in (${followstring})`;
+    var followingdata = await client.query(query);
+
+    
+    followingdata = followingdata.rows;
+    console.log(followingdata);
+    // return false;
+
+    // for each user in the list, remove the user to be deleted from their follower list,
+    // and check if that user follows the person to be deleted. If so, remove them from their
+    // following list.
+    followingdata.forEach(async (entry, index) => {
+      // console.log('initial following:', entry.following.users);
+      // remove todelete from x's follower list
+      console.log(entry.username,'is followed by', entry.followers);
+      entry.followers.splice(entry.followers.indexOf(username), 1);
+      console.log('removing', username, 'from', entry.username, "'s follower list:", entry.followers)
+      // check if todelete exists in x's following list
+      for (var j = 0; j < entry.following.users.length; j++)
+      {
+        // if the user exists in x's following list, splice the array around that index
+        // and break
+        if (username === entry.following.users[j].username) 
+        {
+          console.log(username,'exists in', entry.username,"'s following list", entry.following.users[j]);
+          entry.following.users.splice(j, 1);
+          break;
+        }
+      }
+      query = `UPDATE ${USER_TABLE} SET followers = $2, following = $1 WHERE username = $3 RETURNING username, following, followers`;
+      var args = [entry.following, entry.followers, entry.username];
+      
+      console.log('updating the database for ', entry.username);
+      
+      var res = await client.query(query, args);
+      console.log(res.rows);
+    
+     
+      console.log('updated following for', entry.username, ':', entry.following.users);
+      console.log('updated followers for', entry.username, ':', entry.followers);
+      });
+
+
+    // await client.query('ROLLBACK');
+    // return false;
 
     // delete spin table
-    var query =  `DROP TABLE ${tablename}`;
+    query = `DROP TABLE ${tablename}`;
 
     var res = await client.query(query);
 
@@ -165,7 +255,8 @@ async function deleteUser(username){
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.deleteUser: ${ e }`);
-    // return e;
+    // throw e;
+    return e;
   }
   finally {
     client.release();
@@ -245,7 +336,7 @@ async function clearNewPostColumn(username) {
 
     client.query("BEGIN");
 
-    query = `UPDATE ${USER_TBALE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
 
     await client.query(query, [username]);
 
@@ -315,7 +406,11 @@ async function getSpins(user, users) {
   var client = await pool.connect();
   try {
     followed = JSON.parse(users);
-    console.log(followed);
+    // console.log(followed);
+    if (followed.length < 1)
+    {
+      return [];
+    }
     // SELECT new_tag_posts from USERS_TABLE where username
     // ful SQL injection vulnerability mode: Engaged
     // for each user in the user list, append their spin table to a query string
@@ -652,9 +747,9 @@ async function followTopicUserPair(username, tofollow, tags) {
 
     args = [tofollow];
 
-    var query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
+    query = `SELECT followers FROM ${USER_TABLE} WHERE username = $1`;
 
-    var res = await client.query(query,args);
+    res = await client.query(query,args);
     rows = res.rows;
     console.log(rows);
 
@@ -668,15 +763,15 @@ async function followTopicUserPair(username, tofollow, tags) {
     // update new following and new followers
     args = [tofollow, followers];
 
-    var query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET followers = $2 WHERE username = $1 RETURNING username`;
 
-    var res = await client.query(query, args);
+    res = await client.query(query, args);
 
     args = [username, following];
 
-    var query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET following = $2 WHERE username = $1 RETURNING username`;
 
-    var res = await client.query(query, args);
+    res = await client.query(query, args);
 
     await client.query('COMMIT');
     rows = res.rows;
@@ -975,7 +1070,8 @@ module.exports = {
   updateUser,
   updateSpin,
   deleteSpin,
-  unfollowTopicUserPair,
   searchForUser,
   getSingleSpin,
+  bootClearNewPosts,
+
 };

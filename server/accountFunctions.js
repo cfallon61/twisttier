@@ -300,7 +300,7 @@ async function updateProfileInfo(req, res, next) {
     profile_pic: imgsrc
   };
   // console.log(req.params, "\n", req.body, "\n", user);
-  
+
   // get user's profile data so i can be lazy
   console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
@@ -309,7 +309,7 @@ async function updateProfileInfo(req, res, next) {
   {
     res.setHeader('error', "unable to update");
     console.log('unable to update user idk what happened');
-    if (req.file != undefined)
+    if (req.file != undefined && req.file.path)
     {
       extFuncs.delete_profile_img(req.file.path);
     }
@@ -321,7 +321,7 @@ async function updateProfileInfo(req, res, next) {
     user.profile_pic = userData.profile_pic;
   }
   // if no password provided, retain old password
-  if (user.password && user.password.length === 0) 
+  if (user.password && user.password.length === 0)
   {
     user.password = oldPass;
   }

@@ -290,6 +290,7 @@ async function updateProfileInfo(req, res, next) {
   if (req.file && req.file.path) {
     imgsrc = req.file.path;
   }
+  var oldPass = req.body.oldPass,
   var user = {
     username: req.params.username,
     password: req.body.password,
@@ -300,10 +301,20 @@ async function updateProfileInfo(req, res, next) {
     profile_pic: imgsrc
   };
   // console.log(req.params, "\n", req.body, "\n", user);
-
+  
   // get user's profile data so i can be lazy
   console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
+
+  var passgood = await bcrypt.compare(oldPass, userData.passhash);
+
+  if (!passgood)
+  {
+    res.setHeader('error', "unable to update: bad password");
+    console.log('unable to update user bad password provided');
+    extFuncs.delete_profile_img(req.file.path);
+    return next();
+  }
 
   if (!userData) {
     res.setHeader('error', "unable to update");
@@ -315,6 +326,11 @@ async function updateProfileInfo(req, res, next) {
   // if no new profile picture is provided, set the new one to be the current one
   if (!user.profile_pic) {
     user.profile_pic = userData.profile_pic;
+  }
+  // if no password provided, retain old password
+  if (user.password && user.password.length === 0) 
+  {
+    user.password = oldPass;
   }
   // if one is provided, set a parameter in the request object to point to the old
   // profile picture path and then delete that image

@@ -67,34 +67,20 @@ class UserSettings extends Component {
     //split the interests into array
     let interestsArray = this.state.interests.split(',');
 
-    let body = {
-      "password" : this.state.password,
-      "bio": this.state.bio,
-      "name": this.state.name,
-      "interests": interestsArray,
-      "accessibility_features": this.state.accessibility_features,
-      "profileImage": this.imageFile.current.files[0]
-    };
-    console.log(this.imageFile.current.files[0])
-    // var formdata = new FormData();
-    // formdata.append('password', this.state.password);
-    // formdata.append('bio', this.state.bio);
-    // formdata.append('name', this.state.name);
-    // formdata.append('interests', interestsArray);
-    // formdata.append('accessibility_features', this.state.accessibility_features);
-    // formdata.append('profileImage', this.imageFile.current.files[0]);
-    // console.log("body", body)
-    // console.log("user", this.state.username)
-    // console.log('data')
-    // console.log(formdata)
-    console.log(body);
+    var formdata = new FormData();
+    formdata.append('password', this.state.password);
+    formdata.append('bio', this.state.bio);
+    formdata.append('name', this.state.name);
+    formdata.append('interests', JSON.stringify(interestsArray));
+    formdata.append('accessibility_features', JSON.stringify(this.state.accessibility_features));
+    formdata.append('profileImage', this.imageFile.current.files[0]);
+
+    //console.log(formdata)
 
     fetch(`/api/update/${this.state.username}`, {
         method : 'POST',
-        headers: {
-            'Content-Type' : 'application/json'
-        },
-        body: JSON.stringify(body)
+        redirect: 'follow',
+        body: formdata//JSON.stringify(body)
     }).then(function(res)
     {
       console.log(res);
@@ -104,8 +90,8 @@ class UserSettings extends Component {
         return;
       }
       NotificationManager.success("Saved changes");
-      //window.location.href = "/";
-      //window.location.reload(true);
+
+      window.location.reload(true);
 
     }).catch(function(error){
       console.log(error);

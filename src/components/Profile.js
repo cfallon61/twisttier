@@ -78,16 +78,15 @@ class Profile extends Component{
                 //If link is not empty
               if (dataDict.profile_pic !== "" && dataDict.profile_pic != null)
                 {
-                  // console.log(dataDict.profile_pic);
+
                   fetch(dataDict.profile_pic).then(function(res)
                   {
-                    // console.log('received ', res, 'from server');
+
                     if(res.status === 200)
                     {
                       self.state.profilePicLink = res.url;
 
-                      // console.log('profile pic url =', self.state.profilePicLink);
-                      chosenProfilePic = (<div>
+                        chosenProfilePic = (<div>
                         <img src={self.state.profilePicLink} alt={self.state.username} style={imgScale}/>
                           </div>);
 
@@ -185,6 +184,17 @@ class Profile extends Component{
       );
     }
 
+    changeDescription(desc)
+    {
+        this.setState({bio : desc})
+    }
+
+    addTag(tag)
+    {
+        let updatedList = this.state.tags.push(tag);
+        this.setState({tags : updatedList});
+    }
+
     render()
     {
         console.log("Rednginering Profile.");
@@ -209,10 +219,12 @@ class Profile extends Component{
           speechText += `I have no interests 😢 Life is meaningless without interests`;
         }
 
+        var userLinkToProfile = `/profile/${this.username}`;
+
         return (
             <div className="profile-container">
                 <div className="profile-info">
-                    <h3>{this.state.username}</h3>
+                    <a href = {userLinkToProfile}><h3>{this.state.username}</h3></a>
                     <h6>{this.state.bio}</h6>
                     {this.state.profilePic}                    
                 </div>
@@ -228,16 +240,8 @@ class Profile extends Component{
         );
     }
 
-    changeDescription(desc)
-    {
-        this.setState({bio : desc})
-    }
 
-    addTag(tag)
-    {
-        let updatedList = this.state.tags.push(tag);
-        this.setState({tags : updatedList});
-    }
+    
 }
 
 /*Helper components for profile.*/

@@ -94,6 +94,31 @@ class Spin extends Component
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
         this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
         this.closeMoreTagsModal = this.closeMoreTagsModal.bind(this);
+        this.getUserTags = this.getUserTags.bind(this);
+    }
+
+       /**
+     * Helper method for getting tags of the author
+     */
+    getUserTags(followingList, author)
+    {
+        // console.log(followingList);
+        // console.log(author);
+        if(followingList === undefined || followingList.users.length === 0) 
+        {
+            console.log("Return empty");
+            return [];//Empty list
+        }
+        // console.log(followingList.users.length);
+        for(var i = 0; i < followingList.users.length; i++)
+        {
+            if(followingList.users[i].username === author)
+            {
+                return followingList.users[i].tags;
+            }
+        }
+        // console.log("Return empty from end.");
+        return [];//Empty list
     }
 
     getAuthor()
@@ -277,12 +302,47 @@ class Spin extends Component
         }
     }
 
-    updateViewerTags(tags)
+    updateViewerTags()
     {
-        if(tags !== undefined)
+        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        const self = this;
+        // console.log(`/api/users/${self.userToView}`);
+        fetch(`/api/users/${self.userToView}`, {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            }
+        })
+        .then(function(res)
         {
-            this.setState({ viewingUserTags: tags});
-        }
+          // console.log(res);
+          if(res.status === 200)
+          {
+            res.json().then(function(jsonData)
+            {
+                const dataDict = JSON.parse(jsonData);
+                let followingList = dataDict.following;
+                // console.log(followingList);
+                // console.log(self.author);
+                let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
+                console.log("Followed tags from author: " + followedTagsFromAuthor);
+                self.setState({ viewingUserTags: followedTagsFromAuthor});
+              })
+          }
+          else
+          {
+            if(res.headers.error)
+            {
+              NotificationManager.error(res.headers.error);
+              self.setState({error : res.headers.error});
+            }
+          }
+        })
+        .catch(function(err){
+            console.log(err);
+            self.setState({error : err});
+        })
+        ;
     }
 
     // checks whether viewer is logged in or nor
@@ -296,6 +356,7 @@ class Spin extends Component
         if(this.viewerIsAuthenticated())
         {
             this.updateWhetherViewerLikedTheSpin();
+            this.updateViewerTags();
         }
     }
 

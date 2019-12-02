@@ -308,6 +308,14 @@ class UsernameListEntry extends Component
           </div>
           );
       }
+      else
+      {
+        hoverView =(
+          <div className="hover-tag-view">
+                Every tag
+          </div>
+          );
+      }
     }
     /*OnMouseEnter and OnMouseLeave are events to catch hovering. When the username is hovered, we want to show the list of tags being followed or following.*/
     return (

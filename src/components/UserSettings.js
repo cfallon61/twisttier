@@ -10,6 +10,8 @@ import Button from "react-bootstrap/Button";
 import Profile from './Profile.js';
 import Form from 'react-bootstrap/Form'
 import {NotificationManager} from 'react-notifications';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import Modal from './Modal';
 
 class UserSettings extends Component {
   //Get logged in user and render accordingly
@@ -23,7 +25,11 @@ class UserSettings extends Component {
       name: "",
       profile_pic: "",
       interests: [],
-      accessibility_features: ""
+      accessibility_features: "",
+      showPasswordForm : false,
+      //This is for confirm deletion.
+      inputPassword : "",
+      email : ""
     };
 
     this.handleEditBio = this.handleEditBio.bind(this);
@@ -31,9 +37,14 @@ class UserSettings extends Component {
     this.getUserInfo = this.getUserInfo.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
+    this.handleDeleteAccount = this.handleDeleteAccount.bind(this);
+    this.renderPasswordConfirm = this.renderPasswordConfirm.bind(this);
+    this.handlePassChange = this.handlePassChange.bind(this);
+    this.openPasswordModal = this.openPasswordModal.bind(this);
+    this.closePasswordModal = this.closePasswordModal.bind(this);
   }
 
-
+  //This is for updating the password.
   handlePasswordChange(event)
   {
     this.setState({password : event.target.value});
@@ -79,7 +90,61 @@ class UserSettings extends Component {
   }
 
 
-  handleDeleteAccount(event) {}
+  handleDeleteAccount() 
+  {
+    let requestBody = {
+      username : this.state.username,
+      password : this.state.inputPassword,
+      email : this.state.email
+    }
+    console.log(requestBody);
+    //Send request to server with username, email, password on body.
+    fetch("/api/delete", {
+      method : 'POST',
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify(requestBody)
+    }).then((res) => {
+        if(res.status === 200)
+        {
+          NotificationManager.success("Account deleted successfully!");
+          setTimeout(function() { //Start the timer
+            window.location.href = "/"; //Redirect.
+        }.bind(this), 900)
+      }
+      else
+      {
+        if(res.headers.has('error'))
+        {
+          NotificationManager.error(res.headers['error']);
+        }
+        else
+        {
+          NotificationManager.error("Error has occured.");
+        }
+      }
+    }).catch((err) => {
+      console.log("Unknown issue.");
+      NotificationManager.error(err);
+    })
+  }
+
+  handlePassChange(event)
+  {
+    this.setState({inputPassword : event.target.value});
+  }
+
+  renderPasswordConfirm()
+  {
+    return <div>
+      <label>Please confirm deletion by re-entering your password.</label>
+      <input type="password" onChange={this.handlePassChange} style={{'display' : 'block', 'margin' : 'auto'}}></input>
+
+      <Button onClick={this.handleDeleteAccount}  style={{'margin' : '1vw'}}>Confirm</Button>
+      <Button onClick={this.closePasswordModal} style={{'margin' : '1vw'}}>Cancel</Button>
+    </div>
+  }
 
   getUserInfo() {
 
@@ -88,6 +153,7 @@ class UserSettings extends Component {
     let d_name = "";
     let d_interests = "";
     let d_profilepic ="";
+    let d_email = "";
     let self = this;
     // console.log("USERNAME=", username);
     fetch(`/api/users/${username}`, {
@@ -106,7 +172,8 @@ class UserSettings extends Component {
             d_bio = dataDict.bio;
             d_name = dataDict.name;
             d_interests = dataDict.interests;
-            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
+            d_email = dataDict.email;
+            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic, email : d_email});
 
         });
       }
@@ -117,6 +184,16 @@ class UserSettings extends Component {
   componentDidMount()
   {
     this.getUserInfo();
+  }
+
+  openPasswordModal()
+  {
+    this.setState({showPasswordForm : true});
+  }
+
+  closePasswordModal()
+  {
+    this.setState({showPasswordForm : false});
   }
 
   render() {
@@ -159,6 +236,10 @@ class UserSettings extends Component {
           </Row>
           </div>
         </Container>
+        <Button variant="primary" onClick={this.openPasswordModal}> Delete Account </Button>
+        <Modal show={this.state.showPasswordForm}>
+          {this.renderPasswordConfirm()}
+        </Modal>
       </div>
     );
   }

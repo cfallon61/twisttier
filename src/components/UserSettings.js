@@ -24,7 +24,7 @@ class UserSettings extends Component {
       bio: "",
       name: "",
       profile_pic: "",
-      interests: [],
+      interests: "",
       accessibility_features: "",
       showPasswordForm : false,
       //This is for confirm deletion.
@@ -43,6 +43,8 @@ class UserSettings extends Component {
     this.openPasswordModal = this.openPasswordModal.bind(this);
     this.closePasswordModal = this.closePasswordModal.bind(this);
     this.handleConfirmEmailChange = this.handleConfirmEmailChange.bind(this);
+    this.handleInterestsChange = this.handleInterestsChange.bind(this);
+    this.imageFile = React.createRef();
   }
 
   //This is for updating the password.
@@ -55,19 +57,37 @@ class UserSettings extends Component {
     this.setState({bio: event.target.value});
   }
 
+  handleInterestsChange(event) {
+    this.setState({interests: event.target.value});
+  }
+
   handleSubmit(event)
   {
     event.preventDefault();
+    //split the interests into array
+    let interestsArray = this.state.interests.split(',');
+
     let body = {
       "password" : this.state.password,
       "bio": this.state.bio,
       "name": this.state.name,
-      "interests":this.state.interests,
+      "interests": interestsArray,
       "accessibility_features": this.state.accessibility_features,
-      "profile_pic": this.state.profile_pic
+      "profileImage": this.imageFile.current.files[0]
     };
-    console.log("body", body)
-    console.log("user", this.state.username)
+    console.log(this.imageFile.current.files[0])
+    // var formdata = new FormData();
+    // formdata.append('password', this.state.password);
+    // formdata.append('bio', this.state.bio);
+    // formdata.append('name', this.state.name);
+    // formdata.append('interests', interestsArray);
+    // formdata.append('accessibility_features', this.state.accessibility_features);
+    // formdata.append('profileImage', this.imageFile.current.files[0]);
+    // console.log("body", body)
+    // console.log("user", this.state.username)
+    // console.log('data')
+    // console.log(formdata)
+    console.log(body);
 
     fetch(`/api/update/${this.state.username}`, {
         method : 'POST',
@@ -84,6 +104,9 @@ class UserSettings extends Component {
         return;
       }
       NotificationManager.success("Saved changes");
+      //window.location.href = "/";
+      //window.location.reload(true);
+
     }).catch(function(error){
       console.log(error);
     }
@@ -91,7 +114,7 @@ class UserSettings extends Component {
   }
 
 
-  handleDeleteAccount() 
+  handleDeleteAccount()
   {
     let requestBody = {
       username : this.state.username,
@@ -237,6 +260,16 @@ class UserSettings extends Component {
                     <Form.Label>Password</Form.Label>
                     <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
                 </Form.Group>
+                <Form.Group>
+                    <Form.Label>Add Interests</Form.Label>
+                    <Form.Control type="text" placeholder="Add interests separated by a ','" onChange={this.handleInterestsChange}/>
+                </Form.Group>
+
+                <Form.Group>
+                  <Form.Label>Profile Image</Form.Label>
+                  <Form.Control type="file" accept="image/*" ref={this.imageFile}/>
+                </Form.Group>
+
                 <Form.Group>
                   <Button variant="primary" type="submit">Save Changes</Button>
                 </Form.Group>

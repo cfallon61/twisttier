@@ -263,7 +263,7 @@ app.post('/api/spins/esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => 
 // @brief:  endpoint for deleting account
 // @author: Chris Fallon
 // helpers.loggedIn,
-app.post('/api/delete',  users.deleteAccount, (req, res) => {
+app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
     res.status(406);

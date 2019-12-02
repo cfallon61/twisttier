@@ -131,7 +131,7 @@ async function authorize(req, res, next) {
 // returns error or success response
 async function deleteAccount(req, res, next) {
   // extract info from the request
-  console.log(req.body);
+  console.log('deleting', req.body.username);
   const user = {
     username: req.body.username,
     password: req.body.password,
@@ -155,6 +155,7 @@ async function deleteAccount(req, res, next) {
   }
   // check if the user exists
   // if it exists, call the delete user function of db
+  // goodPass=true;
   if (userData !== false && goodPass) {
 
     var deleteSuccess = await db.deleteUser(req.body.username);

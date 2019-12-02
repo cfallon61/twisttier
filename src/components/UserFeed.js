@@ -12,7 +12,6 @@ import App from '../App.jsx';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
 import "./userfeed.css";
-import Speech from "react-speech";
 
 
 var OperationEnum = {
@@ -41,9 +40,16 @@ class UserFeed extends Component
             //This is for the follow modal to keep track of the items selected.
             toFollowInterests : [],
             toUnfollowInterests : [],
-            currentOperation : OperationEnum.FOLLOW
+            currentOperation : OperationEnum.FOLLOW,
+            newSpins: [],
+
+
+            // for edit and follow/unfollow
+            userToViewInterests : [],
+            userToViewFollowing : []
         }
 
+        // functions
         this.onFollowPressed = this.onFollowPressed.bind(this);
         this.onActionPressedAtModal = this.onActionPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -53,15 +59,17 @@ class UserFeed extends Component
         this.addInterestToUnfollowList = this.addInterestToUnfollowList.bind(this);
         this.changeOperationState = this.changeOperationState.bind(this);
         this.getViewingUser = this.getViewingUser.bind(this);
+        this.getUserInterestsAndFollowing = this.getUserInterestsAndFollowing.bind(this);
 
         this.userToView = this.getViewingUser();
     }
 
     updateUserSpins(username)
     {
-        //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
+        //Since "this" changes when you enter a new context, 
+        //we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log("Fetching...");
+        console.log("Fetching... ", `/api/posts/${username}`);
         fetch(`/api/posts/${username}`, {
             method: "POST",
             credentials: 'same-origin'
@@ -73,7 +81,7 @@ class UserFeed extends Component
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
                     console.log(jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
                 });
@@ -98,9 +106,9 @@ class UserFeed extends Component
 
     componentDidMount()
     {
-        console.log(this.username);
         this.updateUserSpins(this.username);
         this.updateTagData();
+        this.getUserInterestsAndFollowing();
     }
 
     onFollowPressed()
@@ -116,6 +124,38 @@ class UserFeed extends Component
             return document.cookie.split('=')[1];
         }
         else return null;
+    }
+
+    getUserInterestsAndFollowing() {
+        let self = this;
+        fetch(`/api/users/${this.userToView}`, {
+            method: 'POST'
+        }).then(function(response){
+
+                if (response.status === 200) {
+                    response.json().then(function(data){
+                    let jsonData = JSON.parse(data);
+                    // console.log("user data: ", data);
+                    let currentInterests = [];
+                    
+                    // fill current interests of the user
+                    for (var i = 0; i < jsonData.tags_associated.length; i++) {
+                        currentInterests.push(jsonData.tags_associated[i]);
+                    }
+
+                    // fill the following of the user
+                    let userfollowing = jsonData.following.users;
+                    // console.log("following: ", userfollowing);
+
+
+                    self.setState({
+                        userToViewInterests : currentInterests,
+                        userToViewFollowing : userfollowing
+                    });
+                    
+                })
+            }
+        })
     }
 
     /**
@@ -217,7 +257,7 @@ class UserFeed extends Component
             {
                 response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log(data);
+                    // console.log(data);
                     let currentInterests = [];
                     for(var i = 0; i < jsonData.tags_associated.length; i++)
                     {
@@ -255,7 +295,7 @@ class UserFeed extends Component
             return <Dropdown.Item onClick={() => this.onDropdownItemClicked(tagName)}>{tagName}</Dropdown.Item>;
         });
         let disableTagDropdown = false;
-        console.log(followItems);
+        // console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;
@@ -331,12 +371,28 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                console.log('spin =', spin);
-                feed.addSpin(<Spin username={spin.username} content={spin.content} timestamp={spin.date} spinID={spin.id} userToView={this.userToView} tags={spin.tags} likes={spin.likes} likeList={spin.like_list}/>);
+                // console.log('spin =', spin);
+                // console.log("user to view interests: ", this.state.userToViewInterests);
+                // console.log("user to view following: ", this.state.userToViewFollowing);
+
+                // find out the tags viewing user follows from the author of the spin
+                var followingTagsForThisSpin = [];
+                for (var j = 0; j < this.state.userToViewFollowing.length; j++) {
+                    if (this.state.userToViewFollowing[j].username === spin.username) {
+                        followingTagsForThisSpin = this.state.userToViewFollowing[j].tags;
+                    }
+                }
+
+                feed.addSpin(<Spin username={spin.username} content={spin.content} 
+                    timestamp={spin.date} spinID={spin.id} userToView={this.userToView} 
+                    tags={spin.tags} likes={spin.likes} likeList={spin.like_list}
+                    userInterests = {this.state.userToViewInterests}
+                    tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                    />);
             }
         }
         else{
-            feed.addSpin(<h6>This user currently has no spins...</h6>);
+          feed.addSpin(<h6>This user currently has no spins 😢</h6>);
         }
 
         let followButton = null;
@@ -346,9 +402,6 @@ class UserFeed extends Component
         {
             followButton = <Button onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
         }
-
-        let speechText = "You are right now checking the profile of: " + this.username;
-
         /**
          * The view organized by these parts:
          *          Page
@@ -357,7 +410,6 @@ class UserFeed extends Component
         return (
             <div className="user-feed-page">
                 <div className="user-feed-left">
-                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
                     <Profile username={this.username}/>
                     {followButton}
                     <Modal show={this.state.showFollowModal}>
@@ -366,9 +418,6 @@ class UserFeed extends Component
                 </div>
                 <div className="user-feed-middle">
                     {feed.render()}
-                    <footer>
-                        <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                    </footer>
                 </div>
 
             </div>

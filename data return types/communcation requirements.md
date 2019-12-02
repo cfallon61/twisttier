@@ -219,6 +219,18 @@ to remove all tags.
 ---
 # Spins Interface
 
+## Getting a single spin from a user
+1. Client will `POST /api/spin/username` with the following in the `POST body`:
+    ```
+    body : {
+      spinID: <spin id here>
+    }
+    ```
+2. Server will query the database for this user and the corresponding post's ID
+  * Server will set header `error: unable to get spin <spinID> from <username>` if an error occurs
+  * Under error conditions, server will send response `404: Not Found`
+  * Server will respond with a single spin JSON upon success.
+
 ## Getting a single user's spins
  1. Client will `POST /api/posts/` with the username as a URL parameter ex `username=steve`
     * if the user is not found an 'error' header will be set with message 'user not found' and 404 will be returned

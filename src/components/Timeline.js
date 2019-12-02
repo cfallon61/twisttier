@@ -20,10 +20,12 @@ class Timeline extends Component
     constructor(props)
     {
         super(props);
+        
         this.username = this.props.username;
         this.state = {
             tag : "",
             spins : [],
+            newSpins : [],
             interests : [],
             error : {
                 exist : false,
@@ -35,9 +37,11 @@ class Timeline extends Component
                 text : " ",
                 chars : 0,
                 interests : [],
-            }
+            },
+            following : []
         };
 
+        // functions
         this.onSpinPressed = this.onSpinPressed.bind(this);
         this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -51,6 +55,7 @@ class Timeline extends Component
 
     componentDidMount()
     {
+
         this.getUserInterests();
         const self = this;
         fetch(`/api/timeline/${this.username}`, {
@@ -63,7 +68,7 @@ class Timeline extends Component
             {
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    self.setState({spins : dataDict.regularposts});
+                    self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 });
             }
             else{
@@ -94,7 +99,7 @@ class Timeline extends Component
     }
 
     closeModal() {
-        this.setState({showSpinModal : false})
+        this.setState({showSpinModal : false});
     }
 
     onSpinPressedAtModal(event) {
@@ -110,16 +115,12 @@ class Timeline extends Component
 
         //TODO: send text to server
         else {
-            console.log(this.state.spin.text);
-            console.log(this.state.spin.interests);
+            // console.log(this.state.spin.text);
+            // console.log(this.state.spin.interests);
             let body = {
                 spinBody: this.state.spin.text,
                 tags: this.state.spin.interests,
                 is_quote: false,
-                quote_oritin: {
-                    username: this.username,
-                    spinID: 'x'
-                }
             };
             fetch(`/api/add_spin/${this.username}`, {
                 method : 'POST',
@@ -132,7 +133,9 @@ class Timeline extends Component
                 {
                     NotificationManager.success("Spun!");
 
-                    //res.headers['error']
+                    setTimeout(function() { //Start the timer
+                        window.location.reload();
+                    }.bind(this), 1000)
                 }
                 else
                 {
@@ -140,8 +143,10 @@ class Timeline extends Component
                     {
                         NotificationManager.error(res.headers.get('error'));
                     }
-                    //Error handling
-                }
+                    else
+                    {
+                        NotificationManager.error("Server didn't return OK response.");
+                    }                }
             });
             this.closeModal();
         }
@@ -157,7 +162,7 @@ class Timeline extends Component
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
         interestsList.push(interest);
-        console.log(interestsList);
+        // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
         this.setState({spin : {interests : interestsList, chars: currentChar, text : currentText}});
@@ -168,14 +173,26 @@ class Timeline extends Component
         fetch(`/api/users/${this.username}`, {
             method: 'POST'
         }).then(function(response){
-            if (response.status===200) {
-                response.json().then(function(data){
+                if (response.status===200) {
+                    response.json().then(function(data){
                     let jsonData = JSON.parse(data);
+                    console.log("user data: ", data);
                     let currentInterests = [];
+                    // fill current interests of the user
                     for (var i = 0; i < jsonData.tags_associated.length; i++) {
                         currentInterests.push(jsonData.tags_associated[i]);
                     }
-                    self.setState({interests : currentInterests});
+
+                    // fill the following of the user
+                    let userfollowing = jsonData.following.users;
+                    console.log("following: ", userfollowing);
+
+
+                    self.setState({
+                        interests : currentInterests,
+                        following : userfollowing
+                    });
+                    
                 })
             }
         })
@@ -188,7 +205,7 @@ class Timeline extends Component
         });
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
-        currentAddedInterestView = this.state.spin.interests.map((tagName) => {
+            currentAddedInterestView = this.state.spin.interests.map((tagName) => {
             return <h6>{tagName}</h6>;
         });
         }
@@ -201,7 +218,7 @@ class Timeline extends Component
 
         let dropdownInterests = (
             <Dropdown>
-                <Dropdown.Toggle className = "editButtons" variant = "outline-primary" id="dropdown-basic">
+                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
                     Tags
                 </Dropdown.Toggle>
 
@@ -250,23 +267,69 @@ class Timeline extends Component
 
     render()
     {
+        console.log("state following: ", this.state.following);
         //Right now we will use three parts of the spin.
         //content, username and timestamp.
         if(this.state.error.exist) {
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
         let feed = new Feed(this.props.username);
+        if(this.state.newSpins !== undefined && this.state.newSpins.length > 0)
+        {
+            for(var i = 0; i < this.state.newSpins.length; i++)
+            {
+                var spin = this.state.newSpins[i];
+                if(spin.username !== this.props.username)
+                {
+                    feed.addSpin(<Spin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={this.username} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        userInterests = {this.state.interests} hasNewTags={true}
+                    />);
+                }
+            }
+        }
         if(this.state.spins !== undefined && this.state.spins.length > 0)
         {
             for(var i = 0; i < this.state.spins.length; i++)
-            {
+            {   
                 var spin = this.state.spins[i];
-                feed.addSpin(<Spin username={spin.username} content={spin.content}
-                    timestamp={spin.date} spinID = {spin.id}
-                    userToView={this.username} tags={spin.tags}
-                    likes= {spin.likes} likeList = {spin.like_list}
-                    userInterests = {this.state.interests}
-                />);
+
+                // find the list of followed tags for the author of the spin
+                var followingTagsForThisSpin = [];
+                for (var j = 0; j < this.state.following.length; j++) {
+                    if (this.state.following[j].username === spin.username) {
+                        followingTagsForThisSpin = this.state.following[j].tags;
+                    }
+                }
+                // console.log("Author: ", spin.username);
+                // console.log("tags to send: ", followingTagsForThisSpin);
+
+                // check if the user is following atleast one of the tags
+                var tagMatchCount = 0;
+                for (var a = 0; a < followingTagsForThisSpin.length; a++){
+                    if (spin.tags.includes(followingTagsForThisSpin[a])) {
+                        tagMatchCount++;
+                        break;
+                    }
+                }
+
+                // if following atleast one of the tags
+                if (tagMatchCount !== 0) {
+                    
+                    if(spin.username !== this.props.username) //Filter out spins that the user made.
+                    {
+                        feed.addSpin(<Spin username={spin.username} content={spin.content}
+                            timestamp={spin.date} spinID = {spin.id}
+                            userToView={this.username} tags={spin.tags}
+                            likes= {spin.likes} likeList = {spin.like_list}
+                            userInterests = {this.state.interests} 
+                            tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                        />);
+                    }
+                
+                }
             }
         }
         else{

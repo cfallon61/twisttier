@@ -58,3 +58,7 @@
 .user-list-view:hover{
     background-color: burlywood;
 }
+
+a {
+    text-decoration: none;
+}

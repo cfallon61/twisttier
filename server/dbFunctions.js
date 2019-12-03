@@ -1048,17 +1048,21 @@ async function getSingleSpin(username, spinid)
   try 
   {
     var res = await pool.query(query, [spinid]);
-    // console.log(res);
+
     var spin = res.rows[0];
-    // console.log(spin);
-    if (spin != undefined && spin.length === 0)
+
+    if (res.rows.length === 0)
     {
-      return false;
+      console.log(spin);
+      spin = {
+        content: "-deleted-",
+        id: null,
+        username: '-deleted-',
+        date: '-deleted-',
+        likes: 0,
+      }
     }
-    else
-    {
-      return spin;;
-    }
+    return spin;;
   }
   catch (e)
   {

@@ -387,14 +387,15 @@ class Spin extends Component
     {
         if(this.state.quoted) //If quoted is true, quoteOrigin should contain the dict of username and id.
         { 
-          console.log('this =',this)
+          // console.log('this =',this)
             let quotedUsername = this.quoteOrigin['username'];
             let quotedID = this.quoteOrigin['spinId'];
             let requestBody = {
                 spinID : quotedID
             }
-            console.log('original poster:', quotedUsername);
-            console.log(quotedID);
+            // console.log('quote origin:', this.quoteOrigin);
+            // console.log('original poster:', quotedUsername);
+            // console.log("post id:", quotedID);
             let self = this;
             fetch(`/api/spin/${quotedUsername}`, {
                 method : "POST",
@@ -408,7 +409,7 @@ class Spin extends Component
                 {
                     res.json().then((jsonData) => {
                         let spin = JSON.parse(jsonData);
-                        console.log(spin);
+                        console.log('spin =',spin);
                         let quotedView = <QuotedSpin username={spin.username} content={spin.content}
                         timestamp={spin.date} spinID = {spin.id}
                         userToView={self.userToView} tags={spin.tags}
@@ -657,6 +658,7 @@ class Spin extends Component
                 spinId: this.state.spinID,
             }
         };
+        // console.log('body =', body);
         console.log("Text:" + this.state.sharedSpinText);
         fetch(`/api/add_spin/${this.userToView}`, {
             method : 'POST',

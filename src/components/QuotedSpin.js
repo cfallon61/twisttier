@@ -46,9 +46,13 @@ class QuotedSpin extends Component
     // formats the date
     formatDate(timestamp)
     {
-        let dateAndTime = timestamp.split('T');
-        let time = dateAndTime[1].substring(0, 5);
-        return dateAndTime[0] + " " + time;
+      if (timestamp === '-deleted-')
+      {
+        return timestamp;
+      }
+      let dateAndTime = timestamp.split('T');
+      let time = dateAndTime[1].substring(0, 5);
+      return dateAndTime[0] + " " + time;
     }
 
     render()
@@ -61,7 +65,7 @@ class QuotedSpin extends Component
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
 
         let speechText = this.props.username + " wrote:      " + this.props.content + "       ";
-        if(this.props.tags.length > 0)
+        if(this.props.tags && this.props.tags.length > 0)
         {
             speechText += "  Added tags: ";
             for(let i = 0; i < this.props.tags.length; i++)

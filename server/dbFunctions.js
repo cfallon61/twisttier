@@ -1020,12 +1020,12 @@ pool.on('error', (err, client) => {
 async function searchForUser(userdata)
 {
   var query = `SELECT username, profile_pic, tags_associated
-   FROM ${USER_TABLE} WHERE username LIKE $1 OR name LIKE $1`;
+   FROM ${USER_TABLE} WHERE username ~* $1 OR name ~* $1`;
   var results = [];
   try
   {
-    results = await pool.query(query, ['\%' + userdata + '\%']);
-    console.log('users matching given criteria =', results.rows);
+    results = await pool.query(query, ['.*' + userdata + '.*']);
+    // console.log('users matching given criteria =', results.rows);
     return (results.rows.length > 0 ? results.rows : false);
   }
   catch (e)

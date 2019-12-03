@@ -234,13 +234,11 @@ class UserSettings extends Component {
     return (
 
       <div>
-        <Container  className = "page-container">
-            <Row>
-              <Col className = "page-content">
-                {profile}
-              </Col>
-              
-              <Col className = "page-content">
+        <div className = "page-container">
+                <div className="page-content">
+                  {profile}
+                </div>
+                <div className="page-content">
                 <Form onSubmit={this.handleSubmit}>
                   <Form.Group>
                       <Form.Label>Bio</Form.Label>
@@ -265,15 +263,11 @@ class UserSettings extends Component {
                     <Button className = "delete-button" variant="primary" type="submit">Save Changes</Button>
                   </Form.Group>
                </Form>
-              </Col>
-
-              <Col className = "page-content">
+              </div>
+              <div className="page-content">
                 <Button variant="primary" onClick={this.openPasswordModal}>Delete Account </Button>
-              </Col>
-
-            </Row>
-
-         </Container>
+              </div>
+         </div>
         
         
         <Modal show={this.state.showPasswordForm}>

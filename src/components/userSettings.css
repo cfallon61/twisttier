@@ -3,7 +3,9 @@
 }
 
 .page-content {
-    margin: 10px;
+    flex : 1;
+    margin: auto;
+    padding: 10px;
 }
 
 @media only screen and (max-width:800px){

@@ -69,6 +69,10 @@ class SearchUser extends Component {
                     
                 });
             }
+            else if (res.status === 404)
+            {
+              NotificationManager.error('no users found matching that criteria');
+            }
             else
             {
                 if(res.headers.has('error'))

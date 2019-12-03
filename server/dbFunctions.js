@@ -415,6 +415,7 @@ async function getSpins(user, users) {
     // console.log(followed);
     if (followed.length < 1)
     {
+      console.log('not following anyone i guess')
       return [];
     }
     // SELECT new_tag_posts from USERS_TABLE where username
@@ -515,7 +516,6 @@ async function getSpins(user, users) {
   {
     client.release();
   }
-
   return posts;
 };
 

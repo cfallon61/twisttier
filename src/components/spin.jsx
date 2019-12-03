@@ -20,6 +20,7 @@ import deleteImage from "./delete.png";
 import showMoreButton from "./showMore.png";
 import Speech from "react-speech";
 import Flame from "./flame.png";
+import QuotedSpin from "./QuotedSpin";
 
 const tagContainerStyle = {
     display: "grid",
@@ -45,10 +46,10 @@ class Spin extends Component
         this.state = {
             tags: this.props.tags, //spin's tags
             edited: false, //the spin has been edited
-            quoted: false, //the spin is a quote
+            quoted: this.props.quoted || false, //the spin is using a quote? Default is false
+            quote: null, //quote view.
             content: this.props.content, //spin's text
             timestamp: this.props.timestamp, //spin modified
-            quoteOrigin: "", 
             likes : this.props.likes,
             spinID : this.props.spinID,
             showLike : true,
@@ -56,7 +57,8 @@ class Spin extends Component
             likeList: this.props.likeList,
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
-            
+            sharedSpinText : "",
+            sharedSpinTags:[],
             showEditer : false,
             showShare : false,
            /// initialEditorValue : this.props.content,
@@ -71,7 +73,10 @@ class Spin extends Component
         this.userToView = this.props.userToView; //viewer
         this.author = this.props.username;
         this.spinID = this.props.spinID;
-        this.interestsOfUser = this.props.userInterests;       
+        this.interestsOfUser = this.props.userInterests;
+        //quoteInfo is in form of:
+        // {username : "username", spinId : <int>}  
+        this.quoteOrigin = this.props.quoteOrigin || undefined;     
 
         //this.followTag = this.followTag.bind(this);
         //this.unfollowTag = this.unfollowTag.bind(this);
@@ -92,6 +97,7 @@ class Spin extends Component
         this.renderShareForm = this.renderShareForm.bind(this);
 
         this.handleTextChange = this.handleTextChange.bind(this);
+        this.handleShareTextChange = this.handleShareTextChange.bind(this);
         this.handleInterestAddition = this.handleInterestAddition.bind(this);
         this.handleInterestDeletion = this.handleInterestDeletion.bind(this);
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
@@ -374,8 +380,59 @@ class Spin extends Component
             this.updateWhetherViewerLikedTheSpin();
             this.updateViewerTags();
         }
+        this.updateQuote();
     }
 
+    updateQuote()
+    {
+        if(this.state.quoted) //If quoted is true, quoteOrigin should contain the dict of username and id.
+        {
+            let quotedUsername = this.quoteOrigin['username'];
+            let quotedID = this.quoteOrigin['spinId'];
+            let requestBody = {
+                spinID : quotedID
+            }
+            console.log(quotedUsername);
+            console.log(quotedID);
+            let self = this;
+            fetch(`/api/spin/${quotedUsername}`, {
+                method : "POST",
+                headers : {
+                    "Content-Type" : "application/json"
+                },
+                body : JSON.stringify(requestBody)
+            })
+            .then((res) => {
+                if(res.status === 200)
+                {
+                    res.json().then((jsonData) => {
+                        let spin = JSON.parse(jsonData);
+                        console.log(spin);
+                        let quotedView = <QuotedSpin username={spin.username} content={spin.content}
+                        timestamp={spin.date} spinID = {spin.id}
+                        userToView={self.userToView} tags={spin.tags}
+                        likes= {spin.likes} likeList = {spin.like_list}
+                        />
+                        self.setState({quote : quotedView});
+                    });
+                }
+                else
+                {
+                    if(res.headers.has('error'))
+                    {
+                        NotificationManager.error(res.headers.get('error'));
+                    }
+                    else
+                    {
+                        NotificationManager.error("Server didn't return OK response.");
+                    }
+                }
+            })
+            .catch((err) => {
+                NotificationManager.error(err);
+            });
+        }
+    }
 
     // formats the date
     formatDate(timestamp)
@@ -589,9 +646,9 @@ class Spin extends Component
         // if (this.state.content === ) {
         //     this.state.content = " ";
         // }
-
+        let self = this;
         let body = {
-            spinBody: this.state.content,
+            spinBody: this.state.sharedSpinText,
             tags: this.state.tags,
             is_quote: true,
             quote_origin: {
@@ -599,7 +656,7 @@ class Spin extends Component
                 spinId: this.state.spinID,
             }
         };
-        console.log(body);
+        console.log("Text:" + this.state.sharedSpinText);
         fetch(`/api/add_spin/${this.userToView}`, {
             method : 'POST',
             headers : {
@@ -611,10 +668,10 @@ class Spin extends Component
             {
                 NotificationManager.success("Shared!");
                 setTimeout(function() { //Start the timer
-                    this.setState({
+                    self.setState({
                         showShare : false
                     });
-                }.bind(this), 1000)   
+                }.bind(self), 1000)   
 
             }
             else
@@ -629,7 +686,6 @@ class Spin extends Component
             
             }
         });
-        this.closeShareModal();
     }
 
     // creates the components of the edit modal
@@ -746,11 +802,17 @@ class Spin extends Component
 
         );
     }
+
+    handleShareTextChange(event)
+    {
+        this.setState({sharedSpinText : event.target.value});
+    }
+
     renderShareForm(){        
         // get all the tags the user has posted with before
         let newInterestOptions = [];
         let self = this;
-        fetch(`/api/users/${this.userToView}`, {
+        /*fetch(`/api/users/${this.userToView}`, {
             method: 'POST'
         }).then(function(res){
             if (res.status===200) {
@@ -773,7 +835,7 @@ class Spin extends Component
                     NotificationManager.error("Server didn't return OK response.");
                 }
             }
-        });
+        });*/
         let newAuthorInterests = this.viewersTags;
 
         if(newAuthorInterests !== undefined)
@@ -850,9 +912,11 @@ class Spin extends Component
         let quote = null;
         let jsonData = null;
         let quoteBody = {
+            username : this.author,
             spinID: this.state.spinID,
         };
-        fetch(`/api/spin/${this.author}`, {
+
+        /*fetch(`/api/spin/${this.author}`, {
             method : 'POST',
             headers : {
                 "Content-Type" : "application/json"
@@ -879,7 +943,42 @@ class Spin extends Component
                     NotificationManager.error("Unexpected error while liking spin.");
                 }
             }
-        });
+        });*/
+        //Adding spin for the user who decided to share.
+        /*let requestBody = {
+            spinBody : this.state.sharedSpinText,
+            tags : this.state.sharedSpinTags,
+            is_quoted : true,
+            quote_origin : quoteBody
+        }
+        fetch(`/api/add_spin/${this.userToView}`, {
+            method : 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then((res)=>{
+            if(res.status == 200)
+            {
+                NotificationManager.success('Share successful!');
+                self.closeShareModal();
+            }
+            else
+            {
+                if(res.headers.has('error'))
+                {
+                    NotificationManager.error(res.headers.get('error'));
+                }
+                else
+                {
+                    NotificationManager.error("Server didn't return an OK response.");
+                }
+            }
+        })
+        .catch((err) => {
+            NotificationManager.error(err);
+        });*/
 
         return (
             <div className="spin-form">
@@ -892,9 +991,9 @@ class Spin extends Component
                             as = "textarea" 
                             placeholder="Your Spin here"
                             rows="3" 
-                            onChange = {this.handleTextChange}
+                            onChange = {this.handleShareTextChange}
                         />
-                            <p>{this.state.content.length}/90 characters</p>
+                            <p>{this.state.sharedSpinText.length}/90 characters</p>
                         
                         {newInterestsDropdown}
                         {addedTagsDropdown}
@@ -1056,7 +1155,6 @@ class Spin extends Component
                 speechText += this.state.tags[i] + "       ";
             }
         } 
-  
 
         return (
             <div className="spin-area">
@@ -1086,6 +1184,7 @@ class Spin extends Component
                     {delete_button}
                 </div>
                 <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
+                {this.state.quote}
                 <div className="tags-container" style={tagContainerStyle}>
                     {tagViewList}
                     {moreTagsButton}

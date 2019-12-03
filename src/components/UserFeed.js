@@ -382,12 +382,12 @@ class UserFeed extends Component
                         followingTagsForThisSpin = this.state.userToViewFollowing[j].tags;
                     }
                 }
-
+                console.log(spin);
                 feed.addSpin(<Spin username={spin.username} content={spin.content} 
                     timestamp={spin.date} spinID={spin.id} userToView={this.userToView} 
                     tags={spin.tags} likes={spin.likes} likeList={spin.like_list}
                     userInterests = {this.state.userToViewInterests}
-                    tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                    tagsFollowedForThisSpin = {followingTagsForThisSpin}  quoted={spin.is_quote} quoteOrigin={spin.quote_origin}
                     />);
             }
         }

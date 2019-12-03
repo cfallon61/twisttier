@@ -6,56 +6,58 @@
     --button-second: rgba(255, 0, 76, 0.63);
 }
 
-.spin-area{
-    width: 65%;
-    max-height: 30vh;
-    margin: 1vh auto;
+.quoted-spin-area{
+    width: 70%;
+    max-height: 40vh;
     border: 2px solid var(--spin-main);
     border-radius: 25px;
     padding: 10px;
     color: black;
-    font-weight: 400;
+    font-weight: 200;
     display: block;
+    margin:auto;
+    margin-top: 10px;
 }
 
-.username-section{
+.quoted-username-section{
     display: flex;
     flex-direction: row;
     text-align: left;
     font-weight: 300;
     padding-left: 1vw;
-    max-height: 5vh;
+    max-height: 10vh;
     margin: 10px;
 }
 
-.username-section .username-link {
+.quoted-username-section .quoted-username-link {
     flex: 10;
 }
-.username-section .username-link a {
+.quoted-username-section .quoted-username-link a {
+    color: var(--spin-main);
     font-family: 'Lato', cursive;
     font-weight: 800;
 }
 
-.spin-content{
+.quoted-spin-content{
     display: block;
     text-align: left;
     padding-left: 1vw;
     border: solid;
-    border-radius: 50px;
+    border-radius: 30px;
     font-size: 1em;
     box-shadow: 2px 3px var(--spin-second);
-    margin: 10px;
-    margin-bottom: 30px;
+    margin: 5px;
+    margin-bottom: 10px;
 }
 
-.spin-content p{
+.quoted-spin-content p{
     font-family: 'Lato', cursive;
     max-height: 50vh;
     max-width: 30ch;
     margin: auto;
 }
 
-.time-section{
+.quoted-time-section{
     text-align: right;
     font-family: 'Lato', cursive;
     font-style: italic;
@@ -64,12 +66,12 @@
     max-width: 25vw;
 }
 
-.other-info {
+.quoted-other-info {
     display: flex;
     margin: 10px;
 }
 
-.share-image, .like-image {
+.quoted-share-image, .quoted-like-image {
     width: 70%;
     height: 70%;
     justify-content: center;
@@ -79,7 +81,7 @@
 }
 
 
-.more-tags-image {
+.quoted-more-tags-image {
     width: 70%;
     height: 70%;
     justify-content: center;
@@ -87,31 +89,31 @@
     outline: none;
 }
 
-.tags-container p {
+.quoted-tags-container p {
     font-size: 0.5em;
     padding: 0.05em;
 }
 
-p.followed-tags:hover, p.unfollowed-tags:hover {
+p.quoted-followed-tags:hover, p.quoted-unfollowed-tags:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-p.followed-tags {
+p.quoted-followed-tags {
     color: var(--spin-main);
 }
 
-p.unfollowed-tags {
+p.quoted-unfollowed-tags {
     color: var(--spin-second);
 }
 
-p.num-likes{
+p.quoted-num-likes{
     margin-left: 5px;
     text-align: left;
-    flex: 50;
+    flex: 1;
 }
 
-.more-tags-button {
+.quoted-more-tags-button {
     background-color: var(--button-main);
     width: 2vw;
     height: 4vh;
@@ -123,7 +125,7 @@ p.num-likes{
     border-radius: 10px;
 }
 
-.action-buttons {
+.quoted-action-buttons {
     display: flex;
     flex: 40;
     align-items: right;
@@ -131,11 +133,11 @@ p.num-likes{
     z-index: 0;
 }
 
-.editButtons {
+.quoted-editButtons {
     margin : 10px;
 }
 
-.image-button-cover{
+.quoted-image-button-cover{
     width: 1.5cm;
     height: 1.5cm;
     background-color: Transparent;
@@ -146,7 +148,7 @@ p.num-likes{
     outline:none;
 }
 
-.image-button-cover:hover{
+.quoted-image-button-cover:hover{
     background-color: Transparent;
     background-repeat:no-repeat;
     border: 2px solid lightskyblue;

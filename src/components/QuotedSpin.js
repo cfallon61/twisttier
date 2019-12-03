@@ -37,57 +37,25 @@ class QuotedSpin extends Component
         this.quoted = this.props.quoted || false; 
     }
 
+    // checks whether viewer is logged in or nor
+    viewerIsAuthenticated()
+    {
+        return document.cookie !== "";
+    }
+
+    // formats the date
+    formatDate(timestamp)
+    {
+        let dateAndTime = timestamp.split('T');
+        let time = dateAndTime[1].substring(0, 5);
+        return dateAndTime[0] + " " + time;
+    }
+
     render()
     {
-        let likeButton = null;
         let moreTagsButton = null;
         let tagViewList = [];
         let flameIcon = null;
-
-        if(this.viewerIsAuthenticated())
-        {
-            if(this.props.showLike)
-            {
-                likeButton = <Button onClick={this.likeSpin} className="image-button-cover"><Image title = "Like spin" className="like-image" alt="like" src={LikeImage}/></Button>;
-            }
-            else
-            {
-                likeButton = <Button onClick={this.unlikeSpin} className="image-button-cover"><Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/></Button>;
-            }
-
-            /*if(this.props.tags.length === 0)
-            {   
-                tagViewList.push(<h6>No associated tags found.</h6>);
-            }
-            else
-            {   
-                let i = 0;
-                
-                while(i < MAX_TAGS && i < this.props.tags.length)
-                {
-                    let tagName = this.props.tags[i];
-                    let view = null;
-
-                    if (this.props.viewingUserTags !== undefined ) {
-                        
-                        if(this.props.viewingUserTags.includes(tagName))
-                        {
-                            view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
-                        }
-                        else
-                        {
-                            view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
-                        }
-                        tagViewList.push(view);
-                    
-                    } else {
-                        view = <p className="unfollowed-tags">###{tagName}</p>;
-                    }
-                    i++;
- 
-                }
-            }*/
-        }
 
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
@@ -101,38 +69,30 @@ class QuotedSpin extends Component
                 speechText += this.props.tags[i] + "       ";
             }
         } 
-        let quotedSpin = null;
-        if(this.quoted)
-        {
-            quotedSpin = this.props.quote;
-        }
-
+        
         return (
-            <div className="spin-area">
+            <div className="quoted-spin-area">
 
-                <div className="username-section">
-                    <div className="username-link">
+                <div className="quoted-username-section">
+                    <div className="quoted-username-link">
                         {usernameField}  
                     </div>
-                    {flameIcon}
-                    <div className="time-section">
+                    <div className="quoted-time-section">
                         <h6>
                             {this.formatDate(this.props.timestamp)}
                         </h6>
                     </div> 
                 </div>
-                <div className="spin-content">
+                <div className="quoted-spin-content">
                     <p>
                         {this.props.content}
                     </p>
                 </div>
 
-                <div className="other-info">
-                    {likeButton} 
-                    <p className="num-likes">{this.props.likes} people like this</p>
+                <div className="quoted-other-info">
+                    <p className="quoted-num-likes">{this.props.likes} people liked this</p> 
                 </div>
                 <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
-                {quotedSpin}
             </div>
         );
     }

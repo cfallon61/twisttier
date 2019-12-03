@@ -916,69 +916,6 @@ class Spin extends Component
             spinID: this.state.spinID,
         };
 
-        /*fetch(`/api/spin/${this.author}`, {
-            method : 'POST',
-            headers : {
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(quoteBody)
-          }).then(function (res) {
-            if (res.status === 200) {
-              res.json().then(function (data) {
-                jsonData = JSON.parse(data);
-                quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
-                console.log(quote);
-                self.quote = quote;
-              });
-            }
-            else
-            {
-                if(res.headers.has('error'))
-                {
-                    NotificationManager.error(res.headers.get('error'));
-                }
-                else
-                {
-                    NotificationManager.error("Unexpected error while liking spin.");
-                }
-            }
-        });*/
-        //Adding spin for the user who decided to share.
-        /*let requestBody = {
-            spinBody : this.state.sharedSpinText,
-            tags : this.state.sharedSpinTags,
-            is_quoted : true,
-            quote_origin : quoteBody
-        }
-        fetch(`/api/add_spin/${this.userToView}`, {
-            method : 'POST',
-            headers: {
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(requestBody)
-        })
-        .then((res)=>{
-            if(res.status == 200)
-            {
-                NotificationManager.success('Share successful!');
-                self.closeShareModal();
-            }
-            else
-            {
-                if(res.headers.has('error'))
-                {
-                    NotificationManager.error(res.headers.get('error'));
-                }
-                else
-                {
-                    NotificationManager.error("Server didn't return an OK response.");
-                }
-            }
-        })
-        .catch((err) => {
-            NotificationManager.error(err);
-        });*/
-
         return (
             <div className="spin-form">
                     <Form >

@@ -570,11 +570,8 @@ class Spin extends Component
 
     showShareModal() {
         this.setState({showShare : true});
-        this.setState({content : " "})
     }
     closeShareModal() {
-        window.location.reload();
-
         this.setState({showShare : false})
     }
 
@@ -645,9 +642,7 @@ class Spin extends Component
     }
 
     handleSharePostSubmission(){
-        // if (this.state.content === ) {
-        //     this.state.content = " ";
-        // }
+
         let self = this;
         let body = {
             spinBody: this.state.sharedSpinText,
@@ -658,7 +653,7 @@ class Spin extends Component
                 spinId: this.state.spinID,
             }
         };
-        // console.log('body =', body);
+        
         console.log("Text:" + this.state.sharedSpinText);
         fetch(`/api/add_spin/${this.userToView}`, {
             method : 'POST',
@@ -670,12 +665,7 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success("Shared!");
-                setTimeout(function() { //Start the timer
-                    self.setState({
-                        showShare : false
-                    });
-                }.bind(self), 1000)   
-
+                this.closeShareModal();
             }
             else
             {
@@ -808,37 +798,18 @@ class Spin extends Component
 
     handleShareTextChange(event)
     {
-        this.setState({sharedSpinText : event.target.value});
+        let updatingText = event.target.value;
+        if(event.target.value !== undefined && event.target.value.length > 90)
+        {
+            updatingText = updatingText.substring(0, 90);
+        }
+        this.setState({sharedSpinText : updatingText});
     }
 
     renderShareForm(){        
         // get all the tags the user has posted with before
         let newInterestOptions = [];
         let self = this;
-        /*fetch(`/api/users/${this.userToView}`, {
-            method: 'POST'
-        }).then(function(res){
-            if (res.status===200) {
-                res.json().then(function(data){
-                    let jsonData = JSON.parse(data);
-                    let tags = [];
-                    for (var i = 0; i < jsonData.tags_associated.length; i++) {
-                        tags.push(jsonData.tags_associated[i]);
-                    }
-                    self.viewersTags = tags;                     
-                });
-            }
-            else{
-                if(res.headers.has("error"))
-                {
-                    NotificationManager.error(res.headers.get('error'));
-                }
-                else
-                {
-                    NotificationManager.error("Server didn't return OK response.");
-                }
-            }
-        });*/
         let newAuthorInterests = this.viewersTags;
 
         if(newAuthorInterests !== undefined)
@@ -944,15 +915,18 @@ class Spin extends Component
                             placeholder = "Add a new tag"
                             onChange = {this.handleNewTagTextChange}
                             value = {this.state.newTagText}
+                            style = {{marginTop : "10px", marginBottom : "10px"}}
                         />
-
-                        <Button variant = "primary" type = "submit">Add tag</Button>
+                        <div>
+                            <Button variant = "outline-primary" type = "submit" style={{ display : "block", margin : "auto", marginBottom : "10px"}}>Add tag</Button>
+                            {this.state.tags.map((tagName) => <p>{tagName}</p>)}
+                        </div>
                     </Form>
 
 
                 <div className="modal-footer">
-                    <Button onClick = {this.handleSharePostSubmission}>Share</Button>
-                    <Button onClick={this.closeShareModal}>Cancel</Button>
+                    <Button variant = "outline-primary" className = "editButtons" onClick = {this.handleSharePostSubmission}>Share</Button>
+                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeShareModal}>Cancel</Button>
                 </div>
             </div>
     );

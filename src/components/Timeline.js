@@ -279,15 +279,13 @@ class Timeline extends Component
             for(var i = 0; i < this.state.newSpins.length; i++)
             {
                 var spin = this.state.newSpins[i];
-                let quote_state = spin.is_quote === "true";
-                console.log(quote_state);
                 if(spin.username !== this.props.username)
                 {
                     feed.addSpin(<Spin username={spin.username} content={spin.content}
                         timestamp={spin.date} spinID = {spin.id}
                         userToView={this.username} tags={spin.tags}
                         likes= {spin.likes} likeList = {spin.like_list}
-                        userInterests = {this.state.interests} hasNewTags={true} quoted={quote_state} quoteOrigin={spin.quote_origin}
+                        userInterests = {this.state.interests} hasNewTags={true} quoted={spin.is_quote} quoteOrigin={spin.quote_origin}
                     />);
                 }
             }
@@ -316,7 +314,7 @@ class Timeline extends Component
                       userToView={this.username} tags={spin.tags}
                       likes= {spin.likes} likeList = {spin.like_list}
                       userInterests = {this.state.interests} 
-                      tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                      tagsFollowedForThisSpin = {followingTagsForThisSpin} quoted={spin.is_quote} quoteOrigin={spin.quote_origin}
                   />);
                 }
                 

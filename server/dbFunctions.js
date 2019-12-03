@@ -984,7 +984,13 @@ async function unlikeSpin(user_liker, user_poster, spin) {
       like_list.splice(index, 1);
 
       args = [like_list, spin];
-      query = `UPDATE ${tablename} SET like_list = $1, likes = likes - 1
+      query = `UPDATE ${tablename} SET like_list = $1, 
+      likes = 
+        case when likes - 1 < 0 
+          then 0 
+        else 
+          likes - 1 
+      end 
       WHERE id = $2 RETURNING *`;
 
       res = await client.query(query, args);

@@ -386,13 +386,14 @@ class Spin extends Component
     updateQuote()
     {
         if(this.state.quoted) //If quoted is true, quoteOrigin should contain the dict of username and id.
-        {
+        { 
+          console.log('this =',this)
             let quotedUsername = this.quoteOrigin['username'];
             let quotedID = this.quoteOrigin['spinId'];
             let requestBody = {
                 spinID : quotedID
             }
-            console.log(quotedUsername);
+            console.log('original poster:', quotedUsername);
             console.log(quotedID);
             let self = this;
             fetch(`/api/spin/${quotedUsername}`, {

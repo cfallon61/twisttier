@@ -156,7 +156,12 @@ class Timeline extends Component
 
     //when the spin text is changed, update the chars count
     handleSpinChange(event){
-        this.setState({spin: {chars: event.target.value.length, text: event.target.value, interests : this.state.spin.interests}});
+        let updatingText = event.target.value;
+        if(event.target.value !== undefined && event.target.value.length > 90)
+        {
+            updatingText = updatingText.substring(0, 90);
+        }
+        this.setState({spin: {chars: updatingText.length, text: updatingText, interests : this.state.spin.interests}});
      }
 
     addInterestToSpin(interest) { //this needs an action listener

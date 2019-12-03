@@ -1,0 +1,19 @@
+.page-container {
+    display: flex;  
+}
+
+.page-content {
+    margin: 10px;
+}
+
+@media only screen and (max-width:800px){
+    .page-content {
+        font-size: 80%;
+    }
+}
+
+@media only screen and (min-width:800px) and (max-width:1000px){
+    .page-content {
+        font-size: 95%;
+    }
+}

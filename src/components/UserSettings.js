@@ -12,6 +12,7 @@ import Form from 'react-bootstrap/Form'
 import {NotificationManager} from 'react-notifications';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import Modal from './Modal';
+import './userSettings.css';
 
 class UserSettings extends Component {
   //Get logged in user and render accordingly
@@ -233,47 +234,48 @@ class UserSettings extends Component {
     return (
 
       <div>
-        <Container  >
-          <Row>
-            <Col>
-              <h1>{this.username} </h1>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              {profile}
-            </Col>
-          </Row>
-          <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
-          <Row>
-            <Form onSubmit={this.handleSubmit}>
-                <Form.Group>
-                    <Form.Label>Bio</Form.Label>
-                    <Form.Control type="text" placeholder="Bio" onChange={this.handleEditBio}/>
-                </Form.Group>
-                
-                <Form.Group>
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Add Interests</Form.Label>
-                    <Form.Control type="text" placeholder="Add interests separated by a ','" onChange={this.handleInterestsChange}/>
-                </Form.Group>
+        <Container  className = "page-container">
+            <Row>
+              <Col className = "page-content">
+                {profile}
+              </Col>
+              
+              <Col className = "page-content">
+                <Form onSubmit={this.handleSubmit}>
+                  <Form.Group>
+                      <Form.Label>Bio</Form.Label>
+                      <Form.Control type="text" placeholder="Bio" onChange={this.handleEditBio}/>
+                  </Form.Group>
+                  
+                  <Form.Group>
+                      <Form.Label>Password</Form.Label>
+                      <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
+                  </Form.Group>
+                  <Form.Group>
+                      <Form.Label>Add Interests</Form.Label>
+                      <Form.Control type="text" placeholder="Add interests separated by a ','" onChange={this.handleInterestsChange}/>
+                  </Form.Group>
 
-                <Form.Group>
-                  <Form.Label>Profile Image</Form.Label>
-                  <Form.Control type="file" accept="image/*" ref={this.imageFile}/>
-                </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Profile Image</Form.Label>
+                    <Form.Control type="file" accept="image/*" ref={this.imageFile}/>
+                  </Form.Group>
 
-                <Form.Group>
-                  <Button variant="primary" type="submit">Save Changes</Button>
-                </Form.Group>
-            </Form>
-          </Row>
-          </div>
-        </Container>
-        <Button variant="primary" onClick={this.openPasswordModal}> Delete Account </Button>
+                  <Form.Group>
+                    <Button className = "delete-button" variant="primary" type="submit">Save Changes</Button>
+                  </Form.Group>
+               </Form>
+              </Col>
+
+              <Col className = "page-content">
+                <Button variant="primary" onClick={this.openPasswordModal}>Delete Account </Button>
+              </Col>
+
+            </Row>
+
+         </Container>
+        
+        
         <Modal show={this.state.showPasswordForm}>
           {this.renderPasswordConfirm()}
         </Modal>

@@ -215,7 +215,7 @@ class SearchUser extends Component {
 
             // TODO: Formulate the picture, setting default for now
             var chosenProfilePic = (
-                <div className = "searchDPCont">
+                <div onClick={() => window.location.href = usernameLink} className = "searchDPCont">
                     <img className = "searchDP" src={defaultPic} alt={user.username} style={imgScale}/>
                 </div>
                     );
@@ -224,7 +224,7 @@ class SearchUser extends Component {
             if(user.profile_pic !== "" && user.profile_pic !== null && user.profile_pic !== "{}"){
                 // console.log("IMAGE exists");
                 chosenProfilePic = (
-                    <div className = "searchDPCont">
+                    <div onClick={() => window.location.href = usernameLink} className = "searchDPCont">
                             <img className = "searchDP" src={user.profile_pic} alt={user.username} style={imgScale}/>
                     </div>
                             );

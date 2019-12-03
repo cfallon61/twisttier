@@ -21,8 +21,12 @@ async function bootClearNewPosts(req, res, next)
 {
   try 
   {
+    console.log('clearing new tag posts');
     var result = await pool.query(`UPDATE ${USER_TABLE} SET new_tag_posts = NULL`);
-    console.log(result.old);
+    if (result.old) 
+    {
+      console.log(result.old);
+    }
   }
   catch (e)
   {
@@ -55,7 +59,7 @@ var userExists = async function (user) {
     console.log("what the fuck")
     return false;
   }
-  console.log(query, params);
+  // console.log(query, params);
   // console.log('before query')
   var res = await pool.query(query, params);
 
@@ -338,7 +342,7 @@ async function clearNewPostColumn(username) {
 
     client.query("BEGIN");
 
-    query = `UPDATE ${USER_TABLE} SET new_tag_posts NULL WHERE username = $1 RETURNING username`;
+    query = `UPDATE ${USER_TABLE} SET new_tag_posts = NULL WHERE username = $1 RETURNING username`;
 
     await client.query(query, [username]);
 
@@ -576,9 +580,9 @@ async function addSpin(username, spin) {
       ];
       // add the post to the new tag posts column and set a timer function
       query = `UPDATE ${USER_TABLE} SET tags_associated = $1, new_tag_posts=$2
-                WHERE username = $3 RETURNING username`;
-      await client.query(query, args);
-
+                WHERE username = $3 RETURNING username, new_tag_posts`;
+      res = await client.query(query, args);
+      console.log(res.rows)
       // trigger a function to delete the post id from the new post column after
       // NEW_POST_TIMEOUT amount of time, 5 minutes for dev environment, 24 hours for
       // actual

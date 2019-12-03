@@ -747,6 +747,10 @@ class Spin extends Component
         // get all the tags the user has posted with before
         let newInterestOptions = [];
         let self = this;
+        if (this.userToView === null)
+        {
+          return;
+        }
         fetch(`/api/users/${this.userToView}`, {
             method: 'POST'
         }).then(function(res){
@@ -844,40 +848,43 @@ class Spin extends Component
                 </DropdownButton>
             );
         }
-        let quote = null;
-        let jsonData = null;
-        let quoteBody = {
+        // I think this is necessary. My understanding is that if the post is a quote then 
+        // this will get the original post and essentially link it
+        // as it stands now this gets every single post individually for no reason.
+        console.log(this.state);
+        // if (this.state.quoted)
+        {
+          let quote = null;
+          let jsonData = null;
+          let quoteBody = {
             spinID: this.state.spinID,
-        };
-        fetch(`/api/spin/${this.author}`, {
-            method : 'POST',
-            headers : {
-                "Content-Type" : "application/json"
+          };
+          fetch(`/api/spin/${this.author}`, {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json"
             },
             body: JSON.stringify(quoteBody)
-        }).then(function(res){
-            if(res.status === 200)
-            {
-                res.json().then(function(data){
-                    jsonData = JSON.parse(data);
-                    quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
-                    console.log(quote);
-                    self.quote = quote;
-                });
+          }).then(function (res) {
+            if (res.status === 200) {
+              res.json().then(function (data) {
+                jsonData = JSON.parse(data);
+                quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
+                console.log(quote);
+                self.quote = quote;
+              });
             }
-            else
-            {
-                if(res.headers.has('error'))
-                {
-                    NotificationManager.error(res.headers['error']);
-                }
-                else
-                {
-                    NotificationManager.error("Unexpected error while liking spin.");
-                }
+            else {
+              if (res.headers.has('error')) {
+                NotificationManager.error(res.headers['error']);
+              }
+              else {
+                NotificationManager.error("Unexpected error while liking spin.");
+              }
             }
-        });
-
+          });
+        }
+        
         return (
             <div className="spin-form">
                     <Form >

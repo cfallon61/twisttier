@@ -74,6 +74,15 @@ class QuotedSpin extends Component
             }
         } 
         
+        let timeField = this.formatDate(this.props.timestamp);
+        let likesField = `${this.props.likes} people liked this`;
+        if (this.props.username === '-deleted-') {
+            speechText = "This spin was deleted."
+            usernameField = null;
+            timeField = null;
+            likesField = null;
+        }
+
         return (
             <div className="quoted-spin-area">
 
@@ -83,7 +92,7 @@ class QuotedSpin extends Component
                     </div>
                     <div className="quoted-time-section">
                         <h6>
-                            {this.formatDate(this.props.timestamp)}
+                            {timeField}
                         </h6>
                     </div> 
                 </div>
@@ -94,7 +103,7 @@ class QuotedSpin extends Component
                 </div>
 
                 <div className="quoted-other-info">
-                    <p className="quoted-num-likes">{this.props.likes} people liked this</p> 
+                    <p className="quoted-num-likes">{likesField}</p> 
                 </div>
                 <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
             </div>

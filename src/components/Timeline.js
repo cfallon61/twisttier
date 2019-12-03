@@ -132,10 +132,6 @@ class Timeline extends Component
                 if(res.status === 200)
                 {
                     NotificationManager.success("Spun!");
-
-                    setTimeout(function() { //Start the timer
-                        window.location.reload();
-                    }.bind(this), 1000)
                 }
                 else
                 {

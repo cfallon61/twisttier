@@ -1006,11 +1006,11 @@ class Spin extends Component
                         
                         if(this.state.viewingUserTags.includes(tagName))
                         {
-                            view = <p className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
+                            view = <p tabIndex={0} className="followed-tags" onClick={() => this.unfollowTag(tagName)}>#{tagName}</p>;
                         }
                         else
                         {
-                            view = <p className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
+                            view = <p tabIndex={0} className="unfollowed-tags" onClick={() => this.followTag(tagName)}>#{tagName}</p>;
                         }
                         tagViewList.push(view);
                     

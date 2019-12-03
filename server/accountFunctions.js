@@ -295,8 +295,8 @@ async function updateProfileInfo(req, res, next) {
     password: req.body.password,
     bio: req.body.bio,
     name: req.body.name,
-    interests: req.body.interests,
-    accessibility_features: req.body.accessibility_features,
+    interests: JSON.parse(req.body.interests),
+    accessibility_features: JSON.parse(req.body.accessibility_features),
     profile_pic: imgsrc
   };
   // console.log(req.params, "\n", req.body, "\n", user);
@@ -305,16 +305,25 @@ async function updateProfileInfo(req, res, next) {
   console.log('updating', user.username, '\'s profile');
   var userData = await db.userExists(user);
 
-  if (!userData) {
+  if (!userData) 
+  {
     res.setHeader('error', "unable to update");
     console.log('unable to update user idk what happened');
-    extFuncs.delete_profile_img(req.file.path);
+    if (req.file != undefined && req.file.path)
+    {
+      extFuncs.delete_profile_img(req.file.path);
+    }
     return next();
   }
 
   // if no new profile picture is provided, set the new one to be the current one
   if (!user.profile_pic) {
     user.profile_pic = userData.profile_pic;
+  }
+  // if no password provided, retain old password
+  if (user.password && user.password.length === 0)
+  {
+    user.password = oldPass;
   }
   // if one is provided, set a parameter in the request object to point to the old
   // profile picture path and then delete that image
@@ -324,6 +333,7 @@ async function updateProfileInfo(req, res, next) {
   }
 
   // attempt to update the user's crap
+  user.passhash = userData.passhash;
   userData = await db.updateUser(user);
 
   // if all checking fine, update the user
@@ -332,7 +342,7 @@ async function updateProfileInfo(req, res, next) {
     console.log('user not found in user updating');
     res.setHeader('error', 'user not found');
   }
-  else 
+  else
   {
     res.setHeader('username', userData.username);
     req.imgsrc = userData.profile_pic;
@@ -393,19 +403,19 @@ async function updateFollowing(req, res, next) {
   }
 }
 
-// @brief: middleware for handling the searching for users. 
-async function search(req, res, next) 
+// @brief: middleware for handling the searching for users.
+async function search(req, res, next)
 {
   console.log('searching for', req.params.user);
   const user = req.params.user;
   // if the parameter is not definec
-  if (!user || user === "") 
+  if (!user || user === "")
   {
     res.status(406)
     res.setHeader('error', "query cannot be empty");
     return next();
   }
-  
+
   var results = await db.searchForUser(user);
 
   if (!results)
@@ -414,7 +424,7 @@ async function search(req, res, next)
     res.setHeader('error', "no users found matching that search parameter");
     return next();
   }
-  else 
+  else
   {
     res.json(JSON.stringify(results));
   }

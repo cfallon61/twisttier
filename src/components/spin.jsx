@@ -922,15 +922,14 @@ class Spin extends Component
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify(quoteBody)
-        }).then(function(res){
-            if(res.status === 200)
-            {
-                res.json().then(function(data){
-                    jsonData = JSON.parse(data);
-                    quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
-                    console.log(quote);
-                    self.quote = quote;
-                });
+          }).then(function (res) {
+            if (res.status === 200) {
+              res.json().then(function (data) {
+                jsonData = JSON.parse(data);
+                quote = `"${jsonData.content}\t\t-${jsonData.username}"`;
+                console.log(quote);
+                self.quote = quote;
+              });
             }
             else
             {

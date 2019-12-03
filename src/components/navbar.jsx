@@ -43,8 +43,10 @@ logOut()
       {
         NotificationManager.success("Logout successful");
         document.cookie = ""; //Clear cookies.
+        window.location.reload();
       }
-      else{
+      else
+      {
         if(res.headers.has('error'))
         {
           NotificationManager.error(res.headers['error']);
@@ -58,16 +60,15 @@ logOut()
 }
 
 onLogoutClicked()
-  {
-    this.logOut();
-    window.location.reload();
+{
+  this.logOut();
 }
 
 handleSearchValueChange(event) {
   event.preventDefault();
-    this.setState({
-        searchValue : event.target.value
-    })
+  this.setState({
+      searchValue : event.target.value
+  })
 }
 
 // change the redirect bool

@@ -31,11 +31,11 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../build/')));
 app.use(helpers.cloudinaryConfig);
-app.use(db.bootClearNewPosts);
 
 app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
+  db.bootClearNewPosts(null, null, () => {console.log('cleared new posts column')});
 });
 
 if (process.env.TEST === 'true')
@@ -101,7 +101,7 @@ if (process.env.TEST === 'true')
 app.get('/logout', helpers.loggedIn, (req, res) => {
   console.log(req.clientSession.uid, 'is logging out');
   // console.log(req.cookies);
- helpers.deleteSession(req, res);
+  helpers.deleteSession(req, res);
   res.redirect('/'); // redirect to home page
 });
 
@@ -270,6 +270,7 @@ app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
     res.sendFile(index);
   } 
   else {
+    console.log('deleting session', req.clientSession)
     helpers.deleteSession(req, res);
     res.redirect('/'); // redirect to home page
   }

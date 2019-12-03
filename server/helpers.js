@@ -142,16 +142,20 @@ function createSession(req, res) {
 // @author: Chris Fallon
 function deleteSession(req, res) {
 
-  if (req.clientSession.uid) {
+  res.clearCookie('clientSession');
+  res.clearCookie('username')
+  if (req.clientSession.uid) 
+  {
     req.clientSession.uid = null;
     req.clientSession.destroy((err) => { if (err) throw err; });
-    res.clearCookie('clientSession');
   }
-  if (req.cookies.username) {
+  if (req.cookies.username) 
+  {
     req.cookies.username = null;
-    res.clearCookie('username')
   }
-  console.log(req.clientSession, req.cookies);
+  req.clientSession.reset();
+
+  console.log('clientsession =', req.clientSession, 'cookies =', req.cookies);
   return 0;
 }
 
@@ -161,8 +165,9 @@ function loggedIn(req, res, next) {
     res.setHeader("loggedIn", true);
     console.log(req.clientSession.uid, 'is logged in');
     return next();
-  } else {
-    res.redirect('/'); // TODO route this however
+  } 
+  else {
+    res.redirect('/');
   }
 };
 

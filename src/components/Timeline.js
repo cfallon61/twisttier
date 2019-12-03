@@ -308,30 +308,18 @@ class Timeline extends Component
                 // console.log("Author: ", spin.username);
                 // console.log("tags to send: ", followingTagsForThisSpin);
 
-                // check if the user is following atleast one of the tags
-                var tagMatchCount = 0;
-                for (var a = 0; a < followingTagsForThisSpin.length; a++){
-                    if (spin.tags.includes(followingTagsForThisSpin[a])) {
-                        tagMatchCount++;
-                        break;
-                    }
+         
+                if(spin.username !== this.props.username) //Filter out spins that the user made.
+                {
+                  feed.addSpin(<Spin username={spin.username} content={spin.content}
+                      timestamp={spin.date} spinID = {spin.id}
+                      userToView={this.username} tags={spin.tags}
+                      likes= {spin.likes} likeList = {spin.like_list}
+                      userInterests = {this.state.interests} 
+                      tagsFollowedForThisSpin = {followingTagsForThisSpin}
+                  />);
                 }
-
-                // if following atleast one of the tags
-                if (tagMatchCount !== 0) {
-                    
-                    if(spin.username !== this.props.username) //Filter out spins that the user made.
-                    {
-                        feed.addSpin(<Spin username={spin.username} content={spin.content}
-                            timestamp={spin.date} spinID = {spin.id}
-                            userToView={this.username} tags={spin.tags}
-                            likes= {spin.likes} likeList = {spin.like_list}
-                            userInterests = {this.state.interests} 
-                            tagsFollowedForThisSpin = {followingTagsForThisSpin}
-                        />);
-                    }
                 
-                }
             }
         }
         else{

@@ -1009,7 +1009,7 @@ class Spin extends Component
             }
             else
             {
-                likeButton = <Button onClick={this.unlikeSpin} className="image-button-cover"><Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage} onClick={this.unlikeSpin}/></Button>;
+                likeButton = <Button onClick={this.unlikeSpin} className="image-button-cover"><Image title = "Unlike spin" className="like-image" alt="unlike" src={unlikeImage}/></Button>;
             }
 
             if(this.state.tags.length === 0)

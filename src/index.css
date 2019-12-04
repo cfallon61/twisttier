@@ -79,7 +79,7 @@ dark-mode-toggle {
 }
 
 .spin-area{
-      background: linear-gradient(var(--background-color), white);
+  background: var(--background-color);
 }
 
 .username-section .username-link a {

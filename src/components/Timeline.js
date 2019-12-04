@@ -8,7 +8,7 @@ import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
 import { NotificationManager } from 'react-notifications';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { Dropdown, DropdownButton} from 'react-bootstrap';
 import Speech from 'react-speech';
 
 
@@ -201,6 +201,23 @@ class Timeline extends Component
         })
     }
 
+    handleInterestDeletion(oldInterest) {
+
+        let interestList = this.state.interests;
+
+        // find index of the tag
+        let indexOfInterest = interestList.indexOf(oldInterest);
+
+        // delete the tag
+        if (indexOfInterest != -1) {
+            interestList.splice(indexOfInterest, 1);
+        }
+        // reset the state
+        this.setState({
+            interests : interestList
+        });
+    }
+
     renderSpinForm() {
         // console.log(this.state.spin.interests);
         let spinInterests = [];
@@ -230,7 +247,9 @@ class Timeline extends Component
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
             currentAddedInterestView = this.state.spin.interests.map((tagName) => {
-            return <h6>{tagName}</h6>;
+            return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
+            {tagName}
+        </Dropdown.Item>;
         });
         }
 
@@ -241,15 +260,24 @@ class Timeline extends Component
         }
 
         let dropdownInterests = (
-            <Dropdown>
-                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
-                    Tags
-                </Dropdown.Toggle>
+            <DropdownButton
+            title='   Add from Existing Tags   '
+            variant='outline-success'
+            block
+            className = "editButtons"
+        >
+            {spinInterests}
+        </DropdownButton>
 
-                <Dropdown.Menu>
-                    {spinInterests}
-                </Dropdown.Menu>
-            </Dropdown>
+            // <Dropdown>
+            //     <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
+            //         Tags
+            //     </Dropdown.Toggle>
+
+            //     <Dropdown.Menu>
+            //         {spinInterests}
+            //     </Dropdown.Menu>
+            // </Dropdown>
         );
 
         let interestsDropdown = null;
@@ -266,12 +294,18 @@ class Timeline extends Component
             <div className="spin-form">
                     <Form onSpin = {this.handleSpin} >
                         <Form.Label>Spin</Form.Label>
-                        <Form.Control as = "textarea" placeholder="Your Spin here" rows="3"
-                            onChange = {this.handleSpinChange}/>
+                        <Form.Control 
+                            as = "textarea" 
+                            placeholder="Your Spin here" 
+                            rows="3"
+                            onChange = {this.handleSpinChange}
+                        />
                             <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
-                    {this.state.spin.interests}
+                    {this.state.spin.interests.map(function(tagName, index) { 
+                            return <span>{ ( index ? ', ' : '') + tagName}</span>;
+                        })}
                     <Form>
 
                     </Form>

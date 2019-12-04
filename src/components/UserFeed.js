@@ -5,7 +5,7 @@ import Profile from "./Profile.js";
 import { template } from '@babel/core';
 import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown'
+import { Dropdown, DropdownButton}  from 'react-bootstrap';
 import Modal from './Modal.js';
 import {NotificationManager} from 'react-notifications';
 import App from '../App.jsx';
@@ -317,7 +317,23 @@ class UserFeed extends Component
 
     closeSpinModal()
     {
+        window.location.reload();
         this.setState({spinModalShow : false});
+    }
+
+    handleInterestDeletion(oldInterest) {
+
+        let interestList = this.state.spin.interests;
+
+        // find index of the tag
+        let indexOfInterest = interestList.indexOf(oldInterest);
+
+        // delete the tag
+        if (indexOfInterest != -1) {
+            interestList.splice(indexOfInterest, 1);
+        }
+        // reset the state
+        this.setState({spin : {chars: this.state.spin.text.length, text: this.state.spin.text, interests : interestList}});
     }
 
     renderSpinForm() {
@@ -328,9 +344,22 @@ class UserFeed extends Component
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
             currentAddedInterestView = this.state.spin.interests.map((tagName) => {
-            return <h6>{tagName}</h6>;
+            return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
+            {tagName}
+        </Dropdown.Item>;
         });
         }
+
+        let addedDropdown = (
+            <DropdownButton
+            title='Remove from Existing Tags'
+            variant='outline-danger'
+            block
+            className = "shareButtons"
+            >
+                {currentAddedInterestView}
+            </DropdownButton>
+        );
 
         let disableInterestDropdown = false;
         // console.log(spinInterests);
@@ -339,15 +368,23 @@ class UserFeed extends Component
         }
 
         let dropdownInterests = (
-            <Dropdown>
-                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
-                    Tags
-                </Dropdown.Toggle>
+            <DropdownButton
+            title='   Add from Existing Tags   '
+            variant='outline-success'
+            block
+            className = "spinButtons"
+        >
+            {spinInterests}
+        </DropdownButton>
+            // <Dropdown>
+            //     <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
+            //         Tags
+            //     </Dropdown.Toggle>
 
-                <Dropdown.Menu>
-                    {spinInterests}
-                </Dropdown.Menu>
-            </Dropdown>
+            //     <Dropdown.Menu>
+            //         {spinInterests}
+            //     </Dropdown.Menu>
+            // </Dropdown>
         );
 
         let interestsDropdown = null;
@@ -356,7 +393,7 @@ class UserFeed extends Component
         } else {
             interestsDropdown = (<div>
                 {dropdownInterests}
-                {currentAddedInterestView}
+                {addedDropdown}
             </div>)
         }
 
@@ -369,13 +406,15 @@ class UserFeed extends Component
                             <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
-                    {this.state.spin.interests}
                     <Form>
 
                     </Form>
 
                     <Form onSubmit = {this.handleTag} >
-                    <Form.Control width = "40%" placeholder = "Add new tag" onChange = {this.handleTagChange}/>
+                    <Form.Control 
+                        width = "40%" 
+                        placeholder = "Add new tag" 
+                        onChange = {this.handleTagChange}/>
                         <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
                     </Form>
                 <div className="modal-footer">
@@ -417,9 +456,8 @@ class UserFeed extends Component
             }).then(function(res){
                 if(res.status === 200)
                 {
-                    NotificationManager.success("Spun!");
                     self.closeSpinModal();
-                    window.location.reload();
+                    NotificationManager.success("Spun!");                   
                 }
                 else
                 {

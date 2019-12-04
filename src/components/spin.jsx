@@ -884,20 +884,12 @@ class Spin extends Component
                 </DropdownButton>
             );
         }
-        let quote = null;
-        let jsonData = null;
-        let quoteBody = {
-            username : this.author,
-            spinID: this.state.spinID,
-        };
 
         return (
             <div className="spin-form">
                     <Form >
                         <Form.Label>Share Spin</Form.Label>
-                        <p>{self.quote}</p>
-                        
-                        
+            
                         <Form.Control 
                             as = "textarea" 
                             placeholder="Your Spin here"

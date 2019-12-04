@@ -177,7 +177,6 @@ async function deleteAccount(req, res, next) {
     res.setHeader('error', 'deletion failed: bad password');
   }
   return next();
-
 }
 
 // API for frontend development

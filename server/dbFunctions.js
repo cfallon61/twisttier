@@ -247,10 +247,10 @@ async function deleteUser(username){
 
     var res = await client.query(query);
 
-    query = `DELETE FROM ${USER_TABLE} WHERE username=$1, email=$2 RETURNING username`;
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING username`;
 
     // query = `SELECT * FROM ${USER_TABLE} WHERE username=$1`;
-    var res = await client.query(query, [username, ]);
+    var res = await client.query(query, [username]);
     await client.query('COMMIT');
 
     rows = res.rows;
@@ -260,7 +260,7 @@ async function deleteUser(username){
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.deleteUser: ${ e }`);
     // throw e;
-    return e;
+    return false;
   }
   finally {
     client.release();
@@ -1057,23 +1057,27 @@ async function searchForUser(userdata)
 async function getSingleSpin(username, spinid)
 {
   var spintable = userSpinTableName(username);
+  var client = await pool.connect();
   var query = `SELECT * FROM ${spintable} where id = $1`;
   try 
   {
-    var res = await pool.query(query, [spinid]);
-
-    var spin = res.rows[0];
-
-    if (res.rows.length === 0)
+    var spin = {
+      content: "-deleted-",
+      id: null,
+      username: '-deleted-',
+      date: '-deleted-',
+      likes: 0,
+    }
+    var exists = await client.query(`SELECT username from ${USER_TABLE} WHERE username = $1`, [username]);
+    if (exists.rows.length === 0)
     {
-      console.log(spin);
-      spin = {
-        content: "-deleted-",
-        id: null,
-        username: '-deleted-',
-        date: '-deleted-',
-        likes: 0,
-      }
+      return spin;
+    }
+    var res = await client.query(query, [spinid]);
+
+    if (res.rows.length > 0)
+    {
+      spin = res.rows[0];
     }
     return spin;;
   }
@@ -1081,6 +1085,10 @@ async function getSingleSpin(username, spinid)
   {
     console.log("Error encountered in db.getSingleSpin: ", e);
     return false;
+  }
+  finally 
+  {
+    client.release();
   }
 
 }

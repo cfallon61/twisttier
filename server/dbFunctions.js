@@ -608,6 +608,7 @@ async function addSpin(username, spin) {
   catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.addSpin: ${ e }`);
+    return false;
   }
   finally {
     client.release();

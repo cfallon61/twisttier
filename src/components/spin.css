@@ -154,3 +154,8 @@ p.num-likes{
     overflow: hidden;
     outline:none;
 }
+
+.moreTagsDiv {
+    max-height: 500px;
+    overflow: auto;
+}

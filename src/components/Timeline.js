@@ -150,8 +150,6 @@ class Timeline extends Component
         }
     }
 
-
-
     //when the spin text is changed, update the chars count
     handleSpinChange(event){
         let updatingText = event.target.value;
@@ -203,9 +201,30 @@ class Timeline extends Component
 
     renderSpinForm() {
         // console.log(this.state.spin.interests);
-        let spinInterests = this.state.interests.map((tagName) => {
-            return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
-        });
+        let spinInterests = [];
+        if (this.state.interests.length > 5) {
+            // put 4 in
+            for (var i = 0; i < 5; i++) {
+                let tagName = this.state.interests[i];
+                let item = (
+                    <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>            
+                        {tagName}
+                    </Dropdown.Item>
+                );
+                spinInterests.push(item);
+            }
+
+        } else {
+            
+            spinInterests = this.state.interests.map((tagName) => {
+                return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+            });
+
+        }
+        
+
+
+    
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
             currentAddedInterestView = this.state.spin.interests.map((tagName) => {
@@ -270,7 +289,7 @@ class Timeline extends Component
 
     render()
     {
-        console.log("state following: ", this.state.following);
+        // console.log("state following: ", this.state.following);
         //Right now we will use three parts of the spin.
         //content, username and timestamp.
         if(this.state.error.exist) {

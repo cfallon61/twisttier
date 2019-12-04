@@ -524,9 +524,10 @@ class Spin extends Component
     handleInterestAddition(newTag) { 
 
         let tagList = this.state.tags;
-
-        tagList.push(newTag);
-
+        if(!tagList.includes(newTag))
+        {
+            tagList.push(newTag);
+        }
         this.setState({
             tags : tagList
         });
@@ -665,7 +666,7 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success("Shared!");
-                this.closeShareModal();
+                self.closeShareModal();
             }
             else
             {

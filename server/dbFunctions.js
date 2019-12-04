@@ -143,6 +143,7 @@ function userSpinTableName(username) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.createUser: ${e}`);
+    return 'unable to create user';
     // return e;
   }
   finally {
@@ -260,7 +261,7 @@ async function deleteUser(username){
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.deleteUser: ${ e }`);
     // throw e;
-    return e;
+    return false;
   }
   finally {
     client.release();
@@ -322,6 +323,7 @@ async function updateUser(user) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.updateUser: ${e}`);
+    return false;
   }
   finally {
     client.release();
@@ -388,6 +390,7 @@ async function updateLoginTime(user){
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.updateLoginTime: ${e}`);
+    return false;
   }
   finally {
     client.release();
@@ -440,7 +443,7 @@ async function getSpins(user, users) {
 
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      console.log('newpost =', newpostid);
+      // console.log('newpost =', newpostid);
       if (newpostid && newpostid.new_tag_posts != null)
       {
         newposts.push({ username: newpostid.username, postid: newpostid.new_tag_posts} );
@@ -608,6 +611,7 @@ async function addSpin(username, spin) {
   catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.addSpin: ${ e }`);
+    return false;
   }
   finally {
     client.release();
@@ -906,6 +910,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.unfollowTopicUserPair: ${ e }`);
+    return false;
   }
   finally {
     client.release();
@@ -1057,23 +1062,27 @@ async function searchForUser(userdata)
 async function getSingleSpin(username, spinid)
 {
   var spintable = userSpinTableName(username);
+  var client = await pool.connect();
   var query = `SELECT * FROM ${spintable} where id = $1`;
   try 
   {
-    var res = await pool.query(query, [spinid]);
-
-    var spin = res.rows[0];
-
-    if (res.rows.length === 0)
+    var spin = {
+      content: "-deleted-",
+      id: null,
+      username: '-deleted-',
+      date: '-deleted-',
+      likes: 0,
+    }
+    var exists = await client.query(`SELECT username from ${USER_TABLE} WHERE username = $1`, [username]);
+    if (exists.rows.length === 0)
     {
-      console.log(spin);
-      spin = {
-        content: "-deleted-",
-        id: null,
-        username: '-deleted-',
-        date: '-deleted-',
-        likes: 0,
-      }
+      return spin;
+    }
+    var res = await client.query(query, [spinid]);
+
+    if (res.rows.length > 0)
+    {
+      spin = res.rows[0];
     }
     return spin;;
   }
@@ -1081,6 +1090,10 @@ async function getSingleSpin(username, spinid)
   {
     console.log("Error encountered in db.getSingleSpin: ", e);
     return false;
+  }
+  finally 
+  {
+    client.release();
   }
 
 }

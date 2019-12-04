@@ -50,7 +50,7 @@ class UserFeed extends Component
             userToViewInterests : [],
             userToViewFollowing : [],
             spin : {
-                text : " ",
+                text : "",
                 chars : 0,
                 interests : [],
             },
@@ -375,7 +375,7 @@ class UserFeed extends Component
                     </Form>
 
                     <Form onSubmit = {this.handleTag} >
-                    <Form.Control width = "40%" placeholder = "add tag" onChange = {this.handleTagChange}/>
+                    <Form.Control width = "40%" placeholder = "Add new tag" onChange = {this.handleTagChange}/>
                         <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
                     </Form>
                 <div className="modal-footer">

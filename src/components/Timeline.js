@@ -99,8 +99,10 @@ class Timeline extends Component
     }
 
     closeModal() {
+        console.log("Closing spin modal...");
         this.setState({showSpinModal : false});
     }
+
 
     onSpinPressedAtModal(event) {
         //TODO: set interest
@@ -256,8 +258,8 @@ class Timeline extends Component
                     </Form>
 
                     <Form onSubmit = {this.handleTag} >
-                    <Form.Control width = "40%" placeholder = "add tag" onChange = {this.handleTagChange.bind(this)}/>
-                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
+                    <Form.Control width = "40%" placeholder = "Add new tag" onChange = {this.handleTagChange.bind(this)}/>
+                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add new tag</Button>
                     </Form>
                 <div className="modal-footer">
                     <Button variant = "outline-primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>

@@ -112,9 +112,13 @@ class SearchUser extends Component {
 
         shownTags.push(header);
 
-        tagsToShow.map( (tag) => {
-            shownTags.push( <p>#{tag}</p> );
-        });
+        // tagsToShow.map( (tag) => {
+        //     shownTags.push( <p>#{tag}</p> );
+        // });
+
+        tagsToShow.map(function(tagName, index) { 
+            return <span>{ ( index ? ', ' : '') + tagName}</span>;
+        })
 
         // push the close button
         shownTags.push(<Button onClick={this.closeAllTagsModal}>Close</Button>);

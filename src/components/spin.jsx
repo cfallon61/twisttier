@@ -573,6 +573,7 @@ class Spin extends Component
     }
     closeShareModal() {
         this.setState({showShare : false})
+        window.location.reload();
     }
 
     // show the edit post modal
@@ -665,7 +666,7 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success("Shared!");
-                this.closeShareModal();
+                self.closeShareModal();
             }
             else
             {
@@ -713,7 +714,7 @@ class Spin extends Component
         {
             userInterestsDropdown = (
                 <DropdownButton
-                    title='   Add from Suggested Tags   '
+                    title='   Add from Existing Tags   '
                     variant='outline-success'
                     block
                     className = "editButtons"
@@ -778,7 +779,7 @@ class Spin extends Component
                     <Form onSubmit = {this.handleNewTagAddition}>
                         <Form.Control
                             width = "40%"
-                            placeholder = "Add a new tag"
+                            placeholder = "Add new tag"
                             onChange = {this.handleNewTagTextChange}
                             value = {this.state.newTagText}
                         />
@@ -808,42 +809,42 @@ class Spin extends Component
 
     renderShareForm(){        
         // get all the tags the user has posted with before
-        let newInterestOptions = [];
+       // let newInterestOptions = [];
         let self = this;
-        let newAuthorInterests = this.viewersTags;
+        // let newAuthorInterests = this.viewersTags;
 
-        if(newAuthorInterests !== undefined)
-        {
-            newInterestOptions = newAuthorInterests.map((tagName) => {
+        // if(newAuthorInterests !== undefined)
+        // {
+        //     newInterestOptions = newAuthorInterests.map((tagName) => {
 
-                if (!(this.state.tags !== undefined && this.state.tags.includes(tagName))){
-                    return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
-                            {tagName}
-                            </Dropdown.Item>;
-                }
-            });
-        }
-        // create dropdown of previously used tags    
-        let newInterestsDropdown = null;
+        //         if (!(this.state.tags !== undefined && this.state.tags.includes(tagName))){
+        //             return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
+        //                     {tagName}
+        //                     </Dropdown.Item>;
+        //         }
+        //     });
+        // }
+        // // create dropdown of previously used tags    
+        // let newInterestsDropdown = null;
         
-        // create a dropdown using those interests. If list is empty, then the view will only consist of text.
-        if(newInterestOptions.length === 0)
-        {
-            newInterestsDropdown = <h3>You don't have any tags yet.</h3>
-        }
-        else
-        {
-            newInterestsDropdown = (
-                <DropdownButton
-                title='   Add from Suggested Tags   '
-                variant='outline-success'
-                block
-                className = "shareButtons"
-                >
-                    {newInterestOptions}
-                </DropdownButton>
-            );
-        }
+        // // create a dropdown using those interests. If list is empty, then the view will only consist of text.
+        // if(newInterestOptions.length === 0)
+        // {
+        //     newInterestsDropdown = <h3>You don't have any tags yet.</h3>
+        // }
+        // else
+        // {
+        //     newInterestsDropdown = (
+        //         <DropdownButton
+        //         title='   Add from Suggested Tags   '
+        //         variant='outline-success'
+        //         block
+        //         className = "shareButtons"
+        //         >
+        //             {newInterestOptions}
+        //         </DropdownButton>
+        //     );
+        // }
 
         let addedInterests = null;
         if (this.state.tags !== undefined) {
@@ -905,21 +906,24 @@ class Spin extends Component
                         />
                             <p>{this.state.sharedSpinText.length}/90 characters</p>
                         
-                        {newInterestsDropdown}
                         {addedTagsDropdown}
+
+                        {this.state.tags.map(function(tagName, index) { 
+                            return <span>{ ( index ? ', ' : '') + tagName}</span>;
+                        })}
+
                     </Form>
 
                     <Form onSubmit = {this.handleNewTagAddition}>
                         <Form.Control
                             width = "40%"
-                            placeholder = "Add a new tag"
+                            placeholder = "Add new tag"
                             onChange = {this.handleNewTagTextChange}
                             value = {this.state.newTagText}
                             style = {{marginTop : "10px", marginBottom : "10px"}}
                         />
                         <div>
                             <Button variant = "outline-primary" type = "submit" style={{ display : "block", margin : "auto", marginBottom : "10px"}}>Add tag</Button>
-                            {this.state.tags.map((tagName) => <p>{tagName}</p>)}
                         </div>
                     </Form>
 

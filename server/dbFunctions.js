@@ -143,6 +143,7 @@ function userSpinTableName(username) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.createUser: ${e}`);
+    return 'unable to create user';
     // return e;
   }
   finally {
@@ -322,6 +323,7 @@ async function updateUser(user) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.updateUser: ${e}`);
+    return false;
   }
   finally {
     client.release();
@@ -388,6 +390,7 @@ async function updateLoginTime(user){
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.updateLoginTime: ${e}`);
+    return false;
   }
   finally {
     client.release();
@@ -907,6 +910,7 @@ async function unfollowTopicUserPair(unfollowingUser, unfollowedUser, tags) {
   catch (e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.unfollowTopicUserPair: ${ e }`);
+    return false;
   }
   finally {
     client.release();

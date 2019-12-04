@@ -200,7 +200,7 @@ class Profile extends Component{
 
     render()
     {
-        console.log("Rednginering Profile.");
+        //console.log("Rednginering Profile.");
         let tagViews = [];
         var followinglist = [];
         let speechText = `Details of user ${this.username}: Bio: ${this.state.bio}`
@@ -229,7 +229,7 @@ class Profile extends Component{
                 <div className="profile-info">
                     <a href = {userLinkToProfile}><h3>{this.state.username}</h3></a>
                     <h6>{this.state.bio}</h6>
-                    {this.state.profilePic}                    
+                    {this.state.profilePic}
                 </div>
                 <div className="tag-info">
                     <h4>My interests</h4>
@@ -244,7 +244,7 @@ class Profile extends Component{
     }
 
 
-    
+
 }
 
 /*Helper components for profile.*/
@@ -290,7 +290,7 @@ class UsernameListEntry extends Component
           {
             tagList.push(this.tags[i]);
           }
-  
+
         }
         else
         {

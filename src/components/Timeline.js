@@ -162,7 +162,10 @@ class Timeline extends Component
 
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
-        interestsList.push(interest);
+        if(!interestsList.includes(interest))
+        {
+            interestsList.push(interest);
+        }
         // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;

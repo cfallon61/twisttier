@@ -447,25 +447,33 @@ async function getSpins(user, users) {
       query += baseQuery + userSpinTableName(item.username);
 
       // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
-      if (item.tags.length > 0 && item.tags[0] != reservedTag) {
+      if (item.tags.length > 0)
+      {
         tagList.push(item.tags);
         // supposed to search in the range of a list supplied
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
+        // console.log('tags =', item.tags);
         var where = ' WHERE ';
 
         //  for each tag in the tag list, append it to a where statement
-      item.tags.forEach((tag, i) => {
-        console.log(tag);
-        where += '\'' + tag + '\'' + '=ANY(tags) ';
-        // if i is not the last index, append an or
-        if (i < item.tags.length - 1){
-          where += ' OR ';
-        }
-      });
+
+        item.tags.forEach((tag, i) => 
+        {
+          // console.log(tag);
+          where += '\'' + tag + '\'' + '=ANY(tags) ';
+          // if i is not the last index, append an or
+          if (i < item.tags.length - 1){
+            where += ' OR ';
+          }
+        });
         // append the conditions to the select query
         // SELECT * FROM < user1_spins > WHERE <tag>=ANY(tags)
         // query += where;
+      }
+      if (where.length > 0)
+      {
+        query += where;
       }
 
       // if last item in list do not append union
@@ -485,7 +493,7 @@ async function getSpins(user, users) {
     // ORDER BY date DESC;
     query += ' ORDER BY date DESC';
 
-    console.log(query);
+    // console.log(query);
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
@@ -505,7 +513,7 @@ async function getSpins(user, users) {
         }
       }
       query += ' ORDER BY date DESC';
-      console.log('newtagposts query =', query);
+      // console.log('newtagposts query =', query);
       posts.newtagposts = await client.query(query).rows;
     }
   }

@@ -146,6 +146,11 @@ async function deleteAccount(req, res, next) {
       res.setHeader('error', 'invalid data provided: empty fields will not be tolerated, sir. Fix your junk.');
       return next();
     }
+    else if (user.email != userData.email)
+    {
+      res.setHeader('error', 'unable to delete account: invalid email provided')
+      return next();
+    }
     var goodPass = await bcrypt.compare(user.password, userData.passhash);
   }
   catch (e) {
@@ -275,7 +280,7 @@ async function getTimeline(req, res, next) {
     res.setHeader('alert', 'no spins found :(')
     // return next();
   }
-  console.log(followedSpins);
+  // console.log(followedSpins);
   res.json(JSON.stringify(followedSpins));
   // return next();
 }

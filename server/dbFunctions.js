@@ -247,10 +247,10 @@ async function deleteUser(username){
 
     var res = await client.query(query);
 
-    query = `DELETE FROM ${USER_TABLE} WHERE username=$1 RETURNING username`;
+    query = `DELETE FROM ${USER_TABLE} WHERE username=$1, email=$2 RETURNING username`;
 
     // query = `SELECT * FROM ${USER_TABLE} WHERE username=$1`;
-    var res = await client.query(query, [username]);
+    var res = await client.query(query, [username, ]);
     await client.query('COMMIT');
 
     rows = res.rows;
@@ -440,7 +440,7 @@ async function getSpins(user, users) {
 
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      console.log('newpost =', newpostid);
+      // console.log('newpost =', newpostid);
       if (newpostid && newpostid.new_tag_posts != null)
       {
         newposts.push({ username: newpostid.username, postid: newpostid.new_tag_posts} );

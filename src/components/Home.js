@@ -45,7 +45,7 @@ class Home extends Component{
                 <Row>
                     <Col>
                         <Nav.Link>
-                           <Link to = "/login"><Button variant="primary" width="50%">Log in</Button>
+                           <Link to = "/login"><Button variant="primary" style={{width : "100px"}}>Login</Button>
                            </Link> 
                         </Nav.Link> 
                     </Col>
@@ -53,7 +53,7 @@ class Home extends Component{
                 <Row>
                 <Col>
                         <Nav.Link>
-                           <Link to = "/signup"><Button variant="secondary" width="50%">Sign up</Button>
+                           <Link to = "/signup"><Button variant="secondary" style={{width : "100px"}}>Sign up</Button>
                            </Link> 
                         </Nav.Link> 
                     </Col>

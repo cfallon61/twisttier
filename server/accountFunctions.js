@@ -237,6 +237,7 @@ async function getPosts(req, res, next) {
   if (!spins || spins.length === 0) {
     res.setHeader('alert', 'no spins found :(');
   }
+  // console.log(spins);
   res.json(JSON.stringify(spins));
   // return next();
 
@@ -275,6 +276,7 @@ async function getTimeline(req, res, next) {
     // return next();
   }
   // console.log(followedSpins.regularposts);
+  // console.log(followedSpins);
   res.json(JSON.stringify(followedSpins));
   // return next();
 }

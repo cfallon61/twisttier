@@ -134,7 +134,7 @@ async function getspin(req, res, next)
   }
   else
   {
-    console.log('got spin', spinid, 'from', username);
+    // console.log('got spin', spinid, 'from', username);
     res.json(JSON.stringify(result));
   }
 }

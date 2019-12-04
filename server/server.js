@@ -266,6 +266,7 @@ app.post('/api/spins/esteem', helpers.loggedIn, spins.esteemSpin, (req, res) => 
 app.post('/api/delete', helpers.loggedIn, users.deleteAccount, (req, res) => {
 
   if (res.getHeader('error') != undefined) {
+    console.log(res.getHeader('error'));
     res.status(406);
     res.sendFile(index);
   } 

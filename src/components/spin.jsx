@@ -524,9 +524,10 @@ class Spin extends Component
     handleInterestAddition(newTag) { 
 
         let tagList = this.state.tags;
-
-        tagList.push(newTag);
-
+        if(!tagList.includes(newTag))
+        {
+            tagList.push(newTag);
+        }
         this.setState({
             tags : tagList
         });
@@ -1064,6 +1065,19 @@ class Spin extends Component
                 speechText += this.state.tags[i] + "       ";
             }
         } 
+        
+        var content = this.state.content;
+        var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+
+        var exp = urlRegex.exec(content);
+        var url = '';
+        if (exp && exp.length > 1)
+        {
+          url = exp[0];
+          content = content.replace(url, "");
+        }
+
+        console.log('content =', content)
 
         return (
             <div className="spin-area">
@@ -1080,8 +1094,9 @@ class Spin extends Component
                     </div> 
                 </div>
                 <div className="spin-content">
-                    <p>
-                        {this.state.content}
+                    <p> 
+                      { content}
+                      <a href={url}>{url}</a>
                     </p>
                 </div>
 

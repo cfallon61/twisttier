@@ -16,7 +16,9 @@ import { NotificationManager } from 'react-notifications';
 import { Redirect } from 'react-router';
 import { selectFields } from 'express-validator/src/select-fields';
 
-
+const toggleCSS = {
+  margin : "5px"
+};
 
 class Navbardemo extends Component {
   constructor(props)
@@ -129,15 +131,17 @@ render() {
           <Navbar.Collapse id="basic-navbar-nav">
 
             <Nav className="ml-auto">
-                <dark-mode-toggle
-                  id="dark-mode-toggle"
-                  light="Light"
-                  dark="Dark"
-                  appearance="toggle"
-                  permanent="false"
-                ></dark-mode-toggle>
+                
 
                 <Form inline onSubmit = {this.handleSearch}>
+                  <dark-mode-toggle
+                    id="dark-mode-toggle"
+                    light="Light"
+                    dark="Dark"
+                    appearance="toggle"
+                    permanent="false"
+                    style = {toggleCSS}
+                  ></dark-mode-toggle>
                   <FormControl
                     placeholder="Search"
                     value = {this.state.searchValue}

@@ -122,7 +122,11 @@ class UserFeed extends Component
 
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
+        if(!interestsList.includes(interest))
+        {
         interestsList.push(interest);
+        }
+        
         // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
@@ -339,15 +343,18 @@ class UserFeed extends Component
     renderSpinForm() {
         // console.log(this.state.spin.interests);
         let spinInterests = this.state.interests.map((tagName) => {
+            if (!this.state.spin.interests.includes(tagName)) {
             return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+            }
         });
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
             currentAddedInterestView = this.state.spin.interests.map((tagName) => {
-            return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
-            {tagName}
-        </Dropdown.Item>;
-        });
+                     return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>        
+                        {tagName}
+                    </Dropdown.Item>;
+                
+            });
         }
 
         let addedDropdown = (
@@ -355,7 +362,7 @@ class UserFeed extends Component
             title='Remove from Existing Tags'
             variant='outline-danger'
             block
-            className = "shareButtons"
+            className = "spinButtons"
             >
                 {currentAddedInterestView}
             </DropdownButton>
@@ -434,6 +441,9 @@ class UserFeed extends Component
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
+            return;
+        } else if (this.state.interests === undefined || this.state.interests.length <= 0) {
+            NotificationManager.error("You must have a tag!");
             return;
         }
 
@@ -521,7 +531,10 @@ class UserFeed extends Component
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-                {followItems}
+                <div className = "more-tags-div">
+                    {followItems}
+                </div>
+                
             </Dropdown.Menu>
             </Dropdown>
         );
@@ -596,7 +609,7 @@ class UserFeed extends Component
                         followingTagsForThisSpin = this.state.userToViewFollowing[j].tags;
                     }
                 }
-                console.log(spin);
+                // console.log(spin);
                 feed.addSpin(<Spin username={spin.username} content={spin.content} 
                     timestamp={spin.date} spinID={spin.id} userToView={this.userToView} 
                     tags={spin.tags} likes={spin.likes} likeList={spin.like_list}

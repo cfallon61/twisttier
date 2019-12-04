@@ -100,9 +100,9 @@ class Timeline extends Component
 
     closeModal() {
         console.log("Closing spin modal...");
+        window.location.reload();
         this.setState({showSpinModal : false});
     }
-
 
     onSpinPressedAtModal(event) {
         //TODO: set interest
@@ -134,8 +134,9 @@ class Timeline extends Component
             }).then(function(res){
                 if(res.status === 200)
                 {
-                    NotificationManager.success("Spun!");
                     self.closeModal();
+                    NotificationManager.success("Spun!");
+
                 }
                 else
                 {
@@ -164,7 +165,10 @@ class Timeline extends Component
 
     addInterestToSpin(interest) { //this needs an action listener
         let interestsList = this.state.spin.interests;
-        interestsList.push(interest);
+        if(!interestsList.includes(interest))
+        {
+            interestsList.push(interest);
+        }
         // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
@@ -221,25 +225,27 @@ class Timeline extends Component
     renderSpinForm() {
         // console.log(this.state.spin.interests);
         let spinInterests = [];
-        if (this.state.interests.length > 5) {
-            // put 4 in
-            for (var i = 0; i < 5; i++) {
-                let tagName = this.state.interests[i];
-                let item = (
-                    <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>            
-                        {tagName}
-                    </Dropdown.Item>
-                );
-                spinInterests.push(item);
-            }
+        // if (this.state.interests.length > 5) {
+        //     // put 4 in
+        //     for (var i = 0; i < 5; i++) {
+        //         let tagName = this.state.interests[i];
+        //         let item = (
+        //             <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>            
+        //                 {tagName}
+        //             </Dropdown.Item>
+        //         );
+        //         spinInterests.push(item);
+        //     }
 
-        } else {
+        // } else {
             
             spinInterests = this.state.interests.map((tagName) => {
-                return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+                if (!this.state.spin.interests.includes(tagName)) {
+                    return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+                }
             });
 
-        }
+        
         
 
 
@@ -252,6 +258,17 @@ class Timeline extends Component
         </Dropdown.Item>;
         });
         }
+
+        let addedDropdown = (
+            <DropdownButton
+            title='Remove from Existing Tags'
+            variant='outline-danger'
+            block
+            className = "shareButtons"
+            >
+                {currentAddedInterestView}
+            </DropdownButton>
+        );
 
         let disableInterestDropdown = false;
         // console.log(spinInterests);
@@ -286,7 +303,7 @@ class Timeline extends Component
         } else {
             interestsDropdown = (<div>
                 {dropdownInterests}
-                {currentAddedInterestView}
+                {addedDropdown}
             </div>)
         }
 
@@ -303,9 +320,10 @@ class Timeline extends Component
                             <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
-                    {this.state.spin.interests.map(function(tagName, index) { 
+
+                    {/* {this.state.spin.interests.map(function(tagName, index) { 
                             return <span>{ ( index ? ', ' : '') + tagName}</span>;
-                        })}
+                        })} */}
                     <Form>
 
                     </Form>

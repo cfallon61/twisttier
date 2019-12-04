@@ -1071,7 +1071,7 @@ class Spin extends Component
         } 
         
         var content = this.state.content;
-        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
         var exp = urlRegex.exec(content);
         var url = '';

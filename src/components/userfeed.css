@@ -16,3 +16,8 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.more-tags-div {
+    max-height: 300px;
+    overflow: auto;
+}

@@ -124,7 +124,7 @@ class UserFeed extends Component
         let interestsList = this.state.spin.interests;
         if(!interestsList.includes(interest))
         {
-            interestsList.push(interest);
+        interestsList.push(interest);
         }
         
         // console.log(interestsList);
@@ -487,7 +487,10 @@ class UserFeed extends Component
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-                {followItems}
+                <div className = "more-tags-div">
+                    {followItems}
+                </div>
+                
             </Dropdown.Menu>
             </Dropdown>
         );

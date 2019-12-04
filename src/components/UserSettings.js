@@ -71,10 +71,12 @@ class UserSettings extends Component {
   {
     event.preventDefault();
     //split the interests into array
-    let interestsArray = []
+    let interestsArray = [];
+    console.log(this.state.interests);
     if(this.state.interests.length > 0)
     {
-      interestsArray = this.state.interests.split(',');
+      let ints = this.state.interests;
+      interestsArray = ints.split(',');
     }
 
     var formdata = new FormData();
@@ -200,7 +202,8 @@ class UserSettings extends Component {
             d_profilepic = dataDict.profile_pic;
             d_bio = dataDict.bio;
             d_name = dataDict.name;
-            d_interests = dataDict.interests;
+            d_interests = dataDict.interests
+            d_interests = d_interests.toString();
             self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
 
         });

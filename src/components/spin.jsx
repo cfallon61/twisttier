@@ -1113,8 +1113,11 @@ class Spin extends Component
                     {this.renderShareForm()}
                 </Modal>
 
-                <Modal show={this.state.showMoreTagsModal}>
-                    {this.getModalTagViews()}
+                <Modal  show={this.state.showMoreTagsModal}>
+                    <div className = "moreTagsDiv">
+                        {this.getModalTagViews()}
+                    </div>
+                    
                     <Button onClick={this.closeMoreTagsModal}>Close</Button>
                 </Modal>
             </div>

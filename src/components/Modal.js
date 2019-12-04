@@ -14,7 +14,8 @@ const modalStyle = {
   margin: 'auto',
   padding: 30,
   color: "black",
-  zIndex : 100
+  zIndex : 100,
+  maxHeight: "650px"
 };
 
 const backdropStyle = {

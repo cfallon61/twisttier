@@ -101,11 +101,11 @@ render() {
         <div>
           <Nav className="ml-auto">
             <Link to={prof}>
-              <Image src={icon_home}  className='icon'/>
+                <Image src={icon_home}  className='icon'/>
             </Link>
 
             <Link to="/userSettings">
-             <Image src={icon_settings}  className='icon' />
+              <Image src={icon_settings}  className='icon' />
             </Link>
 
 

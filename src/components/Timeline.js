@@ -117,6 +117,7 @@ class Timeline extends Component
         else {
             // console.log(this.state.spin.text);
             // console.log(this.state.spin.interests);
+            let self = this;
             let body = {
                 spinBody: this.state.spin.text,
                 tags: this.state.spin.interests,
@@ -132,10 +133,7 @@ class Timeline extends Component
                 if(res.status === 200)
                 {
                     NotificationManager.success("Spun!");
-
-                    setTimeout(function() { //Start the timer
-                        window.location.reload();
-                    }.bind(this), 1000)
+                    self.closeModal();
                 }
                 else
                 {
@@ -148,7 +146,7 @@ class Timeline extends Component
                         NotificationManager.error("Server didn't return OK response.");
                     }                }
             });
-            this.closeModal();
+
         }
     }
 

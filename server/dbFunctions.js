@@ -447,25 +447,33 @@ async function getSpins(user, users) {
       query += baseQuery + userSpinTableName(item.username);
 
       // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
-      if (item.tags.length > 0 && item.tags[0] != reservedTag) {
+      if (item.tags.length > 0)
+      {
         tagList.push(item.tags);
         // supposed to search in the range of a list supplied
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
+        // console.log('tags =', item.tags);
         var where = ' WHERE ';
 
         //  for each tag in the tag list, append it to a where statement
-      item.tags.forEach((tag, i) => {
-        console.log(tag);
-        where += '\'' + tag + '\'' + '=ANY(tags) ';
-        // if i is not the last index, append an or
-        if (i < item.tags.length - 1){
-          where += ' OR ';
-        }
-      });
+
+        item.tags.forEach((tag, i) => 
+        {
+          // console.log(tag);
+          where += '\'' + tag + '\'' + '=ANY(tags) ';
+          // if i is not the last index, append an or
+          if (i < item.tags.length - 1){
+            where += ' OR ';
+          }
+        });
         // append the conditions to the select query
         // SELECT * FROM < user1_spins > WHERE <tag>=ANY(tags)
         // query += where;
+      }
+      if (where.length > 0)
+      {
+        query += where;
       }
 
       // if last item in list do not append union
@@ -485,7 +493,7 @@ async function getSpins(user, users) {
     // ORDER BY date DESC;
     query += ' ORDER BY date DESC';
 
-    console.log(query);
+    // console.log(query);
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
@@ -505,7 +513,7 @@ async function getSpins(user, users) {
         }
       }
       query += ' ORDER BY date DESC';
-      console.log('newtagposts query =', query);
+      // console.log('newtagposts query =', query);
       posts.newtagposts = await client.query(query).rows;
     }
   }
@@ -934,8 +942,9 @@ async function likeSpin(user_liker, user_poster, spin) {
     else {
 
       like_list.push(user_liker);
-      args = [like_list, spin];
-      query = `UPDATE ${tablename} SET like_list = $1, likes = likes + 1 WHERE id = $2 RETURNING *`;
+      var likes = like_list.length;
+      args = [like_list, likes, spin];
+      query = `UPDATE ${tablename} SET like_list = $1, likes = $2 WHERE id = $3 RETURNING *`;
 
       res = await client.query(query, args);
 
@@ -979,31 +988,30 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     var index = like_list.indexOf(user_liker);
     // if the user is found in the like list then we remove the name
     // and write to the database
-    if (index > -1) {
+    console.log(index);
+    if (index === -1) {
+      console.log(user_liker + " has not liked the spin")
+      await client.query("ROLLBACK");
+      return false;
+    }
+    while (index > -1) {
 
       like_list.splice(index, 1);
+      var likes = like_list.length;
 
-      args = [like_list, spin];
+      args = [like_list, likes, spin];
       query = `UPDATE ${tablename} SET like_list = $1, 
-      likes = 
-        case when likes - 1 < 0 
-          then 0 
-        else 
-          likes - 1 
-      end 
-      WHERE id = $2 RETURNING *`;
+      likes = $2
+      WHERE id = $3 RETURNING *`;
 
       res = await client.query(query, args);
 
       rows = res.rows;
 
-      await client.query('COMMIT');
+      
+      index = like_list.indexOf(user_liker);
     }
-    else {
-      console.log(user_liker + " has not liked the spin")
-      await client.query("ROLLBACK");
-      return false;
-    }
+    await client.query('COMMIT');
   } catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.unlikeSpin: ${ e }`);

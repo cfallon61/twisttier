@@ -101,7 +101,7 @@ class SearchUser extends Component {
     }
 
     renderAllTagsForm() {
-        // console.log("Rendering form. Tags are: ", this.state.oneUserTags);
+        
         var tagsToShow = this.state.oneUserTags;
 
         var shownTags = []

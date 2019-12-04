@@ -43,7 +43,7 @@
     "multer": "^1.4.2",
     "npm": "^6.13.2",
     "npm-run-all": "latest",
-    "pg": "^7.13.0",
+    "pg": "^7.14.0",
     "react": "^16.11.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-confirm-alert": "^2.4.1",

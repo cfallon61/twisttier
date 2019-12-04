@@ -947,8 +947,9 @@ async function likeSpin(user_liker, user_poster, spin) {
     else {
 
       like_list.push(user_liker);
-      args = [like_list, spin];
-      query = `UPDATE ${tablename} SET like_list = $1, likes = likes + 1 WHERE id = $2 RETURNING *`;
+      var likes = like_list.length;
+      args = [like_list, likes, spin];
+      query = `UPDATE ${tablename} SET like_list = $1, likes = $2 WHERE id = $3 RETURNING *`;
 
       res = await client.query(query, args);
 
@@ -992,31 +993,30 @@ async function unlikeSpin(user_liker, user_poster, spin) {
     var index = like_list.indexOf(user_liker);
     // if the user is found in the like list then we remove the name
     // and write to the database
-    if (index > -1) {
+    console.log(index);
+    if (index === -1) {
+      console.log(user_liker + " has not liked the spin")
+      await client.query("ROLLBACK");
+      return false;
+    }
+    while (index > -1) {
 
       like_list.splice(index, 1);
+      var likes = like_list.length;
 
-      args = [like_list, spin];
+      args = [like_list, likes, spin];
       query = `UPDATE ${tablename} SET like_list = $1, 
-      likes = 
-        case when likes - 1 < 0 
-          then 0 
-        else 
-          likes - 1 
-      end 
-      WHERE id = $2 RETURNING *`;
+      likes = $2
+      WHERE id = $3 RETURNING *`;
 
       res = await client.query(query, args);
 
       rows = res.rows;
 
-      await client.query('COMMIT');
+      
+      index = like_list.indexOf(user_liker);
     }
-    else {
-      console.log(user_liker + " has not liked the spin")
-      await client.query("ROLLBACK");
-      return false;
-    }
+    await client.query('COMMIT');
   } catch(e) {
     await client.query('ROLLBACK');
     console.log(`An error occurred in db.unlikeSpin: ${ e }`);

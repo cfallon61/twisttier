@@ -72,7 +72,7 @@ class UserSettings extends Component {
     event.preventDefault();
     //split the interests into array
     let interestsArray = []
-    if(this.state.interests != "")
+    if(this.state.interests.length > 0)
     {
       interestsArray = this.state.interests.split(',');
     }
@@ -244,14 +244,14 @@ class UserSettings extends Component {
                       <Form.Label>Bio</Form.Label>
                       <Form.Control type="text" placeholder="Bio" onChange={this.handleEditBio}/>
                   </Form.Group>
-                  
+
                   <Form.Group>
                       <Form.Label>Password</Form.Label>
                       <Form.Control type="password" placeholder="Password" onChange={this.handlePasswordChange}/>
                   </Form.Group>
                   <Form.Group>
                       <Form.Label>Add Interests</Form.Label>
-                      <Form.Control type="text" placeholder="Add interests separated by a ','" onChange={this.handleInterestsChange}/>
+                      <Form.Control type="text" placeholder="Add interests separated by a ','" value={this.state.interests} onChange={this.handleInterestsChange}/>
                   </Form.Group>
 
                   <Form.Group>
@@ -268,8 +268,8 @@ class UserSettings extends Component {
                 <Button variant="primary" onClick={this.openPasswordModal}>Delete Account </Button>
               </div>
          </div>
-        
-        
+
+
         <Modal show={this.state.showPasswordForm}>
           {this.renderPasswordConfirm()}
         </Modal>

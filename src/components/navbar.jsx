@@ -15,7 +15,7 @@ import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import { Redirect } from 'react-router';
 import { selectFields } from 'express-validator/src/select-fields';
-import * as DarkModeToggle from 'dark-mode-toggle';
+
 
 
 class Navbardemo extends Component {
@@ -81,7 +81,7 @@ handleSearch(event) {
     } else {
       let url = "/searchUser/" + this.state.searchValue;
       this.props.history.push(url);
-  
+
       // routing does not rerender. So force reload the page
       window.location.reload();
     }
@@ -92,12 +92,15 @@ handleSearch(event) {
 // render component
 render() {
     let dynamicView = null;
+    let user = this.props.username;
     if(this.props.loggedIn)
     {
+      let prof = "/profile/" + user;
+
       dynamicView = (
         <div>
-          <Navbar.Collapse>
-            <Link to="/">
+          <Nav className="ml-auto">
+            <Link to={prof}>
               <Image src={icon_home}  className='icon'/>
             </Link>
 
@@ -105,9 +108,9 @@ render() {
              <Image src={icon_settings}  className='icon' />
             </Link>
 
-          </Navbar.Collapse>
 
-          <Button variant="outline-success" onClick={this.onLogoutClicked}>Logout</Button>
+            <Button variant="outline-success" onClick={this.onLogoutClicked}>Logout</Button>
+          </Nav>
         </div>
       );
     }
@@ -118,19 +121,23 @@ render() {
 
     return (
       <div>
-        <Navbar expand="lg">
-
-            <Link to="/">
-              <Image src={icon_twister} className='icon'/>
-            </Link>
+        <Navbar expand="sm">
+          <Link to="/">
+            <Image src={icon_twister} className='icon'/>
+          </Link>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
 
-          <Nav className="ml-auto">
+            <Nav className="ml-auto">
+                <dark-mode-toggle
+                  id="dark-mode-toggle"
+                  light="Light"
+                  dark="Dark"
+                  appearance="toggle"
+                  permanent="false"
+                ></dark-mode-toggle>
 
-
-            <Navbar.Brand id="basic-navbar-nav">
                 <Form inline onSubmit = {this.handleSearch}>
-
                   <FormControl
                     placeholder="Search"
                     value = {this.state.searchValue}
@@ -144,9 +151,11 @@ render() {
                       Search
                   </Button>
                 </Form>
-            </Navbar.Brand>
-            {dynamicView}
-          </Nav>
+              {dynamicView}
+            </Nav>
+
+
+          </Navbar.Collapse>
         </Navbar>
       </div>
     )

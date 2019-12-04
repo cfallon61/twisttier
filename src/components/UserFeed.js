@@ -13,6 +13,7 @@ import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { body } from 'express-validator';
 import "./userfeed.css";
 import Speech from "react-speech";
+import Form from 'react-bootstrap/Form';
 
 
 var OperationEnum = {
@@ -43,11 +44,16 @@ class UserFeed extends Component
             toUnfollowInterests : [],
             currentOperation : OperationEnum.FOLLOW,
             newSpins: [],
-
+            spinModalShow: false,
 
             // for edit and follow/unfollow
             userToViewInterests : [],
-            userToViewFollowing : []
+            userToViewFollowing : [],
+            spin : {
+                text : " ",
+                chars : 0,
+                interests : [],
+            },
         }
 
         // functions
@@ -61,6 +67,15 @@ class UserFeed extends Component
         this.changeOperationState = this.changeOperationState.bind(this);
         this.getViewingUser = this.getViewingUser.bind(this);
         this.getUserInterestsAndFollowing = this.getUserInterestsAndFollowing.bind(this);
+
+        this.onSpinPressed = this.onSpinPressed.bind(this);
+        this.closeSpinModal = this.closeSpinModal.bind(this);
+        this.showSpinModal = this.showSpinModal.bind(this);
+        this.addInterestToSpin = this.addInterestToSpin.bind(this);
+        this.handleSpinChange = this.handleSpinChange.bind(this);
+        this.handleTag = this.handleTag.bind(this);
+        this.handleTagChange = this.handleTagChange.bind(this);
+        this.onSpinPressedAtModal = this.onSpinPressedAtModal.bind(this);
 
         this.userToView = this.getViewingUser();
     }
@@ -104,6 +119,26 @@ class UserFeed extends Component
         if(user === null) return;
 
     }
+
+    addInterestToSpin(interest) { //this needs an action listener
+        let interestsList = this.state.spin.interests;
+        interestsList.push(interest);
+        // console.log(interestsList);
+        let currentText = this.state.spin.text;
+        let currentChar = this.state.spin.chars;
+        this.setState({spin : {interests : interestsList, chars: currentChar, text : currentText}});
+    }
+    
+    //when the spin text is changed, update the chars count
+    handleSpinChange(event){
+        let updatingText = event.target.value;
+        if(event.target.value !== undefined && event.target.value.length > 90)
+        {
+            updatingText = updatingText.substring(0, 90);
+        }
+        this.setState({spin: {chars: updatingText.length, text: updatingText, interests : this.state.spin.interests}});
+     }
+
 
     componentDidMount()
     {
@@ -271,6 +306,145 @@ class UserFeed extends Component
 
     }
 
+    onSpinPressed() {
+        this.showSpinModal();
+    }
+
+    showSpinModal()
+    {
+        this.setState({spinModalShow : true});
+    }
+
+    closeSpinModal()
+    {
+        this.setState({spinModalShow : false});
+    }
+
+    renderSpinForm() {
+        // console.log(this.state.spin.interests);
+        let spinInterests = this.state.interests.map((tagName) => {
+            return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
+        });
+        let currentAddedInterestView = [];
+        if (this.state.spin.interests !== undefined) {
+            currentAddedInterestView = this.state.spin.interests.map((tagName) => {
+            return <h6>{tagName}</h6>;
+        });
+        }
+
+        let disableInterestDropdown = false;
+        // console.log(spinInterests);
+        if (spinInterests.length === 0) {
+            disableInterestDropdown = true;
+        }
+
+        let dropdownInterests = (
+            <Dropdown>
+                <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
+                    Tags
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                    {spinInterests}
+                </Dropdown.Menu>
+            </Dropdown>
+        );
+
+        let interestsDropdown = null;
+        if (disableInterestDropdown){
+            interestsDropdown = <h3>You need to add tags.</h3>
+        } else {
+            interestsDropdown = (<div>
+                {dropdownInterests}
+                {currentAddedInterestView}
+            </div>)
+        }
+
+        return (
+            <div className="spin-form">
+                    <Form >
+                        <Form.Label>Spin</Form.Label>
+                        <Form.Control as = "textarea" placeholder="Your Spin here" rows="3"
+                            onChange = {this.handleSpinChange}/>
+                            <p>{this.state.spin.chars}/90 characters</p>
+                    </Form>
+                    {interestsDropdown}
+                    {this.state.spin.interests}
+                    <Form>
+
+                    </Form>
+
+                    <Form onSubmit = {this.handleTag} >
+                    <Form.Control width = "40%" placeholder = "add tag" onChange = {this.handleTagChange}/>
+                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
+                    </Form>
+                <div className="modal-footer">
+                    <Button variant = "outline-primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
+                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeSpinModal}>Cancel</Button>
+                </div>
+            </div>
+
+        );
+    }
+
+    onSpinPressedAtModal(event) {
+        //TODO: set interest
+        console.log("user interests: ", this.state.interests);
+        if(this.state.spin.chars <= 0 ){
+            NotificationManager.error("Spin is too short!");
+            return;
+        } else if (this.state.spin.chars > 90) {
+            NotificationManager.error("Spin is too long!");
+            return;
+        }
+
+        //TODO: send text to server
+        else {
+            // console.log(this.state.spin.text);
+            // console.log(this.state.spin.interests);
+            let self = this;
+            let body = {
+                spinBody: this.state.spin.text,
+                tags: this.state.spin.interests,
+                is_quote: false,
+            };
+            fetch(`/api/add_spin/${this.username}`, {
+                method : 'POST',
+                headers : {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify(body)
+            }).then(function(res){
+                if(res.status === 200)
+                {
+                    NotificationManager.success("Spun!");
+                    self.closeSpinModal();
+                    window.location.reload();
+                }
+                else
+                {
+                    if(res.headers.has("error"))
+                    {
+                        NotificationManager.error(res.headers.get('error'));
+                    }
+                    else
+                    {
+                        NotificationManager.error("Server didn't return OK response.");
+                    }                }
+            });
+           
+        }
+    }
+
+    handleTagChange(event) {
+        this.setState({tag : event.target.value});
+    }
+
+    handleTag(event){
+        event.preventDefault();
+        this.addInterestToSpin(this.state.tag);
+    }
+
     renderFollowForm()
     {
         let currentOperationText = "Follow";
@@ -366,6 +540,7 @@ class UserFeed extends Component
         if(this.state.error.exist) {
             return <Error message={this.state.error.message} statusCode={this.state.error.status}/>
         }
+        
         let feed = new Feed(this.username);
         if(this.state.spins != undefined && this.state.spins.length > 0) 
         {
@@ -397,11 +572,17 @@ class UserFeed extends Component
         }
 
         let followButton = null;
-
+        let spinButton = null;
+        let greeting = null;
         //If cookie is not empty, an authenticated user entered the page.
         if(document.cookie !== "")
         {
             followButton = <Button style={{marginTop : "10px", marginBottom : "10px"}} onClick={this.onFollowPressed}>Follow &amp; Unfollow Interests</Button>;
+            if(this.getViewingUser() === this.username)
+            {
+                spinButton = <Button onClick={this.onSpinPressed}>Spin</Button>;
+                greeting = <h4>Welcome to your profile!</h4>;
+            }
         }
 
         let speechText = `You are right now in the profile of ${this.username}`;
@@ -421,9 +602,13 @@ class UserFeed extends Component
                     </Modal>
                 </div>
                 <div className="user-feed-middle">
+                    {greeting}
+                    {spinButton}
                     {feed.render()}
                 </div>
-
+                <Modal show={this.state.spinModalShow}>
+                    {this.renderSpinForm()}
+                </Modal>
             </div>
         );     
 

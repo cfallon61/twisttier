@@ -35,7 +35,7 @@ app.use(helpers.cloudinaryConfig);
 app.listen(port, (err) => {
   if (err) throw err;
   console.log('Server started on port', port);
-  db.bootClearNewPosts(null, null, () => {console.log('cleared new posts column')});
+  // db.bootClearNewPosts(null, null, () => {console.log('cleared new posts column')});
 });
 
 if (process.env.TEST === 'true')

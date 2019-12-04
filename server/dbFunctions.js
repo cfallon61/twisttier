@@ -434,19 +434,22 @@ async function getSpins(user, users) {
       var newpostid = await client.query(
         `SELECT username, new_tag_posts from ${USER_TABLE}
          WHERE username = $1`, [item.username]);
-
+      // console.log('newpost =',newpostid);
+      
       newpostid = newpostid.rows[0];
 
       // if there is a new post found in the column, push an object with its
       // id and username to an array.
-      if (newpostid.postid)
+      console.log('newpost =', newpostid);
+      if (newpostid && newpostid.new_tag_posts != null)
       {
-        newposts.push({ username: newpostid.username, postid: newpostid.id} );
+        newposts.push({ username: newpostid.username, postid: newpostid.new_tag_posts} );
       }
       // select * from <username_spins>
       query += baseQuery + userSpinTableName(item.username);
 
       // if there is more than just the reserved tag in the tag list then we only search for the list of tags, otherwise we get every tag.
+      var where = '';
       if (item.tags.length > 0)
       {
         tagList.push(item.tags);
@@ -454,7 +457,7 @@ async function getSpins(user, users) {
         // hopefully postgres decides to parse this correctly
         // select * from <username_spins> where @> tags
         // console.log('tags =', item.tags);
-        var where = ' WHERE ';
+        where = ' WHERE ';
 
         //  for each tag in the tag list, append it to a where statement
 
@@ -497,7 +500,7 @@ async function getSpins(user, users) {
     res = await client.query(query);
     posts.regularposts = res.rows;
     // console.log(posts);
-
+    // console.log(newposts);
     query = '';
     if (newposts.length > 0)
     {
@@ -514,7 +517,9 @@ async function getSpins(user, users) {
       }
       query += ' ORDER BY date DESC';
       // console.log('newtagposts query =', query);
-      posts.newtagposts = await client.query(query).rows;
+      var newposts = await client.query(query);
+      // console.log('newposts =', newposts.rows);
+      posts.newtagposts = newposts.rows;
     }
   }
   catch (e) {

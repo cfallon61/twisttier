@@ -44,3 +44,8 @@
 a {
     text-decoration: none;
 }
+
+.showMoreDiv {
+    max-height: 500px;
+    overflow: auto;
+}

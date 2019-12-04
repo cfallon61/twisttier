@@ -119,7 +119,11 @@ class SearchUser extends Component {
         // push the close button
         shownTags.push(<Button onClick={this.closeAllTagsModal}>Close</Button>);
 
-        return shownTags;
+        return (
+            <div className = "showMoreDiv">
+                {shownTags}
+            </div>
+        );
     }
 
     closeAllTagsModal() {
@@ -250,7 +254,7 @@ class SearchUser extends Component {
             {profiles}
             </div>
 
-            <Modal show = {this.state.showAllTags}>
+            <Modal className = "showMoreDiv" show = {this.state.showAllTags}>
                     {this.renderAllTagsForm()}
             </Modal>
         </div>

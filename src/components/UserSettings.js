@@ -71,7 +71,8 @@ class UserSettings extends Component {
   {
     event.preventDefault();
     //split the interests into array
-    let interestsArray = []
+    let interestsArray = [];
+    console.log(this.state.interests);
     if(this.state.interests.length > 0)
     {
       let ints = this.state.interests;

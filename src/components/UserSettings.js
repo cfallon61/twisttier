@@ -141,6 +141,7 @@ class UserSettings extends Component {
         if(res.status === 200)
         {
           NotificationManager.success("Account deleted successfully!");
+          document.cookie = ""; //Clear cookies.
           setTimeout(function() { //Start the timer
             window.location.href = "/"; //Redirect.
         }.bind(this), 900)

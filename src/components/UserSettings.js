@@ -199,12 +199,16 @@ class UserSettings extends Component {
         res.json().then(function(data){
             let dataDict = JSON.parse(data);
             console.log(dataDict);
+            let usernameInScope = dataDict.username;
             d_profilepic = dataDict.profile_pic;
             d_bio = dataDict.bio;
             d_name = dataDict.name;
             d_interests = dataDict.interests
-            d_interests = d_interests.toString();
-            self.setState({username: username, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
+            if(dataDict.interests !== null)
+            {
+              d_interests = d_interests.toString();
+            }
+            self.setState({username: usernameInScope, bio: d_bio, name: d_name, interests: d_interests, profile_pic: d_profilepic});
 
         });
       }

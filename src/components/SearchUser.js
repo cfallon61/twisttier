@@ -69,10 +69,6 @@ class SearchUser extends Component {
                     
                 });
             }
-            else if (res.status === 404)
-            {
-              NotificationManager.error('no users found matching that criteria');
-            }
             else
             {
                 if(res.headers.has('error'))
@@ -145,17 +141,19 @@ class SearchUser extends Component {
       let tempUsers = this.state.users;
       let userName = null;
       let speechText = "";
+      let noMatchButton = null;
 
       // check if users is empty  
       if (tempUsers.length === 0) {
-          profiles = <p>No matches found</p>
+          profiles = <h4 style={{margin : "auto", paddingTop : "50px"}}>No matches found</h4>
           speechText = "No matches found.";
+          noMatchButton =  <Speech text={speechText} textAsButton={true} displayText="Play audio"/>;
 
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
             // console.log("User: ", user);
-            speechText += `Details of user ${user.username}`;
+            speechText = `Details of user ${user.username}`;
             // link the username to profile
             let usernameLink  = `/profile/${user.username}`;
             // console.log("Link", usernameLink);
@@ -255,7 +253,8 @@ class SearchUser extends Component {
       return (
         <div>
             <div className = "profilesContainer">
-            {profiles}
+                {noMatchButton}
+                {profiles}
             </div>
 
             <Modal className = "showMoreDiv" show = {this.state.showAllTags}>

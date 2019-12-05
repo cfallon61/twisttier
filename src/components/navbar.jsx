@@ -78,9 +78,7 @@ handleSearch(event) {
     // console.log("handling search");
     event.preventDefault();
 
-    if (this.state.searchValue === "") {
-      NotificationManager.error("Type in the searchbox before searching");
-    } else {
+    if (this.state.searchValue !== "") {
       let url = "/searchUser/" + this.state.searchValue;
       this.props.history.push(url);
 

@@ -101,7 +101,6 @@ render() {
 
       dynamicView = (
         <div>
-          <Nav className="ml-auto">
             <Link to={prof}>
                 <Image src={icon_home}  className='icon'/>
             </Link>
@@ -112,7 +111,6 @@ render() {
 
 
             <Button variant="outline-success" onClick={this.onLogoutClicked}>Logout</Button>
-          </Nav>
         </div>
       );
     }
@@ -151,11 +149,13 @@ render() {
                   <Button
                     variant="outline-success"
                     onClick = {this.handleSearch}
+                    style = {{marginRight : '10px', marginLeft : '10px'}}
                   >
                       Search
                   </Button>
+                  {dynamicView}
                 </Form>
-              {dynamicView}
+              
             </Nav>
 
 

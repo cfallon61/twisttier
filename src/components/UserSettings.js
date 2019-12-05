@@ -96,15 +96,24 @@ class UserSettings extends Component {
         body: formdata//JSON.stringify(body)
     }).then(function(res)
     {
-      console.log(res);
-      if(res.status === 406)
+      if(res.status === 200)
       {
-        NotificationManager.error("Check fields");
-        return;
+        NotificationManager.success("Saved changes");
+        window.location.reload();
       }
-      NotificationManager.success("Saved changes");
+      else
+      {
+        if(res.headers.has('error'))
+        {
+          NotificationManager.error(res.headers.get('error'));
+        }
+        else
+        {
+          NotificationManager.error('Unexpected error while updating profile information.');
+        }
+      }
 
-      window.location.reload(true);
+      
 
     }).catch(function(error){
       console.log(error);

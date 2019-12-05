@@ -3,7 +3,6 @@ import Feed from './feed.jsx';
 import Spin from './spin.jsx';
 import Profile from "./Profile.js";
 import Form from 'react-bootstrap/Form';
-import { template } from '@babel/core';
 import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import Modal from './Modal.js';
@@ -100,25 +99,25 @@ class Timeline extends Component
 
     closeModal() {
         console.log("Closing spin modal...");
-        window.location.reload();
+        setTimeout(function() { //Start the timer
+            window.location.reload();
+        }.bind(this), 900)
         this.setState({showSpinModal : false});
     }
 
     onSpinPressedAtModal(event) {
-        //TODO: set interest
-        console.log("user interests: ", this.state.interests);
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
             return;
+        } else if (this.state.spin.interests === undefined || this.state.spin.interests.length <= 0) {
+            NotificationManager.error("You must have a tag!");
+            return;
         }
 
-        //TODO: send text to server
         else {
-            // console.log(this.state.spin.text);
-            // console.log(this.state.spin.interests);
             let self = this;
             let body = {
                 spinBody: this.state.spin.text,
@@ -134,9 +133,8 @@ class Timeline extends Component
             }).then(function(res){
                 if(res.status === 200)
                 {
-                    self.closeModal();
                     NotificationManager.success("Spun!");
-
+                    self.closeModal();
                 }
                 else
                 {
@@ -223,33 +221,11 @@ class Timeline extends Component
     }
 
     renderSpinForm() {
-        // console.log(this.state.spin.interests);
-        let spinInterests = [];
-        // if (this.state.interests.length > 5) {
-        //     // put 4 in
-        //     for (var i = 0; i < 5; i++) {
-        //         let tagName = this.state.interests[i];
-        //         let item = (
-        //             <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>            
-        //                 {tagName}
-        //             </Dropdown.Item>
-        //         );
-        //         spinInterests.push(item);
-        //     }
-
-        // } else {
-            
-            spinInterests = this.state.interests.map((tagName) => {
+        let spinInterests = this.state.interests.map((tagName) => {
                 if (!this.state.spin.interests.includes(tagName)) {
                     return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
                 }
-            });
-
-        
-        
-
-
-    
+            });    
         let currentAddedInterestView = [];
         if (this.state.spin.interests !== undefined) {
             currentAddedInterestView = this.state.spin.interests.map((tagName) => {
@@ -271,7 +247,6 @@ class Timeline extends Component
         );
 
         let disableInterestDropdown = false;
-        // console.log(spinInterests);
         if (spinInterests.length === 0) {
             disableInterestDropdown = true;
         }
@@ -285,16 +260,6 @@ class Timeline extends Component
         >
             {spinInterests}
         </DropdownButton>
-
-            // <Dropdown>
-            //     <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
-            //         Tags
-            //     </Dropdown.Toggle>
-
-            //     <Dropdown.Menu>
-            //         {spinInterests}
-            //     </Dropdown.Menu>
-            // </Dropdown>
         );
 
         let interestsDropdown = null;
@@ -318,15 +283,8 @@ class Timeline extends Component
                             onChange = {this.handleSpinChange}
                         />
                             <p>{this.state.spin.chars}/90 characters</p>
-                    </Form>
-                    {interestsDropdown}
-
-                    {/* {this.state.spin.interests.map(function(tagName, index) { 
-                            return <span>{ ( index ? ', ' : '') + tagName}</span>;
-                        })} */}
-                    <Form>
-
-                    </Form>
+                        </Form>
+                        {interestsDropdown}
 
                     <Form onSubmit = {this.handleTag} >
                     <Form.Control width = "40%" placeholder = "Add new tag" onChange = {this.handleTagChange.bind(this)}/>

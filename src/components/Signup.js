@@ -139,7 +139,7 @@ class Signup extends Component {
 
                 <Form.Group controlId="formNewBio">
                     <Form.Label>Bio</Form.Label>
-                    <Form.Control type="bio" placeholder="Insert Bio Here" onChange={this.handleBioChange}/>
+                    <Form.Control as="textarea" rows = "2" placeholder ="Insert Bio Here" onChange={this.handleBioChange}/>
                 </Form.Group>
 
                 <Form.Group>

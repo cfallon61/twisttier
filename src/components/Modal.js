@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 
 const modalStyle = {
-  backgroundColor: 'rgb(223,223,223)',
+  backgroundColor: 'rgb(165,165,165)',
   borderRadius: 5,
   top: "25%",
   bottom: "25%",

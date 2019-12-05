@@ -57,7 +57,7 @@ class Spin extends Component
             likeList: this.props.likeList,
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
-            sharedSpinText : "",
+            sharedSpinText : " ",
             sharedSpinTags:[],
             showEditer : false,
             showShare : false,
@@ -573,8 +573,10 @@ class Spin extends Component
         this.setState({showShare : true});
     }
     closeShareModal() {
+        setTimeout(function() { //Start the timer
+            window.location.reload();
+        }.bind(this), 900)    
         this.setState({showShare : false})
-        window.location.reload();
     }
 
     // show the edit post modal
@@ -597,6 +599,12 @@ class Spin extends Component
     // TODO: handle server response
     handleEditPostSubmission(){
        
+        if(this.state.tags === undefined || this.state.tags.length <= 0) {
+            NotificationManager.error("You must have a tag!");
+            return;
+        }
+
+
         let body = {
         tags: this.state.tags,
         spinBody: this.state.content,
@@ -644,6 +652,11 @@ class Spin extends Component
     }
 
     handleSharePostSubmission(){
+
+        if(this.state.tags === undefined || this.state.tags.length <= 0) {
+            NotificationManager.error("You must have a tag!");
+            return;
+        }
 
         let self = this;
         let body = {

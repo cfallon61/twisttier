@@ -90,3 +90,8 @@ dark-mode-toggle {
 .Navbardemo {
   background-color: var(--navbar-color)
 }
+
+.dropdown-menu {
+  max-height: 210px;
+  overflow-y: scroll;
+}

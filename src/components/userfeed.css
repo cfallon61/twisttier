@@ -21,8 +21,3 @@
     max-height: 300px;
     overflow: auto;
 }
-
-.dropdown-menu {
-    max-height: 210px;
-    overflow-y: scroll;
-  }

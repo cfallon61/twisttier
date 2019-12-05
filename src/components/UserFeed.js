@@ -2,19 +2,14 @@ import React, {Component} from 'react';
 import Feed from './feed.jsx';
 import Spin from './spin.jsx';
 import Profile from "./Profile.js";
-import { template } from '@babel/core';
 import Error from './Error.js';
 import Button from 'react-bootstrap/Button';
 import { Dropdown, DropdownButton}  from 'react-bootstrap';
 import Modal from './Modal.js';
 import {NotificationManager} from 'react-notifications';
-import App from '../App.jsx';
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
-import { body } from 'express-validator';
 import "./userfeed.css";
 import Speech from "react-speech";
 import Form from 'react-bootstrap/Form';
-
 
 var OperationEnum = {
     FOLLOW : 1,
@@ -321,7 +316,9 @@ class UserFeed extends Component
 
     closeSpinModal()
     {
-        window.location.reload();
+        setTimeout(function() {
+            window.location.reload();
+        }.bind(this), 900)
         this.setState({spinModalShow : false});
     }
 
@@ -341,7 +338,6 @@ class UserFeed extends Component
     }
 
     renderSpinForm() {
-        // console.log(this.state.spin.interests);
         let spinInterests = this.state.interests.map((tagName) => {
             if (!this.state.spin.interests.includes(tagName)) {
             return <Dropdown.Item onClick={() => this.addInterestToSpin(tagName)}>{tagName}</Dropdown.Item>
@@ -369,29 +365,14 @@ class UserFeed extends Component
         );
 
         let disableInterestDropdown = false;
-        // console.log(spinInterests);
         if (spinInterests.length === 0) {
             disableInterestDropdown = true;
         }
 
         let dropdownInterests = (
-            <DropdownButton
-            title='   Add from Existing Tags   '
-            variant='outline-success'
-            block
-            className = "spinButtons"
-        >
-            {spinInterests}
-        </DropdownButton>
-            // <Dropdown>
-            //     <Dropdown.Toggle className = "spinButtons" variant = "outline-primary" id="dropdown-basic">
-            //         Tags
-            //     </Dropdown.Toggle>
-
-            //     <Dropdown.Menu>
-            //         {spinInterests}
-            //     </Dropdown.Menu>
-            // </Dropdown>
+            <DropdownButton title='   Add from Existing Tags   '    variant='outline-success'   block   className = "spinButtons">
+                {spinInterests}
+            </DropdownButton>
         );
 
         let interestsDropdown = null;
@@ -413,10 +394,7 @@ class UserFeed extends Component
                             <p>{this.state.spin.chars}/90 characters</p>
                     </Form>
                     {interestsDropdown}
-                    <Form>
-
-                    </Form>
-
+  
                     <Form onSubmit = {this.handleTag} >
                     <Form.Control 
                         width = "40%" 
@@ -434,23 +412,18 @@ class UserFeed extends Component
     }
 
     onSpinPressedAtModal(event) {
-        //TODO: set interest
-        console.log("user interests: ", this.state.interests);
         if(this.state.spin.chars <= 0 ){
             NotificationManager.error("Spin is too short!");
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
             return;
-        } else if (this.state.interests === undefined || this.state.interests.length <= 0) {
+        } else if (this.state.spin.interests === undefined || this.state.spin.interests.length <= 0) {
             NotificationManager.error("You must have a tag!");
             return;
         }
 
-        //TODO: send text to server
         else {
-            // console.log(this.state.spin.text);
-            // console.log(this.state.spin.interests);
             let self = this;
             let body = {
                 spinBody: this.state.spin.text,
@@ -466,8 +439,8 @@ class UserFeed extends Component
             }).then(function(res){
                 if(res.status === 200)
                 {
-                    self.closeSpinModal();
                     NotificationManager.success("Spun!");                   
+                    self.closeSpinModal();
                 }
                 else
                 {

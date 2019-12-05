@@ -57,10 +57,6 @@ class QuotedSpin extends Component
 
     render()
     {
-        let moreTagsButton = null;
-        let tagViewList = [];
-        let flameIcon = null;
-
         let usernameLink  = `/profile/${this.props.username}`;
         let usernameField = <a href={usernameLink}>{this.props.username}</a>
 

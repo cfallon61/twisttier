@@ -19,8 +19,6 @@ body {
   font-size: 12pt;
   background-color: var(--background-color);
   color: var(--text-color);
-  padding: 0;
-  margin: 0;
 }
 
 main {
@@ -76,26 +74,4 @@ dark-mode-toggle {
   --dark-mode-toggle-light-icon: url("sun.png");
   --dark-mode-toggle-icon-size: 1rem;
   --dark-mode-toggle-icon-filter: invert(100%);
-}
-
-.spin-area {
-  background: var(--background-color);
-  border: 2px solid var(--text-color);
-}
-.quoted-spin-area{
-  background: var(--background-color);
-  border: 2px solid var(--text-color);
-}
-
-.quoted-username-section .quoted-username-link a{
-  color: var(--text-color);
-  flex: 10;
-}
-.username-section .username-link a {
-    color: var(--text-color);
-}
-
-
-.Navbardemo {
-  background-color: var(--navbar-color)
 }

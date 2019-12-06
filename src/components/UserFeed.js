@@ -317,10 +317,7 @@ class UserFeed extends Component
 
     closeSpinModal()
     {
-        setTimeout(function() {
-            window.location.reload();
-        }.bind(this), 900)
-        this.setState({spinModalShow : false});
+        this.setState({spin: {text: "", chars: 0, interests: []}, spinModalShow : false});
     }
 
     handleInterestDeletion(oldInterest) {
@@ -432,7 +429,10 @@ class UserFeed extends Component
             }).then(function(res){
                 if(res.status === 200)
                 {
-                    NotificationManager.success("Spun!");                   
+                    NotificationManager.success("Spun!");               
+                    setTimeout(function() {
+                        window.location.reload();
+                    }.bind(this), 900)    
                     self.closeSpinModal();
                 }
                 else

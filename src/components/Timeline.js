@@ -98,6 +98,8 @@ class Timeline extends Component
     }
 
     closeModal() {
+        this.setState({spin: {text: "", chars: 0, interests: []}, showSpinModal : false});
+
         this.setState({showSpinModal : false});
     }
 

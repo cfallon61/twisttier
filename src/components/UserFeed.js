@@ -81,18 +81,15 @@ class UserFeed extends Component
         //Since "this" changes when you enter a new context, 
         //we have to keep the reference for using it inside fetch.
         const self = this;
-        console.log("Fetching... ", `/api/posts/${username}`);
         fetch(`/api/posts/${username}`, {
             method: "POST",
             credentials: 'same-origin'
         }).then(function(res){
-            // console.log(res);
             if(res.status === 200)
             {
                 //res.json also is a promise thus we attach a success callback
                 res.json().then(function(jsonData){
                     const dataDict = JSON.parse(jsonData);
-                    console.log(jsonData);
                     self.setState({spins : dataDict.regularposts, newSpins: dataDict.newtagposts});
                 }).catch(function(error){
                     self.setState({error:{exist:true, message:error, status:404}});
@@ -101,10 +98,8 @@ class UserFeed extends Component
             }
             else{
                 self.setState({error: {exist: true, message: res.headers.error, status:res.status}});
-                console.log(res.headers.error);
             }
         }).catch(function(err){
-            console.log(err);
             self.setState({error: {exist: true, message: err, status:404}});
         });
     }
@@ -123,7 +118,6 @@ class UserFeed extends Component
         interestsList.push(interest);
         }
         
-        // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
         this.setState({spin : {interests : interestsList, chars: currentChar, text : currentText}});
@@ -149,7 +143,6 @@ class UserFeed extends Component
 
     onFollowPressed()
     {
-        console.log("Follow pressed.");
         this.showModal();
     }
 
@@ -171,7 +164,6 @@ class UserFeed extends Component
                 if (response.status === 200) {
                     response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    // console.log("user data: ", data);
                     let currentInterests = [];
                     
                     // fill current interests of the user
@@ -181,7 +173,6 @@ class UserFeed extends Component
 
                     // fill the following of the user
                     let userfollowing = jsonData.following.users;
-                    // console.log("following: ", userfollowing);
 
 
                     self.setState({
@@ -211,7 +202,6 @@ class UserFeed extends Component
             tags : chosenList,
             follower : loggedInUser
         };
-        console.log(jsonBody);
         fetch("/api/updateFollowing", {
             method : "POST",
             headers : {
@@ -239,7 +229,6 @@ class UserFeed extends Component
 
     showModal()
     {
-        console.log("Showing modal...");
         this.setState({showFollowModal : true});
     }
 
@@ -293,7 +282,6 @@ class UserFeed extends Component
             {
                 response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    // console.log(data);
                     let currentInterests = [];
                     for(var i = 0; i < jsonData.tags_associated.length; i++)
                     {
@@ -456,7 +444,6 @@ class UserFeed extends Component
 
     handleTag(event){
         event.preventDefault();
-        console.log(this.state.tag);
         this.addInterestToSpin(this.state.tag);
     }
 
@@ -485,7 +472,6 @@ class UserFeed extends Component
             return <Dropdown.Item onClick={() => this.onDropdownItemClicked(tagName)}>{tagName}</Dropdown.Item>;
         });
         let disableTagDropdown = false;
-        // console.log(followItems);
         if(followItems.length === 0)
         {
             disableTagDropdown = true;
@@ -565,9 +551,6 @@ class UserFeed extends Component
             for(var i = 0; i < this.state.spins.length; i++)
             {
                 var spin = this.state.spins[i];
-                // console.log('spin =', spin);
-                // console.log("user to view interests: ", this.state.userToViewInterests);
-                // console.log("user to view following: ", this.state.userToViewFollowing);
 
                 // find out the tags viewing user follows from the author of the spin
                 var followingTagsForThisSpin = [];
@@ -576,7 +559,6 @@ class UserFeed extends Component
                         followingTagsForThisSpin = this.state.userToViewFollowing[j].tags;
                     }
                 }
-                // console.log(spin);
                 feed.addSpin(<Spin username={spin.username} content={spin.content} 
                     timestamp={spin.date} spinID={spin.id} userToView={this.userToView} 
                     tags={spin.tags} likes={spin.likes} likeList={spin.like_list}

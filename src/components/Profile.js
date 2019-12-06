@@ -57,7 +57,6 @@ class Profile extends Component{
     {
         //Since "this" changes when you enter a new context, we have to keep the reference for using it inside fetch.
         const self = this;
-        // console.log(`/api/users/${self.username}`);
         fetch(`/api/users/${self.username}`, {
             method : 'POST',
             headers: {
@@ -66,14 +65,12 @@ class Profile extends Component{
         })
         .then(function(res)
         {
-          // console.log(res);
           if(res.status === 200)
           {
             res.json().then(function(jsonData)
             {
                 const dataDict = JSON.parse(jsonData);
 
-                // console.log("This is the json data: ", jsonData);
                 let chosenProfilePic = self.defaultProfileView;
                 //If link is not empty
               if (dataDict.profile_pic !== "" && dataDict.profile_pic != null)
@@ -119,7 +116,6 @@ class Profile extends Component{
           }
         })
         .catch(function(err){
-            console.log(err);
             self.setState({error : err});
         })
         ;
@@ -131,14 +127,12 @@ class Profile extends Component{
      */
     showUserList(userList)
     {
-      // console.log(userList);
       //The user list has entries (username, tags).
       let userListView = userList.map((entry) => {
         return (
           <UsernameListEntry entry={entry}/>
         );
       });
-      // console.log(userListView);
       return userListView;
     }
 
@@ -200,12 +194,9 @@ class Profile extends Component{
 
     render()
     {
-        //console.log("Rednginering Profile.");
         let tagViews = [];
         var followinglist = [];
         let speechText = `Details of user ${this.username}: Bio: ${this.state.bio}`
-        // console.log('interests =', this.state.interests);
-        // console.log('following =', this.state.following);
         if(this.state.interests != undefined && this.state.interests.length > 0)
         {
             let currentTags = this.state.interests;

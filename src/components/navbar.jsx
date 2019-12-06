@@ -72,7 +72,6 @@ handleSearchValueChange(event) {
 
 // change the redirect bool
 handleSearch(event) {
-    // console.log("handling search");
     event.preventDefault();
 
     if (this.state.searchValue === "") {

@@ -35,7 +35,6 @@ class App extends Component {
 
   updateAuthInfo()
   {
-    console.log(document.cookie);
     if(document.cookie !== "")
     {
         var username = document.cookie.split('=')[1];

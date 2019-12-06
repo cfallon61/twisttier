@@ -48,8 +48,6 @@ class Timeline extends Component
         this.addInterestToSpin = this.addInterestToSpin.bind(this);
         this.handleSpinChange = this.handleSpinChange.bind(this);
         this.handleTag = this.handleTag.bind(this);
-
-        // console.log(this.username);
     }
 
     componentDidMount()
@@ -88,26 +86,22 @@ class Timeline extends Component
     }
 
     onSpinPressed() {
-        console.log("Spin pressed.");
         this.showModal();
     }
 
     showModal() {
-        console.log("Showing spin modal...");
         this.setState({showSpinModal : true})
     }
 
     closeModal() {
-        console.log("Closing spin modal...");
-        setTimeout(function() { //Start the timer
-            window.location.reload();
-        }.bind(this), 900)
+        this.setState({spin: {text: "", chars: 0, interests: []}, showSpinModal : false});
+
         this.setState({showSpinModal : false});
     }
 
     onSpinPressedAtModal(event) {
         if(this.state.spin.chars <= 0 ){
-            NotificationManager.error("Spin is too short!");
+            NotificationManager.error("Spin must have content!");
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
@@ -167,7 +161,6 @@ class Timeline extends Component
         {
             interestsList.push(interest);
         }
-        // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
         this.setState({spin : {interests : interestsList, chars: currentChar, text : currentText}});
@@ -181,7 +174,6 @@ class Timeline extends Component
                 if (response.status===200) {
                     response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log("user data: ", data);
                     let currentInterests = [];
                     // fill current interests of the user
                     for (var i = 0; i < jsonData.tags_associated.length; i++) {
@@ -190,9 +182,7 @@ class Timeline extends Component
 
                     // fill the following of the user
                     let userfollowing = jsonData.following.users;
-                    console.log("following: ", userfollowing);
-
-
+                    
                     self.setState({
                         interests : currentInterests,
                         following : userfollowing
@@ -246,11 +236,6 @@ class Timeline extends Component
             </DropdownButton>
         );
 
-        let disableInterestDropdown = false;
-        if (spinInterests.length === 0) {
-            disableInterestDropdown = true;
-        }
-
         let dropdownInterests = (
             <DropdownButton
             title='   Add from Existing Tags   '
@@ -262,15 +247,11 @@ class Timeline extends Component
         </DropdownButton>
         );
 
-        let interestsDropdown = null;
-        if (disableInterestDropdown){
-            interestsDropdown = <h3>You need to add tags.</h3>
-        } else {
-            interestsDropdown = (<div>
+        let interestsDropdown = (<div>
                 {dropdownInterests}
                 {addedDropdown}
             </div>)
-        }
+
 
         return (
             <div className="spin-form">
@@ -301,7 +282,6 @@ class Timeline extends Component
 
     render()
     {
-        // console.log("state following: ", this.state.following);
         //Right now we will use three parts of the spin.
         //content, username and timestamp.
         if(this.state.error.exist) {
@@ -337,11 +317,8 @@ class Timeline extends Component
                         followingTagsForThisSpin = this.state.following[j].tags;
                     }
                 }
-                // console.log("Author: ", spin.username);
-                // console.log("tags to send: ", followingTagsForThisSpin);
 
-         
-                if(spin.username !== this.props.username) //Filter out spins that the user made.
+                if(spin.username !== this.props.username && !this.state.newSpins.includes(spin)) //Filter out spins that the user made.
                 {
                   feed.addSpin(<Spin username={spin.username} content={spin.content}
                       timestamp={spin.date} spinID = {spin.id}

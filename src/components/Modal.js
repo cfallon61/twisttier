@@ -43,7 +43,6 @@ class Modal extends Component
             return null;
         }
 
-        // console.log("Rendering modal");
         return (
             <div className="backdrop" style={backdropStyle}>
               <div className="custom-modal" style={modalStyle}>

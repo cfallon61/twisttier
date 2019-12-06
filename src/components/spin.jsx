@@ -122,7 +122,6 @@ class Spin extends Component
 
         if(followingList === undefined || followingList.users.length === 0) 
         {
-            console.log("Return empty");
             return [];//Empty list
         }
         // console.log(followingList.users.length);
@@ -204,9 +203,7 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
-                console.log("Unlike OK response");
                 res.json().then(function(data){
-                    console.log("Unlike sent data.");
                     let jsonData = JSON.parse(data);
                     NotificationManager.success('Unlike successful.');
                     self.setState({likes : jsonData.likes, showLike : true});
@@ -230,7 +227,6 @@ class Spin extends Component
     // follows tags of spins
     followTag(tagName)
     {
-        console.log("Following")
         let tagList = [];
         // console.log(tagName);
         tagList.push(tagName);
@@ -251,7 +247,6 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
-                console.log("Successfully followed user");
                 NotificationManager.success(`You followed ${tagName} from ${self.author}`);
                 setTimeout(function() { //Start the timer
                     window.location.reload();
@@ -293,7 +288,6 @@ class Spin extends Component
         }).then(function(res){
             if(res.status === 200)
             {
-                console.log("Unfollowed successfully");
                 NotificationManager.success(`You unfollowed ${tagName} from ${self.author}`);
                 setTimeout(function() { //Start the timer
                     window.location.reload();
@@ -348,7 +342,6 @@ class Spin extends Component
                 // console.log(followingList);
                 // console.log(self.author);
                 let followedTagsFromAuthor = self.getUserTags(followingList, self.author);
-                console.log("Followed tags from author: " + followedTagsFromAuthor);
                 self.setState({ viewingUserTags: followedTagsFromAuthor});
               })
           }
@@ -365,7 +358,6 @@ class Spin extends Component
           }
         })
         .catch(function(err){
-            console.log(err);
             self.setState({error : err});
         })
         ;
@@ -451,7 +443,6 @@ class Spin extends Component
 
     // deletes the spin
     deleteSpin() {
-        console.log("Deleting spin");
         let deleteSpinID = this.spinID;
         let spinAuthor = this.author;
         let spinToBeDeleted = {"spinId" : deleteSpinID};
@@ -659,9 +650,7 @@ class Spin extends Component
         spinBody: this.state.editedText,
         spinID : this.state.spinID,
         }
-
-        console.log(body);
-        
+       
 
         // send the data to server, refresh the location
         let spinAuthor = this.author;
@@ -1096,8 +1085,6 @@ class Spin extends Component
           url = exp[0];
           content = content.replace(url, "");
         }
-
-        console.log('content =', content)
 
         return (
             <div className="spin-area">

@@ -175,7 +175,7 @@ class SearchUser extends Component {
                 </Dropdown.Item>);
                 tags.push(noItem);
 
-            } else if ( user.tags_associated.length <= 3 ) {
+            } else {
                 // if less than 5 tags
                 speechText += `Tags: `;
                 tags = user.tags_associated.map( (tag) => {
@@ -184,31 +184,7 @@ class SearchUser extends Component {
                             {tag}
                         </Dropdown.Item>;
                 });
-            } else {
-                // if more than 5 tags, show 5 and show all button
-                speechText += `Tags: `;
-                for (var i = 0; i < 4; i++) {
-                    speechText += `${user.tags_associated[i]}`;
-                    let item = (
-                        <Dropdown.Item >            
-                            {user.tags_associated[i]}
-                        </Dropdown.Item>
-                    );
-                    tags.push(item);   
-                }
-                
-                // all tags of this user
-                var thisUserTags = user.tags_associated;
-                // console.log("User tags being passed.", thisUserTags);
-
-                let show_all_button = (
-                    <Dropdown.Item onClick = { () => this.showTagsModal(thisUserTags)}>
-                            ...
-                    </Dropdown.Item>
-                );
-                tags.push(show_all_button);
-                
-            }
+            } 
 
             var userTagsDropdown = (
                 <DropdownButton

@@ -332,7 +332,7 @@ class Timeline extends Component
                 // console.log("tags to send: ", followingTagsForThisSpin);
 
          
-                if(spin.username !== this.props.username) //Filter out spins that the user made.
+                if(spin.username !== this.props.username && !this.state.newSpins.includes(spin)) //Filter out spins that the user made.
                 {
                   feed.addSpin(<Spin username={spin.username} content={spin.content}
                       timestamp={spin.date} spinID = {spin.id}

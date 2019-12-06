@@ -5,7 +5,6 @@ import Nav from 'react-bootstrap/Nav'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import FormControl from 'react-bootstrap/FormControl'
-import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link } from 'react-router-dom'
 import Image from 'react-bootstrap/Image'
 import icon_settings from './settingsIcon.png'
@@ -13,8 +12,6 @@ import icon_home from  './homeIcon.png'
 import icon_twister from './twisterIcon.png'
 import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
-import { Redirect } from 'react-router';
-import { selectFields } from 'express-validator/src/select-fields';
 
 const toggleCSS = {
   margin : "5px"
@@ -78,7 +75,9 @@ handleSearch(event) {
     // console.log("handling search");
     event.preventDefault();
 
-    if (this.state.searchValue !== "") {
+    if (this.state.searchValue === "") {
+      NotificationManager.error("Type in the searchbox before searching");
+    } else {
       let url = "/searchUser/" + this.state.searchValue;
       this.props.history.push(url);
 

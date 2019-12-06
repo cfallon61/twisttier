@@ -342,7 +342,7 @@ class UserFeed extends Component
         let addedDropdown = (
             <DropdownButton
             title='Remove from Existing Tags'
-            variant='outline-danger'
+            variant='danger'
             block
             className = "spinButtons"
             >
@@ -351,7 +351,7 @@ class UserFeed extends Component
         );
 
         let dropdownInterests = (
-            <DropdownButton title='   Add from Existing Tags   '    variant='outline-success'   block   className = "spinButtons">
+            <DropdownButton title='   Add from Existing Tags   '    variant='success'   block   className = "spinButtons">
                 {spinInterests}
             </DropdownButton>
         );
@@ -378,11 +378,11 @@ class UserFeed extends Component
                         placeholder = "Add new tag" 
                         value = {this.state.tag}
                         onChange = {this.handleTagChange}/>
-                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
+                        <Button className = "editButtons" variant = "primary" type = "submit">Add tag</Button>
                     </Form>
                 <div className="modal-footer">
-                    <Button variant = "outline-primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
-                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeSpinModal}>Cancel</Button>
+                    <Button variant = "primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
+                    <Button variant = "primary" className = "editButtons" onClick={this.closeSpinModal}>Cancel</Button>
                 </div>
             </div>
 
@@ -527,7 +527,7 @@ class UserFeed extends Component
         return (
             <div className="follow-form">
                 {stateDropdownView}
-                <h3>Which tags you want to {currentOperationText.toLowerCase()} from the user?</h3>
+                <h3>Which tags do you want to {currentOperationText.toLowerCase()} from the user?</h3>
                 {dropdownListView}
                 <div className="modal-footer">
                     <Button onClick={() => this.onActionPressedAtModal(currentOperationText)}>{currentOperationText}</Button>

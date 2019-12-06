@@ -770,7 +770,7 @@ class Spin extends Component
             userInterestsDropdown = (
                 <DropdownButton
                     title='   Add from Existing Tags   '
-                    variant='outline-success'
+                    variant='success'
                     block
                     className = "editButtons"
                 >
@@ -805,7 +805,7 @@ class Spin extends Component
             addedTagsDropdown = (
                 <DropdownButton
                     title='Remove from Existing Tags'
-                    variant='outline-danger'
+                    variant='danger'
                     block
                     className = "editButtons"
                 >
@@ -839,13 +839,13 @@ class Spin extends Component
                             value = {this.state.newTagText}
                         />
 
-                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add a new tag</Button>
+                        <Button className = "editButtons" variant = "primary" type = "submit">Add a new tag</Button>
                     </Form>
 
 
                 <div className="modal-footer">
-                    <Button variant = "outline-primary" onClick = {this.handleEditPostSubmission}>Edit</Button>
-                    <Button variant = "outline-primary" onClick={this.closeEditModal}>Cancel</Button>
+                    <Button variant = "primary" onClick = {this.handleEditPostSubmission}>Edit</Button>
+                    <Button variant = "primary" onClick={this.closeEditModal}>Cancel</Button>
                 </div>
             </div>
 
@@ -853,25 +853,6 @@ class Spin extends Component
     }
 
     renderShareForm(){        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         let newTags = this.state.sharedSpinTags;
         let addedTags = [];
 
@@ -890,7 +871,7 @@ class Spin extends Component
             addedTagsDropdown = (
                 <DropdownButton
                 title='Remove from Existing Tags'
-                variant='outline-danger'
+                variant='danger'
                 block
                 className = "shareButtons"
                 >
@@ -928,14 +909,14 @@ class Spin extends Component
                             style = {{marginTop : "10px", marginBottom : "10px"}}
                         />
                         <div>
-                            <Button variant = "outline-primary" type = "submit" style={{ display : "block", margin : "auto", marginBottom : "10px"}}>Add tag</Button>
+                            <Button variant = "primary" type = "submit" style={{ display : "block", margin : "auto", marginBottom : "10px"}}>Add tag</Button>
                         </div>
                     </Form>
 
 
                 <div className="modal-footer">
-                    <Button variant = "outline-primary" className = "editButtons" onClick = {this.handleSharePostSubmission}>Share</Button>
-                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeShareModal}>Cancel</Button>
+                    <Button variant = "primary" className = "editButtons" onClick = {this.handleSharePostSubmission}>Share</Button>
+                    <Button variant = "primary" className = "editButtons" onClick={this.closeShareModal}>Cancel</Button>
                 </div>
             </div>
     );

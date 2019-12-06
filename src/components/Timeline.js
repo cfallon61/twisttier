@@ -228,7 +228,7 @@ class Timeline extends Component
         let addedDropdown = (
             <DropdownButton
             title='Remove from Existing Tags'
-            variant='outline-danger'
+            variant='danger'
             block
             className = "shareButtons"
             >
@@ -239,7 +239,7 @@ class Timeline extends Component
         let dropdownInterests = (
             <DropdownButton
             title='   Add from Existing Tags   '
-            variant='outline-success'
+            variant='success'
             block
             className = "editButtons"
         >
@@ -269,11 +269,11 @@ class Timeline extends Component
 
                     <Form onSubmit = {this.handleTag} >
                     <Form.Control width = "40%" placeholder = "Add new tag" onChange = {this.handleTagChange.bind(this)}/>
-                        <Button className = "editButtons" variant = "outline-primary" type = "submit">Add new tag</Button>
+                        <Button className = "editButtons" variant = "primary" type = "submit">Add new tag</Button>
                     </Form>
                 <div className="modal-footer">
-                    <Button variant = "outline-primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
-                    <Button variant = "outline-primary" className = "editButtons" onClick={this.closeModal}>Cancel</Button>
+                    <Button variant = "primary" className = "editButtons" onClick={this.onSpinPressedAtModal}>Spin</Button>
+                    <Button variant = "primary" className = "editButtons" onClick={this.closeModal}>Cancel</Button>
                 </div>
             </div>
 

@@ -107,7 +107,7 @@ class Timeline extends Component
 
     onSpinPressedAtModal(event) {
         if(this.state.spin.chars <= 0 ){
-            NotificationManager.error("Spin is too short!");
+            NotificationManager.error("Spin must have content!");
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
@@ -246,11 +246,6 @@ class Timeline extends Component
             </DropdownButton>
         );
 
-        let disableInterestDropdown = false;
-        if (spinInterests.length === 0) {
-            disableInterestDropdown = true;
-        }
-
         let dropdownInterests = (
             <DropdownButton
             title='   Add from Existing Tags   '
@@ -262,15 +257,11 @@ class Timeline extends Component
         </DropdownButton>
         );
 
-        let interestsDropdown = null;
-        if (disableInterestDropdown){
-            interestsDropdown = <h3>You need to add tags.</h3>
-        } else {
-            interestsDropdown = (<div>
+        let interestsDropdown = (<div>
                 {dropdownInterests}
                 {addedDropdown}
             </div>)
-        }
+
 
         return (
             <div className="spin-form">

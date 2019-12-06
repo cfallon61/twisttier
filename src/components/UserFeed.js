@@ -26,6 +26,7 @@ class UserFeed extends Component
         super(props);
         this.username = this.props.match.params.username;
         this.state = {
+            tag : "",
             spins : [],
             interests : [],
             error : {
@@ -364,26 +365,17 @@ class UserFeed extends Component
             </DropdownButton>
         );
 
-        let disableInterestDropdown = false;
-        if (spinInterests.length === 0) {
-            disableInterestDropdown = true;
-        }
-
         let dropdownInterests = (
             <DropdownButton title='   Add from Existing Tags   '    variant='outline-success'   block   className = "spinButtons">
                 {spinInterests}
             </DropdownButton>
         );
 
-        let interestsDropdown = null;
-        if (disableInterestDropdown){
-            interestsDropdown = <h3>You need to add tags.</h3>
-        } else {
-            interestsDropdown = (<div>
+        let interestsDropdown = (<div>
                 {dropdownInterests}
                 {addedDropdown}
             </div>)
-        }
+        
 
         return (
             <div className="spin-form">
@@ -399,6 +391,7 @@ class UserFeed extends Component
                     <Form.Control 
                         width = "40%" 
                         placeholder = "Add new tag" 
+                        value = {this.state.tag}
                         onChange = {this.handleTagChange}/>
                         <Button className = "editButtons" variant = "outline-primary" type = "submit">Add tag</Button>
                     </Form>
@@ -413,7 +406,7 @@ class UserFeed extends Component
 
     onSpinPressedAtModal(event) {
         if(this.state.spin.chars <= 0 ){
-            NotificationManager.error("Spin is too short!");
+            NotificationManager.error("Spin must have content!");
             return;
         } else if (this.state.spin.chars > 90) {
             NotificationManager.error("Spin is too long!");
@@ -463,6 +456,7 @@ class UserFeed extends Component
 
     handleTag(event){
         event.preventDefault();
+        console.log(this.state.tag);
         this.addInterestToSpin(this.state.tag);
     }
 

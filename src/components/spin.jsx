@@ -1,11 +1,9 @@
 import React from 'react';
 import { Component } from 'react';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import './spin.css';
 import PropTypes from 'prop-types';
 import {NotificationManager} from 'react-notifications';
-import { throwStatement } from '@babel/types';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
@@ -58,11 +56,12 @@ class Spin extends Component
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
             sharedSpinText : " ",
-            sharedSpinTags:[],
+            sharedSpinTags: this.props.tags,
             showEditer : false,
             showShare : false,
            /// initialEditorValue : this.props.content,
             newTagText : "",
+            shareNewTag : "",
             showMoreTagsModal : false
         };
 
@@ -99,9 +98,13 @@ class Spin extends Component
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleShareTextChange = this.handleShareTextChange.bind(this);
         this.handleInterestAddition = this.handleInterestAddition.bind(this);
+        this.handleShareInterestAddition = this.handleShareInterestAddition.bind(this);
         this.handleInterestDeletion = this.handleInterestDeletion.bind(this);
+        this.handleShareInterestDeletion = this.handleShareInterestDeletion.bind(this);
         this.handleNewTagTextChange = this.handleNewTagTextChange.bind(this);
+        this.handleShareNewTagChange = this.handleShareNewTagChange.bind(this);
         this.handNewTagAddition = this.handleNewTagAddition.bind(this);
+        this.handleShareNewTag = this.handleShareNewTag.bind(this);
         this.handleEditPostSubmission = this.handleEditPostSubmission.bind(this);
         this.handleSharePostSubmission = this.handleSharePostSubmission.bind(this);
         this.openMoreTagsModal = this.openMoreTagsModal.bind(this);
@@ -114,8 +117,7 @@ class Spin extends Component
      */
     getUserTags(followingList, author)
     {
-        // console.log(followingList);
-        // console.log(author);
+
         if(followingList === undefined || followingList.users.length === 0) 
         {
             console.log("Return empty");
@@ -512,12 +514,19 @@ class Spin extends Component
 
     // handles change of text for spin
     handleTextChange(event){
-        if (event.target.value.length <= 90) {
+        if (event.target.value !== undefined && event.target.value.length <= 90) {
             this.setState({
                 content : event.target.value
             }); 
         }
-        
+    }
+
+    handleShareTextChange(event)
+    {
+        if(event.target.value !== undefined && event.target.value.length <= 90)
+        {
+            this.setState({sharedSpinText : event.target.value});
+        }
     }
 
     // handles change of interest for spin
@@ -534,9 +543,36 @@ class Spin extends Component
 
     }
 
+    handleShareInterestAddition(newTag) {
+        let tagList = this.state.sharedSpinTags;
+        if(!tagList.includes(newTag))
+        {
+            tagList.push(newTag);
+        }
+        this.setState({
+            sharedSpinTags : tagList
+        })
+    }
+    handleShareInterestDeletion(oldTag) {
+        console.log(`shared tags deleting ${oldTag}`);
+
+        let tagList = this.state.sharedSpinTags;
+
+        // find index of the tag
+        let indexOfTag = tagList.indexOf(oldTag);
+
+        // delete the tag
+        if (indexOfTag != -1) {
+            tagList.splice(indexOfTag, 1);
+        }
+        // reset the state
+        this.setState({
+            sharedSpinTags : tagList
+        });}
+
     // handles deletion of tag from the post
     handleInterestDeletion(oldTag) {
-
+        console.log(`tags deleting ${oldTag}`);
         let tagList = this.state.tags;
 
         // find index of the tag
@@ -557,6 +593,10 @@ class Spin extends Component
         this.setState({newTagText : event.target.value});
     }
 
+    handleShareNewTagChange(event) {
+        this.setState({shareNewTag : event.target.value});
+    }
+
     // handles the addition of a complete new tag
     // NOTE: different format of function used because this format does
     // create a "this" of itself and so, "this" can be used normally
@@ -567,6 +607,12 @@ class Spin extends Component
 
         // reset the newTagText
         this.setState({newTagText : ""})
+    }
+
+    handleShareNewTag = (event) => {
+        event.preventDefault();
+        this.handleShareInterestAddition(this.state.shareNewTag);
+        this.setState({shareNewTag : ""});
     }
 
     showShareModal() {
@@ -653,7 +699,7 @@ class Spin extends Component
 
     handleSharePostSubmission(){
 
-        if(this.state.tags === undefined || this.state.tags.length <= 0) {
+        if(this.state.sharedSpinTags === undefined || this.state.sharedSpinTags.length <= 0) {
             NotificationManager.error("You must have a tag!");
             return;
         }
@@ -661,7 +707,7 @@ class Spin extends Component
         let self = this;
         let body = {
             spinBody: this.state.sharedSpinText,
-            tags: this.state.tags,
+            tags: this.state.sharedSpinTags,
             is_quote: true,
             quote_origin: {
                 username: this.author,
@@ -811,81 +857,40 @@ class Spin extends Component
         );
     }
 
-    handleShareTextChange(event)
-    {
-        let updatingText = event.target.value;
-        if(event.target.value !== undefined && event.target.value.length > 90)
-        {
-            updatingText = updatingText.substring(0, 90);
-        }
-        this.setState({sharedSpinText : updatingText});
-    }
-
     renderShareForm(){        
-        // get all the tags the user has posted with before
-       // let newInterestOptions = [];
-        let self = this;
-        // let newAuthorInterests = this.viewersTags;
 
-        // if(newAuthorInterests !== undefined)
-        // {
-        //     newInterestOptions = newAuthorInterests.map((tagName) => {
 
-        //         if (!(this.state.tags !== undefined && this.state.tags.includes(tagName))){
-        //             return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
-        //                     {tagName}
-        //                     </Dropdown.Item>;
-        //         }
-        //     });
-        // }
-        // // create dropdown of previously used tags    
-        // let newInterestsDropdown = null;
-        
-        // // create a dropdown using those interests. If list is empty, then the view will only consist of text.
-        // if(newInterestOptions.length === 0)
-        // {
-        //     newInterestsDropdown = <h3>You don't have any tags yet.</h3>
-        // }
-        // else
-        // {
-        //     newInterestsDropdown = (
-        //         <DropdownButton
-        //         title='   Add from Suggested Tags   '
-        //         variant='outline-success'
-        //         block
-        //         className = "shareButtons"
-        //         >
-        //             {newInterestOptions}
-        //         </DropdownButton>
-        //     );
-        // }
 
-        let addedInterests = null;
-        if (this.state.tags !== undefined) {
-            addedInterests = this.state.tags.map((tagName) => {
-                return <h6>{tagName}</h6>;
-           });
-        }
 
-        let oldTags = this.state.tags;
-        let oldTagsDropdown = [];
 
-        if (oldTags !== undefined) {
-            oldTagsDropdown = oldTags.map((tagName) => {
-                return <Dropdown.Item onClick={() => this.handleInterestDeletion(tagName)}>
-                {tagName}
-            </Dropdown.Item>;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        let newTags = this.state.sharedSpinTags;
+        let addedTags = [];
+
+
+        if (newTags !== undefined) {
+            addedTags = newTags.map((tagName) => {
+                return <Dropdown.Item onClick={() => this.handleShareInterestDeletion(tagName)}>
+            {tagName}
+        </Dropdown.Item>;
             });
         }
         
         let addedTagsDropdown = null;
 
-        if(oldTagsDropdown.length === 0)
-        {
-            addedTagsDropdown = <h3>This spin doesn't have any associated tags.</h3>
-        }
-        else
-        {
             // create a dropdown using those interests
             addedTagsDropdown = (
                 <DropdownButton
@@ -894,10 +899,9 @@ class Spin extends Component
                 block
                 className = "shareButtons"
                 >
-                    {oldTagsDropdown}
+                    {addedTags}
                 </DropdownButton>
             );
-        }
 
         return (
             <div className="spin-form">
@@ -914,18 +918,18 @@ class Spin extends Component
                         
                         {addedTagsDropdown}
 
-                        {this.state.tags.map(function(tagName, index) { 
+                        {this.state.sharedSpinTags.map(function(tagName, index) { 
                             return <span>{ ( index ? ', ' : '') + tagName}</span>;
                         })}
 
                     </Form>
 
-                    <Form onSubmit = {this.handleNewTagAddition}>
+                    <Form onSubmit = {this.handleShareNewTag}>
                         <Form.Control
                             width = "40%"
                             placeholder = "Add new tag"
-                            onChange = {this.handleNewTagTextChange}
-                            value = {this.state.newTagText}
+                            onChange = {this.handleShareNewTagChange}
+                            value = {this.state.shareNewTag}
                             style = {{marginTop : "10px", marginBottom : "10px"}}
                         />
                         <div>
@@ -969,9 +973,6 @@ class Spin extends Component
 
     render()
     {
-        // console.log("Editor bool: ", this.state.showEditer);
-        // console.log("Author: ", this.author);
-        // console.log("UserToView: ", this.userToView);
         let likeButton = null;
         let moreTagsButton = null;
         let share_button = null;

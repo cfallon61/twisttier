@@ -98,10 +98,9 @@ render() {
 
       dynamicView = (
         <div>
-            <Link to={prof}>
+          <a href={prof}>
                 <Image src={icon_home}  className='icon'/>
-            </Link>
-
+          </a>
             <Link to="/userSettings">
               <Image src={icon_settings}  className='icon' />
             </Link>

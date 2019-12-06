@@ -229,12 +229,10 @@ class Profile extends Component{
                     </div>
                 </div>
                 {this.renderFollowersFollowingList()}
-                <Speech text={speechText} textAsButton={true} displayText="Play audio"/>
+                <Speech text={speechText} textAsButton={true} displayText="Play audio" />
             </div>
         );
     }
-
-
 
 }
 

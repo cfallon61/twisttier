@@ -9,7 +9,6 @@
 .quoted-spin-area{
     width: 70%;
     max-height: 40vh;
-    border: 2px solid var(--spin-main);
     border-radius: 25px;
     padding: 10px;
     color: black;
@@ -33,7 +32,7 @@
     flex: 10;
 }
 .quoted-username-section .quoted-username-link a {
-    color: var(--spin-main);
+
     font-family: 'Lato', cursive;
     font-weight: 800;
 }

@@ -48,8 +48,6 @@ class Timeline extends Component
         this.addInterestToSpin = this.addInterestToSpin.bind(this);
         this.handleSpinChange = this.handleSpinChange.bind(this);
         this.handleTag = this.handleTag.bind(this);
-
-        // console.log(this.username);
     }
 
     componentDidMount()
@@ -88,12 +86,10 @@ class Timeline extends Component
     }
 
     onSpinPressed() {
-        console.log("Spin pressed.");
         this.showModal();
     }
 
     showModal() {
-        console.log("Showing spin modal...");
         this.setState({showSpinModal : true})
     }
 
@@ -165,7 +161,6 @@ class Timeline extends Component
         {
             interestsList.push(interest);
         }
-        // console.log(interestsList);
         let currentText = this.state.spin.text;
         let currentChar = this.state.spin.chars;
         this.setState({spin : {interests : interestsList, chars: currentChar, text : currentText}});
@@ -179,7 +174,6 @@ class Timeline extends Component
                 if (response.status===200) {
                     response.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    console.log("user data: ", data);
                     let currentInterests = [];
                     // fill current interests of the user
                     for (var i = 0; i < jsonData.tags_associated.length; i++) {
@@ -188,9 +182,7 @@ class Timeline extends Component
 
                     // fill the following of the user
                     let userfollowing = jsonData.following.users;
-                    console.log("following: ", userfollowing);
-
-
+                    
                     self.setState({
                         interests : currentInterests,
                         following : userfollowing
@@ -290,7 +282,6 @@ class Timeline extends Component
 
     render()
     {
-        // console.log("state following: ", this.state.following);
         //Right now we will use three parts of the spin.
         //content, username and timestamp.
         if(this.state.error.exist) {
@@ -326,10 +317,7 @@ class Timeline extends Component
                         followingTagsForThisSpin = this.state.following[j].tags;
                     }
                 }
-                // console.log("Author: ", spin.username);
-                // console.log("tags to send: ", followingTagsForThisSpin);
 
-         
                 if(spin.username !== this.props.username && !this.state.newSpins.includes(spin)) //Filter out spins that the user made.
                 {
                   feed.addSpin(<Spin username={spin.username} content={spin.content}

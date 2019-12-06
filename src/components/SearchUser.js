@@ -59,10 +59,8 @@ class SearchUser extends Component {
 
             if(res.status === 200)
             {
-                // console.log("SUCCESFULL RESPONSE");
                 res.json().then(function(data){
                     let jsonData = JSON.parse(data);
-                    // console.log("Response: ", jsonData);
                     self.setState({
                         users : jsonData
                     });
@@ -88,8 +86,6 @@ class SearchUser extends Component {
     }
 
     showTagsModal(tags) {
-        console.log("Showing modal with tags: ", tags);
-
         this.setState({
             oneUserTags : tags,
             showAllTags : true
@@ -134,8 +130,6 @@ class SearchUser extends Component {
     }
 
     render() {
-    //   console.log("Seaching for: ", this.state.searchName);
-    //   console.log("Oneusertags: ", this.state.oneUserTags);
 
       let profiles = [];
       let tempUsers = this.state.users;
@@ -152,11 +146,9 @@ class SearchUser extends Component {
       } else {
           // for each profile
           profiles = tempUsers.map( (user) => {
-            // console.log("User: ", user);
             speechText = `Details of user ${user.username}`;
             // link the username to profile
             let usernameLink  = `/profile/${user.username}`;
-            // console.log("Link", usernameLink);
             
             userName = (
             <a href={usernameLink}>
@@ -204,7 +196,6 @@ class SearchUser extends Component {
 
 
             if(user.profile_pic !== "" && user.profile_pic !== null && user.profile_pic !== "{}"){
-                // console.log("IMAGE exists");
                 chosenProfilePic = (
                     <div onClick={() => window.location.href = usernameLink} className = "searchDPCont">
                             <img className = "searchDP" src={user.profile_pic} alt={user.username} style={imgScale}/>
@@ -212,10 +203,6 @@ class SearchUser extends Component {
                             );
 
             }           
-
-            // console.log("username: ", userName);
-            // console.log("PIC: ", chosenProfilePic);
-
             return <div className="searchProfileContainter">
                             {chosenProfilePic}               
                             <h3>{userName}</h3>

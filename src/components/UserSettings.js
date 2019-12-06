@@ -72,7 +72,6 @@ class UserSettings extends Component {
     event.preventDefault();
     //split the interests into array
     let interestsArray = [];
-    console.log(this.state.interests);
     if(this.state.interests.length > 0)
     {
       let ints = this.state.interests;
@@ -87,8 +86,6 @@ class UserSettings extends Component {
     formdata.append('interests', JSON.stringify(interestsArray));
     formdata.append('accessibility_features', JSON.stringify(this.state.accessibility_features));
     formdata.append('profileImage', this.imageFile.current.files[0]);
-
-    //console.log(formdata)
 
     fetch(`/api/update/${this.state.username}`, {
         method : 'POST',
@@ -116,7 +113,6 @@ class UserSettings extends Component {
       
 
     }).catch(function(error){
-      console.log(error);
     }
     );
   }
@@ -129,7 +125,6 @@ class UserSettings extends Component {
       password : this.state.inputPassword,
       email : this.state.email
     }
-    console.log(requestBody);
     //Send request to server with username, email, password on body.
     fetch("/api/delete", {
       method : 'POST',
@@ -150,8 +145,6 @@ class UserSettings extends Component {
       {
         if(res.headers.has('error'))
         {
-          console.log("error header exists.");
-          console.log(res.headers.get('error'));
           NotificationManager.error(res.headers.get('error'));
         }
         else
@@ -160,7 +153,6 @@ class UserSettings extends Component {
         }
       }
     }).catch((err) => {
-      console.log("Unknown issue.");
       NotificationManager.error(err);
     })
   }
@@ -196,7 +188,6 @@ class UserSettings extends Component {
     let d_interests = "";
     let d_profilepic ="";
     let self = this;
-    // console.log("USERNAME=", username);
     fetch(`/api/users/${username}`, {
       method: 'POST',
       headers: {
@@ -208,7 +199,6 @@ class UserSettings extends Component {
       {
         res.json().then(function(data){
             let dataDict = JSON.parse(data);
-            console.log(dataDict);
             let usernameInScope = dataDict.username;
             d_profilepic = dataDict.profile_pic;
             d_bio = dataDict.bio;

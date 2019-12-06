@@ -682,7 +682,7 @@ class Spin extends Component
                 NotificationManager.success("Spin has been edited");       
                 self.setState({
                     // close the modal
-                    showEditer : false, sharedSpinText : self.state.editedText, sharedSpinTags : self.state.editedTags, content : self.state.editedText, tags : self.state.editedTags
+                    showEditer : false, sharedSpinText : " ", sharedSpinTags : self.state.editedTags, content : self.state.editedText, tags : self.state.editedTags
                 });
                 
             }

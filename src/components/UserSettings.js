@@ -241,11 +241,11 @@ class UserSettings extends Component {
     return (
 
       <div>
-        <div className = "page-container">
-                <div className="page-content">
+        <div className = "user-settings-page">
+                <div className="user-settings-left">
                   {profile}
                 </div>
-                <div className="page-content">
+                <div className="user-settings-right">
                 <Form onSubmit={this.handleSubmit}>
                   <Form.Group>
                       <Form.Label>Bio</Form.Label>
@@ -270,9 +270,8 @@ class UserSettings extends Component {
                     <Button className = "delete-button" variant="primary" type="submit">Save Changes</Button>
                   </Form.Group>
                </Form>
-              </div>
-              <div className="page-content">
-                <Button variant="primary" onClick={this.openPasswordModal}>Delete Account </Button>
+          
+               <Button variant="outline-danger" onClick={this.openPasswordModal}>Delete Account</Button>
               </div>
          </div>
 

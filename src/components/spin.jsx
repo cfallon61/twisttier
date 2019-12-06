@@ -55,6 +55,8 @@ class Spin extends Component
             likeList: this.props.likeList,
             hasNewTags : this.props.hasNewTags || false,
             // for handling the edit form modal
+            editedText : this.props.content,
+            editedTags : this.props.tags,
             sharedSpinText : " ",
             sharedSpinTags: this.props.tags,
             showEditer : false,
@@ -516,7 +518,7 @@ class Spin extends Component
     handleTextChange(event){
         if (event.target.value !== undefined && event.target.value.length <= 90) {
             this.setState({
-                content : event.target.value
+                editedText : event.target.value
             }); 
         }
     }
@@ -532,19 +534,25 @@ class Spin extends Component
     // handles change of interest for spin
     handleInterestAddition(newTag) { 
 
-        let tagList = this.state.tags;
+        let tagList = []
+        for (var i = 0; i <this.state.editedTags.length; i++) {
+            tagList.push(this.state.editedTags[i]);
+        }
         if(!tagList.includes(newTag))
         {
             tagList.push(newTag);
         }
         this.setState({
-            tags : tagList
+            editedTags : tagList
         });
 
     }
 
     handleShareInterestAddition(newTag) {
-        let tagList = this.state.sharedSpinTags;
+        let tagList = []
+        for (var i = 0; i <this.state.sharedSpinTags.length; i++) {
+            tagList.push(this.state.sharedSpinTags[i]);
+        }
         if(!tagList.includes(newTag))
         {
             tagList.push(newTag);
@@ -571,9 +579,10 @@ class Spin extends Component
 
     // handles deletion of tag from the post
     handleInterestDeletion(oldTag) {
-        console.log(`tags deleting ${oldTag}`);
-        let tagList = this.state.tags;
-
+        let tagList = [];
+        for (var i = 0; i < this.state.editedTags.length; i++) {
+            tagList.push(this.state.editedTags[i]);
+        }
         // find index of the tag
         let indexOfTag = tagList.indexOf(oldTag);
 
@@ -583,7 +592,7 @@ class Spin extends Component
         }
         // reset the state
         this.setState({
-            tags : tagList
+            editedTags : tagList
         });
     }
 
@@ -629,11 +638,9 @@ class Spin extends Component
 
     // closes the edit post modal
     closeEditModal() {
-        window.location.reload();
-
         this.setState({            
             // close the modal
-            showEditer : false
+            showEditer : false, editedTags : this.props.tags, editedText : this.state.content
         })
     }
     
@@ -641,15 +648,15 @@ class Spin extends Component
     // TODO: handle server response
     handleEditPostSubmission(){
        
-        if(this.state.tags === undefined || this.state.tags.length <= 0) {
+        if(this.state.editedTags === undefined || this.state.editedTags.length <= 0) {
             NotificationManager.error("You must have a tag!");
             return;
         }
 
 
         let body = {
-        tags: this.state.tags,
-        spinBody: this.state.content,
+        tags: this.state.editedTags,
+        spinBody: this.state.editedText,
         spinID : this.state.spinID,
         }
 
@@ -673,10 +680,9 @@ class Spin extends Component
             {
                 // show the notification and then close the modal
                 NotificationManager.success("Spin has been edited");       
-
                 self.setState({
                     // close the modal
-                    showEditer : false
+                    showEditer : false, sharedSpinText : self.state.editedText, sharedSpinTags : self.state.editedTags, content : self.state.editedText, tags : self.state.editedTags
                 });
                 
             }
@@ -711,7 +717,6 @@ class Spin extends Component
             }
         };
         
-        console.log("Text:" + this.state.sharedSpinText);
         fetch(`/api/add_spin/${this.userToView}`, {
             method : 'POST',
             headers : {
@@ -756,7 +761,7 @@ class Spin extends Component
         {
             spinInterests = userInterestsCopy.map((tagName) => {
 
-                if (!this.state.tags.includes(tagName)){
+                if (!this.state.editedTags.includes(tagName)){
                     return  <Dropdown.Item onClick={() => this.handleInterestAddition(tagName)}>
                             {tagName}
                             </Dropdown.Item>;
@@ -786,7 +791,7 @@ class Spin extends Component
         }
 
         // show all the tags that are already associated with the spin in a dropdown
-        let initialTags = this.state.tags;
+        let initialTags = this.state.editedTags;
 
         let initialTagsDropdown = [];
 
@@ -827,11 +832,11 @@ class Spin extends Component
                         <Form.Label>Edit Spin</Form.Label>
                         <Form.Control 
                             as = "textarea" 
-                            value= {this.state.content}
+                            value= {this.state.editedText}
                             rows="3" 
                             onChange = {this.handleTextChange}
                         />
-                            <p>{this.state.content.length}/90 characters</p>
+                            <p>{this.state.editedText.length}/90 characters</p>
                         
                         {userInterestsDropdown}
                         {addedTagsDropdown}

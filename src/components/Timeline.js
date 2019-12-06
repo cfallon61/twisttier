@@ -98,10 +98,6 @@ class Timeline extends Component
     }
 
     closeModal() {
-        console.log("Closing spin modal...");
-        setTimeout(function() { //Start the timer
-            window.location.reload();
-        }.bind(this), 900)
         this.setState({showSpinModal : false});
     }
 

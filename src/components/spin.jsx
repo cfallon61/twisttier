@@ -554,21 +554,20 @@ class Spin extends Component
         })
     }
     handleShareInterestDeletion(oldTag) {
-        console.log(`shared tags deleting ${oldTag}`);
-
-        let tagList = this.state.sharedSpinTags;
-
-        // find index of the tag
+        let tagList = [];
+        for (var i = 0; i < this.state.sharedSpinTags.length; i++) {
+            tagList.push(this.state.sharedSpinTags[i]);
+        }
         let indexOfTag = tagList.indexOf(oldTag);
 
-        // delete the tag
         if (indexOfTag != -1) {
             tagList.splice(indexOfTag, 1);
         }
         // reset the state
         this.setState({
-            sharedSpinTags : tagList
-        });}
+            sharedSpinTags : tagList, 
+        });
+    }
 
     // handles deletion of tag from the post
     handleInterestDeletion(oldTag) {
@@ -618,11 +617,8 @@ class Spin extends Component
     showShareModal() {
         this.setState({showShare : true});
     }
-    closeShareModal() {
-        setTimeout(function() { //Start the timer
-            window.location.reload();
-        }.bind(this), 900)    
-        this.setState({showShare : false})
+    closeShareModal() {   
+        this.setState({showShare : false, sharedSpinTags : this.state.tags})
     }
 
     // show the edit post modal
@@ -726,6 +722,11 @@ class Spin extends Component
             if(res.status === 200)
             {
                 NotificationManager.success("Shared!");
+                if (self.author === self.userToView) {
+                setTimeout(function() { //Start the timer
+                    window.location.reload();
+                }.bind(this), 900);
+                }
                 self.closeShareModal();
             }
             else

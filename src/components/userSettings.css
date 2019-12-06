@@ -16,28 +16,3 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
-/* .page-container {
-    display: flex;  
-}
-
-.page-content {
-    flex : 1;
-    width : 33%;
-    margin: auto;
-    padding: 10px;
-}
-
-
-@media only screen and (max-width:767px){
-    .page-content {
-        font-size: 80%;
-        width : 99%;
-    }
-}
-
-@media only screen and (min-width:768px) and (max-width:1023px){
-    .page-content {
-        font-size: 95%;
-        width : 66%
-    }
-} */

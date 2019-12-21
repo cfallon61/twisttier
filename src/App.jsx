@@ -50,6 +50,7 @@ class App extends Component {
   {
     this.updateAuthInfo();
   }
+  
 
   render() {
     return (
